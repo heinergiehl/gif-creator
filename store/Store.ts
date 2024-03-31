@@ -457,10 +457,10 @@ export class Store {
       }
     }
     return new Promise((resolve, reject) => {
-      gif.on("finished", (blob) => {
+      gif.on("finished", (blob: Blob) => {
         resolve(URL.createObjectURL(blob))
       })
-      gif.on("error", (error) => {
+      gif.on("error", (error: Error) => {
         reject(error)
       })
       gif.render()
