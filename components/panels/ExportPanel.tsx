@@ -52,12 +52,7 @@ const ExportPanel = observer(() => {
         </button>
       )}
       {gifUrl && (
-        <a
-          href
-          download="animated.gif"
-          className="btn btn-primary"
-          href={gifUrl}
-        >
+        <a href={gifUrl} download="animated.gif" className="btn btn-primary">
           Download Gif
         </a>
       )}
