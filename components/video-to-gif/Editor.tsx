@@ -33,10 +33,18 @@ export const Editor = observer(() => {
     // make sure to keep the position of the objects when resizing
     const objects = store.canvas.getObjects()
     objects.forEach((object) => {
-      object.scaleX *= scale
-      object.scaleY *= scale
-      object.left *= scale
-      object.top *= scale
+      if (object.scaleX) {
+        object.scaleX *= scale
+      }
+      if (object.scaleY) {
+        object.scaleY *= scale
+      }
+      if (object.left) {
+        object.left *= scale
+      }
+      if (object.top) {
+        object.top *= scale
+      }
       object.setCoords()
     })
   }
