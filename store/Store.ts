@@ -106,7 +106,7 @@ export class Store {
       )
       element.fabricObject = fabricImage
       this._editorElements[this._editorElements.length - 1] = element
-      this.canvas?.add(fabricImage)
+      if (fabricImage) this.canvas?.add(fabricImage)
       element.fabricObject = fabricImage
     }
     //text
@@ -229,9 +229,6 @@ export class Store {
     if (!this._selectedElement) return
     this._imageObject = imageObject
   }
-  get imageObject() {
-    return this._imageObject
-  }
   getEditorElementByIndex(index: number) {
     console.log(this._editorElements, index)
     return this._editorElements[index]
@@ -283,27 +280,29 @@ export class Store {
       this._editorElements = []
     }
   }
-  createFabricImage(image: HTMLImageElement): fabric.Image {
+  createFabricImage(image: HTMLImageElement): fabric.Image | undefined {
     // Create a new fabric.Image object using the editorElement properties
-    const canvasWidth = this._canvas.getWidth()
-    const canvasHeight = this._canvas.getHeight()
-    // make sure the image fits exactly the canvas
-    const orignalHeight = image.naturalHeight
-    const orignalWidth = image.naturalWidth
-    const imageObject = new fabric.Image(image, {})
-    imageObject.set({
-      width: orignalWidth,
-      height: orignalHeight,
-      scaleX: canvasWidth / orignalWidth,
-      scaleY: canvasHeight / orignalHeight,
-      originX: "center",
-      originY: "center",
-      left: canvasWidth / 2,
-      top: canvasHeight / 2,
-    })
-    imageObject.center()
-    imageObject.setCoords()
-    return imageObject
+    if (this._canvas) {
+      const canvasWidth = this._canvas.getWidth()
+      const canvasHeight = this._canvas.getHeight()
+      // make sure the image fits exactly the canvas
+      const orignalHeight = image.naturalHeight
+      const orignalWidth = image.naturalWidth
+      const imageObject = new fabric.Image(image, {})
+      imageObject.set({
+        width: orignalWidth,
+        height: orignalHeight,
+        scaleX: canvasWidth / orignalWidth,
+        scaleY: canvasHeight / orignalHeight,
+        originX: "center",
+        originY: "center",
+        left: canvasWidth / 2,
+        top: canvasHeight / 2,
+      })
+      imageObject.center()
+      imageObject.setCoords()
+      return imageObject
+    }
   }
   addFabricObjectToCanvas() {
     const currentVideoFrame = this.frames[this.currentKeyFrame]
@@ -395,8 +394,11 @@ export class Store {
   }
   playSequence() {
     if (this.playing) {
-      clearInterval(this.playInterval)
+      if (this.playInterval !== null) {
+        clearInterval(this.playInterval)
+      }
       this.setPlaying(false)
+      this.playInterval = null
     } else {
       this.setPlaying(true)
       let currentFrame = this.currentKeyFrame
@@ -406,7 +408,7 @@ export class Store {
           this.setCurrentKeyFrame(currentFrame)
           currentFrame++
         } else {
-          clearInterval(this.playInterval)
+          if (this.playInterval !== null) clearInterval(this.playInterval)
           this.setPlaying(false)
           this.setCurrentKeyFrame(0) // Optionally reset to start or keep the last frame
         }

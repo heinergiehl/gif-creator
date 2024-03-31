@@ -97,7 +97,7 @@ export const Editor = observer(() => {
       fabric.util.requestAnimFrame(render)
     })
     store.setPlaying(false)
-    clearInterval(store.playInterval)
+    if (store.playInterval) clearInterval(store.playInterval)
   }, [])
   return (
     <>
