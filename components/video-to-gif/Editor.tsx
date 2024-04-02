@@ -1,4 +1,3 @@
-"use client"
 import { fabric } from "fabric"
 import React, { use, useEffect, useRef, useState } from "react"
 import { StoreContext } from "@/store"
