@@ -104,7 +104,7 @@ export default function Home() {
                 <p>
                   Simply upload your video file to GifMagic.app, and our tool
                   will instantly convert it into a high-quality GIF. You can
-                  then customize the GIF's frame rate, add text, or edit it
+                  then customize the GIFs frame rate, add text, or edit it
                   further according to your needs.
                 </p>
               </div>
@@ -146,7 +146,8 @@ export default function Home() {
         <footer className="footer footer-center p-4 bg-base-300 text-base-content">
           <p>
             <span className="flex justify-center items-center">
-              GIFMagic.app 2024. All rights reserved.
+              GIFMagic.app <FaRegCopyright className="mx-1" /> 2024. All rights
+              reserved.
             </span>
           </p>
         </footer>
