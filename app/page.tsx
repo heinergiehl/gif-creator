@@ -146,8 +146,7 @@ export default function Home() {
         <footer className="footer footer-center p-4 bg-base-300 text-base-content">
           <p>
             <span className="flex justify-center items-center">
-              GIFMagic.app <FaRegCopyright className="mx-1" /> 2024. All rights
-              reserved.
+              GIFMagic.app 2024. All rights reserved.
             </span>
           </p>
         </footer>
