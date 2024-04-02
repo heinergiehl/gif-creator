@@ -7,7 +7,7 @@ export default function Home() {
         <title>Your App Name - Convert Videos to GIFs Easily</title>
         <meta
           name="description"
-          content="Our App Name is the fastest way to convert videos to GIFs. Upload your video and get a high-quality GIF in seconds. Try it now for free!"
+          content="GifMagic.app is the fastest way to convert videos to GIFs. Upload your video and get a high-quality GIF in seconds. Try it now for free!"
         />
         <meta
           name="keywords"

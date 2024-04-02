@@ -11,10 +11,8 @@ const ElementsHistoryPanel = observer(() => {
   console.log(store.currentKeyFrame)
   if (currentFrame) {
     nestedElementsIds = currentFrame.nestedObjects
-    console.log(nestedElementsIds)
   }
   const nestedElements = store._editorElements.filter((element) => {
-    console.log(element.id)
     return nestedElementsIds.some((id) => id.id === element.id)
   })
   const Icon = (type: string) => {

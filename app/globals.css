@@ -12,3 +12,6 @@ canvas{
 .upper-canvas{
     position:relative;
 }
+main {
+ height: calc(100vh ); 
+}

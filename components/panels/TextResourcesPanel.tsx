@@ -57,7 +57,6 @@ const TEXT_RESOURCES = [
 ]
 export const FontPicker = () => {
   const store = React.useContext(StoreContext)
-  const [font, setFont] = useState("Arial")
   const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     store.textFont = event.target.value
   }
@@ -67,10 +66,11 @@ export const FontPicker = () => {
         Choose a font:
       </label>
       <select
+        defaultValue={store.textFont}
         id="fontPicker"
-        value={font}
+        value={store.textFont}
         onChange={handleFontChange}
-        className="select select-bordered w-max"
+        className="select rounded-md  select-bordered min-h-[2rem] h-[2rem]"
       >
         <option value="Arial">Arial</option>
         <option value="Verdana">Verdana</option>
@@ -80,21 +80,15 @@ export const FontPicker = () => {
         <option value="Comic Sans MS">Comic Sans MS</option>
         <option value="Impact">Impact</option>
       </select>
-      <p className="mt-4" style={{ fontFamily: font }}>
-        The quick brown fox jumps over the lazy dog.
-      </p>
     </div>
   )
 }
 export const TextResourcesPanel = observer(() => {
   const store = React.useContext(StoreContext)
   return (
-    <div className="bg-slate-200 h-full">
+    <div className="bg-slate-200 h-full p-4">
       <div className="flex justify-between items-center space-y-4">
         <FontPicker />
-        <div className=" text-sm px-[16px] pt-[16px] pb-[8px] font-semibold text-black">
-          Text
-        </div>
         <label className="text-xs text-gray-500 mr-4" htmlFor="textColor">
           Color
           <input

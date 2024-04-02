@@ -12,7 +12,6 @@ import { useEffect } from "react"
 import { gsap } from "gsap"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import React from "react"
-import { set } from "animejs"
 export const Carousel = observer(() => {
   const [currentlySelectedFrame, setCurrentlySelectedFrame] = useState(0)
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -20,33 +19,9 @@ export const Carousel = observer(() => {
   const timelineRef = useRef<HTMLDivElement>(null)
   const timelinePastRef = useRef<HTMLDivElement>(null)
   gsap.registerPlugin(ScrollToPlugin)
-  const [cardWidth, setCardWidth] = useState(160) // State to store dynamic card width
-  useEffect(() => {
-    // Calculate the width of the card dynamically
-    if (cardRef.current) {
-      const card = cardRef.current
-      if (card) {
-        setCardWidth(card.getBoundingClientRect().width)
-      }
-    }
-  }, [])
+  const [cardWidth, setCardWidth] = useState(120) // State to store dynamic card width
   const cardRef = useRef<HTMLDivElement>(null)
   // ... (rest of the useEffects)
-  useEffect(() => {
-    // Adjust the scroll position based on the current frame and the dynamic width of the card
-    const carousel = carouselRef.current
-    if (carousel && cardWidth) {
-      const scrollPosition =
-        cardWidth * store.currentKeyFrame -
-        carousel.offsetWidth / 2 +
-        cardWidth / 2
-      gsap.to(carousel, {
-        scrollTo: { x: scrollPosition },
-        duration: 2,
-      })
-      setCurrentlySelectedFrame(store.currentKeyFrame)
-    }
-  }, [store.currentKeyFrame, cardWidth])
   const handleSelectFrame = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
@@ -72,7 +47,47 @@ export const Carousel = observer(() => {
     if (carouselRef.current) {
       setCarouselWidth(carouselRef.current.offsetWidth)
     }
-  }, [store.frames])
+  }, [store.frames, store.videoFrames])
+  useEffect(() => {
+    const updateCardWidth = () => {
+      const card = carouselRef.current?.querySelector(
+        ".carousel-item"
+      ) as HTMLDivElement | null
+      if (card) {
+        setCardWidth(card.getBoundingClientRect().width)
+      }
+    }
+    updateCardWidth()
+    const observer = new MutationObserver(updateCardWidth)
+    if (carouselRef.current) {
+      observer.observe(carouselRef.current, { childList: true })
+    }
+    return () => observer.disconnect()
+  }, [store.videoFrames, store.frames])
+  useEffect(() => {
+    const scrollPosition = cardWidth * currentlySelectedFrame
+    if (carouselRef.current) {
+      gsap.to(carouselRef.current, {
+        scrollTo: { x: scrollPosition },
+        duration: 0.1,
+        ease: "sine.inOut",
+      })
+    }
+  }, [currentlySelectedFrame, cardWidth])
+  useEffect(() => {
+    if (store.currentKeyFrame !== currentlySelectedFrame) {
+      setCurrentlySelectedFrame(store.currentKeyFrame)
+    }
+  }, [store.currentKeyFrame])
+  const handleDeleteFrame = (index: number): void => {
+    store.deleteFrame(index) // Assuming this method exists on the store
+    if (index === currentlySelectedFrame || index === store.frames.length - 1) {
+      const newSelectedIndex =
+        (index === 0 ? 0 : index - 1) % store.frames.length
+      setCurrentlySelectedFrame(newSelectedIndex)
+      store.setCurrentKeyFrame(newSelectedIndex) // Assuming this method exists on the store
+    }
+  }
   return (
     <div className="w-full p-4 space-y-4">
       {!creatingGifFrames && store.frames.length > 0 && (
@@ -93,22 +108,29 @@ export const Carousel = observer(() => {
       <div className="  space-x-4  ">
         <div className="  space-y-4">
           <div className="flex justify-center items-center space-x-4">
+            {creatingGifFrames && <ButtonSkeleton />}
             {!creatingGifFrames && store.frames.length > 0 && (
               <button
                 onClick={() => {
-                  if (carouselRef.current && cardRef.current) {
-                    const cardWidth =
-                      cardRef.current.getBoundingClientRect().width
+                  if (carouselRef.current) {
                     gsap.to(carouselRef.current, {
                       scrollTo: { x: "-=" + cardWidth },
                       duration: 1,
-                      ease: "power2.inOut",
+                      ease: "sine.inOut",
                     })
-                    if (currentlySelectedFrame > 0)
+                    console.log(
+                      "currentlySelectedFrame",
+                      currentlySelectedFrame,
+                      cardWidth
+                    )
+                    if (currentlySelectedFrame > 0) {
                       setCurrentlySelectedFrame(
                         (currentlySelectedFrame - 1 + store.frames.length) %
                           store.frames.length
                       )
+                      store.setCurrentKeyFrame(currentlySelectedFrame - 1)
+                      store.addCurrentGifFrameToCanvas()
+                    }
                   }
                 }}
                 className="btn btn-outline"
@@ -120,14 +142,14 @@ export const Carousel = observer(() => {
               {creatingGifFrames && (
                 <div
                   ref={skeletonCarouselRef}
-                  className="min-w-[300px] md:min-w-[850px]   carousel carousel-center p-4  bg-neutral rounded-box w-full space-x-4 "
+                  className="min-w-[300px] xl:min-w-[850px]   carousel carousel-center p-4  bg-neutral rounded-box w-full space-x-4 "
                 >
                   {Array.from({ length: cardsFitInCarousel }).map(
                     (_, index) => (
                       <div
                         key={index}
                         className={cn([
-                          "relative carousel-item    transition-colors duration-200 ease-in-out cursor-pointer ",
+                          "relative carousel-item max-w-[60%]   transition-colors duration-200 ease-in-out cursor-pointer ",
                         ])}
                       >
                         <CardSkeleton />
@@ -139,14 +161,13 @@ export const Carousel = observer(() => {
               {!creatingGifFrames && store.frames.length > 0 && (
                 <div
                   ref={carouselRef}
-                  className="min-w-[300px] md:min-w-[850px] max-w-[70%]   carousel carousel-center p-4  bg-neutral rounded-box w-full space-x-4 "
+                  className="min-w-[300px] xl:min-w-[850px] max-w-[60%]   carousel carousel-center p-4  bg-neutral rounded-box w-full space-x-4 "
                 >
                   {
                     // display the frames
                     store.frames.map((videoFrame, index) => (
                       // make sure the currently selected frame  has border around it
                       <div
-                        ref={cardRef}
                         onClick={() => {
                           setCurrentlySelectedFrame(index)
                           store.setCurrentKeyFrame(index)
@@ -161,9 +182,9 @@ export const Carousel = observer(() => {
                           <div className="absolute inset-0 bg-primary opacity-50   transition-all duration-300"></div>
                         )}
                         <Image
-                          onLoad={() => {
-                            console.log("image loaded")
-                            store.addImage(index)
+                          onLoad={(e) => {
+                            store.cardItemHeight = e.currentTarget.naturalHeight
+                            store.cardItemWidth = e.currentTarget.naturalWidth
                           }}
                           id={"image-" + index}
                           width={120}
@@ -179,7 +200,7 @@ export const Carousel = observer(() => {
                         {/* delete frame */}
                         <button
                           onClick={() => {
-                            store.deleteFrame(index)
+                            handleDeleteFrame(index)
                           }}
                           className="absolute top-2 right-2 text-white z-20"
                         >
@@ -203,21 +224,23 @@ export const Carousel = observer(() => {
                   }
                 </div>
               )}
+              {creatingGifFrames && <ButtonSkeleton />}
               {!creatingGifFrames && store.frames.length > 0 && (
                 <button
                   onClick={() => {
-                    if (carouselRef.current && cardRef.current) {
-                      const cardWidth =
-                        cardRef.current.getBoundingClientRect().width
+                    if (carouselRef.current) {
                       gsap.to(carouselRef.current, {
                         scrollTo: { x: "+=" + cardWidth },
                         duration: 0.5,
-                        ease: "power2.inOut",
+                        ease: "sine.inOut",
                       })
-                      if (currentlySelectedFrame < store.frames.length - 1)
+                      if (currentlySelectedFrame < store.frames.length) {
                         setCurrentlySelectedFrame(
                           (currentlySelectedFrame + 1) % store.frames.length
                         )
+                        store.setCurrentKeyFrame(currentlySelectedFrame + 1)
+                        store.addCurrentGifFrameToCanvas()
+                      }
                     }
                   }}
                   className="btn btn-outline"
@@ -232,9 +255,12 @@ export const Carousel = observer(() => {
     </div>
   )
 })
+const ButtonSkeleton = () => (
+  <div className="inline-block px-6 py-2 rounded-md skeleton h-10 w-20"></div>
+)
 // when the
 const CardSkeleton = () => {
-  return <div className="skeleton w-[160px] h-[100px]"></div>
+  return <div className="skeleton w-[120px] h-[70px]"></div>
 }
 interface Frame {
   id: number

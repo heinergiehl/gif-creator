@@ -41,8 +41,13 @@ export class Store {
   textFont: string
   imageResources: string[]
   gifQuality: number = 10
+  sidebarWidth: number
+  cardItemWidth: number
+  cardItemHeight: number
   constructor() {
     this._canvas = null
+    this.cardItemWidth = 0
+    this.cardItemHeight = 0
     this.textColor = "black"
     this.textFont = "Comic Sans MS"
     this.selectedMenuOption = "Text"
@@ -55,7 +60,7 @@ export class Store {
     this.audios = []
     this._imageObject = null
     this._editorElements = []
-    this.backgroundColor = "green"
+    this.backgroundColor = "lightgrey"
     this.maxTime = 30 * 1000
     this.playing = false
     this.currentKeyFrame = 0
@@ -66,6 +71,7 @@ export class Store {
     this.selectedMenuOption = "Video"
     this.selectedVideoFormat = "mp4"
     this.imageResources = []
+    this.sidebarWidth = 300
     makeAutoObservable(this)
   }
   set canvas(canvas: fabric.Canvas | null) {
@@ -83,6 +89,10 @@ export class Store {
   get canvas() {
     return this._canvas
   }
+  setVideoFrames(videoFrames: VideoFrame[]) {
+    this.videoFrames = videoFrames
+    this.frames = videoFrames
+  }
   setSelectedMenuOption(selectedMenuOption: MenuOption) {
     this.selectedMenuOption = selectedMenuOption
   }
@@ -91,11 +101,11 @@ export class Store {
   }
   setCurrentKeyFrame(frame: number) {
     this.currentKeyFrame = frame
+    this._selectedElement = this._editorElements[frame]
   }
   addEditorElement(element: EditorElement, isResource = false) {
-    this._selectedElement =
-      this._editorElements[this._editorElements.length - 1]
     this._editorElements = [...this._editorElements, element]
+    // this._selectedElement = this._editorElements[0]
     if (isResource && element.type === "image") {
       const currentVideoFrame = this.frames[this.currentKeyFrame]
       currentVideoFrame.nestedObjects.push({ id: element.id })
@@ -106,8 +116,8 @@ export class Store {
       )
       element.fabricObject = fabricImage
       this._editorElements[this._editorElements.length - 1] = element
+      // this.selectedElement = this._editorElements[0] = element
       if (fabricImage) this.canvas?.add(fabricImage)
-      element.fabricObject = fabricImage
     }
     //text
     else if (element.type === "text") {
@@ -120,10 +130,16 @@ export class Store {
       element.fabricObject = text
       this._editorElements[this._editorElements.length - 1] = element
       this.canvas?.add(text)
-    } else {
-      this.refreshElements()
+    } else if (element.type === "image") {
+      const imgElement = document.getElementById(
+        element.properties.elementId
+      ) as HTMLImageElement
+      const fabricImage = this.createFabricImage(imgElement)
+      element.fabricObject = fabricImage
+      this._editorElements[this._editorElements.length - 1] = element
+      this._selectedElement = this._editorElements[0]
+      if (fabricImage) this._canvas?.add(fabricImage)
     }
-    this.canvas?.renderAll()
   }
   clearEditorElements() {
     this._editorElements = []
@@ -166,7 +182,6 @@ export class Store {
     if (!isHtmlImageElement(imageElement)) {
       return
     }
-    const aspectRatio = imageElement.naturalWidth / imageElement.naturalHeight
     const canvasWidth = this._canvas?.width || 800 // Default to 800 if canvas is not initialized
     const canvasHeight = this._canvas?.height || 500 // Default to 500 if canvas is not initialized
     // Calculate the scale for the image to fit the canvas
@@ -176,6 +191,13 @@ export class Store {
     // Use the scale to calculate the actual dimensions to fit the canvas
     const imageWidth = imageElement.naturalWidth * scaleToFit
     const imageHeight = imageElement.naturalHeight * scaleToFit
+    console.log(
+      "SIZE69",
+      imageElement.naturalWidth,
+      imageElement.naturalHeight,
+      imageElement.width,
+      imageElement.height
+    )
     // Center the image on the canvas
     const left = canvasWidth / 2
     const top = canvasHeight / 2
@@ -208,6 +230,12 @@ export class Store {
       },
       isResource
     )
+  }
+  addImages() {
+    this.videoFrames.forEach((image, index) => {
+      console.log("IMAGE69")
+      this.addImage(index, false)
+    })
   }
   set editorElements(editorElements: EditorElement[]) {
     console.log("editorElements", editorElements)
@@ -288,12 +316,22 @@ export class Store {
       // make sure the image fits exactly the canvas
       const orignalHeight = image.naturalHeight
       const orignalWidth = image.naturalWidth
+      console.log(
+        "SIZE69",
+        orignalWidth,
+        orignalHeight,
+        canvasWidth,
+        canvasHeight
+      )
+      const aspectRatio = orignalWidth / orignalHeight
+      const scaleX = canvasWidth / orignalWidth
+      const scaleY = canvasHeight / orignalHeight
       const imageObject = new fabric.Image(image, {})
       imageObject.set({
         width: orignalWidth,
         height: orignalHeight,
-        scaleX: canvasWidth / orignalWidth,
-        scaleY: canvasHeight / orignalHeight,
+        scaleX,
+        scaleY,
         originX: "center",
         originY: "center",
         left: canvasWidth / 2,
@@ -344,8 +382,18 @@ export class Store {
     this.speedFactor = factor
   }
   deleteFrame(index: number) {
-    this.frames.splice(index, 1)
-    this._editorElements.splice(index, 1)
+    const frameToDelete = this.frames[index]
+    this.frames = this.frames.filter((frame, i) => i !== index)
+    this._editorElements = this._editorElements.filter(
+      (element) =>
+        !frameToDelete.nestedObjects.some(
+          (nestedObject) => nestedObject.id === element.id
+        )
+    )
+    this._editorElements = this._editorElements.filter(
+      (element, i) => i !== index
+    )
+    this.videoFrames = this.frames
   }
   deleteNestedObjectOfCurrentFrame(index: number) {
     const currentVideoFrame = this.frames[this.currentKeyFrame]
@@ -374,14 +422,16 @@ export class Store {
     const gifFrame = this._editorElements[this.currentKeyFrame]
     // get all the nested objects for the current frame
     const currentVideoFrame = this.frames[this.currentKeyFrame]
+    if (!currentVideoFrame) return
     const nestedObjectIds = currentVideoFrame.nestedObjects
     const nestedObjects = this._editorElements.filter((element) =>
       nestedObjectIds.some((nestedObject) => nestedObject.id === element.id)
     )
-    this.canvas?.clear()
+    this._canvas?.clear()
     // Create a temporary canvas to draw the image
     if (!gifFrame.fabricObject) return
-    this.canvas?.add(gifFrame.fabricObject)
+    console.log("NESTEDOBJECTS69!", gifFrame.fabricObject)
+    this._canvas?.add(gifFrame.fabricObject)
     console.log("NESTEDOBJECTS80!", nestedObjects)
     nestedObjects.forEach((nestedObject) => {
       console.log("NESTEDOBJECTS90!", nestedObject)
@@ -390,7 +440,6 @@ export class Store {
         this.canvas?.add(nestedObject.fabricObject)
       }
     })
-    this.canvas?.requestRenderAll()
   }
   playSequence() {
     if (this.playing) {

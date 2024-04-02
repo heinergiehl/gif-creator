@@ -17,7 +17,7 @@ const ImageResource = observer(() => {
     reader.readAsDataURL(file)
   }
   return (
-    <div className="p-4 space-y-2">
+    <div className="p-4 space-y-2 h-screen">
       <span className="text-xs font-semibold text-gray-700">
         Add Image Resources
       </span>

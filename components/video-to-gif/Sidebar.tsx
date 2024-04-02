@@ -16,23 +16,26 @@ import { Store } from "@/store/Store"
 export const Sidebar = observer(() => {
   const store = React.useContext(StoreContext)
   return (
-    <ul className="bg-white h-full ">
+    <ul className="bg-white h-screen">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name
         return (
           <li
             key={option.name}
-            className={`h-[72px] w-[72px] flex flex-col items-center justify-center ${
+            className={`h-[72px] w-[72px] flex flex-col items-center justify-center rounded-lg ${
               isSelected ? "bg-slate-200" : ""
             }`}
           >
             <button
+              disabled={
+                option.name !== "Video" && store._editorElements.length === 0
+              }
               onClick={() => option.action(store)}
               className={`flex flex-col items-center`}
             >
               <option.icon size="20" color={isSelected ? "#000" : "#444"} />
               <div
-                className={`text-[0.6rem] hover:text-black ${
+                className={`text-[0.6rem]  hover:text-black ${
                   isSelected ? "text-black" : "text-slate-600"
                 }`}
               >
@@ -54,13 +57,6 @@ const MENU_OPTIONS = [
     },
   },
   {
-    name: "Audio",
-    icon: MdAudiotrack,
-    action: (store: Store) => {
-      store.setSelectedMenuOption("Audio")
-    },
-  },
-  {
     name: "Image",
     icon: MdImage,
     action: (store: Store) => {
@@ -75,24 +71,10 @@ const MENU_OPTIONS = [
     },
   },
   {
-    name: "Animation",
-    icon: MdTransform,
-    action: (store: Store) => {
-      store.setSelectedMenuOption("Animation")
-    },
-  },
-  {
     name: "Effect",
     icon: MdMovieFilter,
     action: (store: Store) => {
       store.setSelectedMenuOption("Effect")
-    },
-  },
-  {
-    name: "Fill",
-    icon: MdOutlineFormatColorFill,
-    action: (store: Store) => {
-      store.setSelectedMenuOption("Fill")
     },
   },
   {
