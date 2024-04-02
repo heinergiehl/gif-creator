@@ -1,5 +1,6 @@
 import Head from "next/head"
 import Link from "next/link"
+import { FaRegCopyright } from "react-icons/fa6"
 export default function Home() {
   return (
     <div>
@@ -143,7 +144,12 @@ export default function Home() {
           </div>
         </section>
         <footer className="footer footer-center p-4 bg-base-300 text-base-content">
-          <p>GIFMagic.app &copy; 2024. All rights reserved.</p>
+          <p>
+            <span className="flex justify-center items-center">
+              GIFMagic.app <FaRegCopyright className="mx-1" /> 2024. All rights
+              reserved.
+            </span>
+          </p>
         </footer>
       </main>
     </div>
