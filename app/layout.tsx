@@ -3,7 +3,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/react"
 import RootNavigation from "./RootNavigation"
-import { GoogleAnalytics } from "@next/third-parties/google"
+import GoogleAnalytics from "@/app/components/consent/GoogleAnalytics"
+import CookieBanner from "./components/consent/CookieBanner"
 const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Turn any video into a GIF",
@@ -17,11 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
       <body className={inter.className}>
         <RootNavigation />
         {children}
         <Analytics />
-        <GoogleAnalytics gaId="G-8M37TENBJS" />
+        <CookieBanner />
       </body>
     </html>
   )
