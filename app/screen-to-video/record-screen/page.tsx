@@ -34,6 +34,7 @@ const RecordView = () => {
       fabric.Image.prototype.objectCaching = false
       if (!videoRef.current) return
       videoRef.current.addEventListener("loadeddata", () => {
+        if (!fabricCanvasRef.current) return
         enableCropMode(fabricCanvasRef.current)
         canvas.on("object:modified", function (e) {
           //
