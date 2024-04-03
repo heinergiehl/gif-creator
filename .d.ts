@@ -1,4 +1,5 @@
 declare module "/node_modules/animejs/lib/anime.es.js"
-interface window {
+interface Window {
   gtag: (...args: any[]) => void
+  dataLayer: Record<string, any>
 }
