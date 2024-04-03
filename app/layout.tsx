@@ -19,9 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Suspense>
-        <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
-      </Suspense>
+      <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
       <body className={inter.className}>
         <RootNavigation />
         {children}
