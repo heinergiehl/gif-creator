@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react"
 import RootNavigation from "./RootNavigation"
 import GoogleAnalytics from "@/app/components/consent/GoogleAnalytics"
 import CookieBanner from "./components/consent/CookieBanner"
+import { Suspense } from "react"
 const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Turn any video into a GIF",
@@ -18,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
+      <Suspense>
+        <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
+      </Suspense>
       <body className={inter.className}>
         <RootNavigation />
         {children}
