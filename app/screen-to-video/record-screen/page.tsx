@@ -102,9 +102,11 @@ const RecordView = () => {
   const handleCrop = () => {
     if (!fabricCanvasRef.current || !cropRectRef.current) return
     // Calculate the new scale ratio for the cropped area to fit the canvas
+    if (!fabricCanvasRef.current.width || !cropRectRef.current.width) return
+    if (!cropRectRef.current.height || !fabricCanvasRef.current.height) return
     const scaleX = fabricCanvasRef.current.width / cropRectRef.current.width
     const scaleY = fabricCanvasRef.current.height / cropRectRef.current.height
-    // Get the cropped area position
+    if (!cropRectRef.current.left || !cropRectRef.current.top) return
     const left = cropRectRef.current.left
     const top = cropRectRef.current.top
     // Calculate the top-left corner of the cropped area in relation to the canvas
@@ -123,13 +125,14 @@ const RecordView = () => {
     ]
     // Remove the crop rectangle from the canvas
     fabricCanvasRef.current.remove(cropRectRef.current)
-    cropRectRef.current = null // Reset the crop rectangle reference
+    if (!cropRectRef.current) return
+    cropRectRef.current = undefined // Reset the crop rectangle reference
     // Deselect any objects on the canvas
     fabricCanvasRef.current.discardActiveObject()
     // Apply the transformations and re-render the canvas
     fabricCanvasRef.current.requestRenderAll()
   }
-  const enableCropMode = (canvas) => {
+  const enableCropMode = (canvas: fabric.Canvas) => {
     if (cropRectRef.current) return
     cropRectRef.current = new fabric.Rect({
       fill: "rgba(0,0,0,0.3)",
@@ -225,7 +228,7 @@ const RecordView = () => {
       </button>
       <video
         ref={videoRef}
-        src={mediaBlobUrl}
+        src={mediaBlobUrl ?? ""}
         width={1280}
         height={768}
         controls
