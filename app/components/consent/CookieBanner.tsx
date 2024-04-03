@@ -3,11 +3,6 @@ import { useEffect, useState } from "react"
 import { getLocalStorage, setLocalStorage } from "@/app/lib/storageHelper"
 import Link from "next/link"
 import { cn } from "@/utils/cn"
-declare global {
-  interface Window {
-    gtag: any
-  }
-}
 export default function CookieBanner() {
   const [cookieConsent, setCookieConsent] = useState(false)
   useEffect(() => {
