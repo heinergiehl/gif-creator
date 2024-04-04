@@ -8,6 +8,21 @@ export const metadata: Metadata = {
   description:
     "GifMagic.app is a free online GIF maker that lets you create GIFs from videos or images. Convert videos to GIFs, edit GIFs, and share them with ease!",
   keywords: "gif maker, video, converter, editor, free gif maker, gif creator",
+  openGraph: {
+    title:
+      "Free GIF Maker: Create GIFs from Videos or Images with GifMagic.app",
+    description:
+      "GifMagic.app is a free online GIF maker that lets you create GIFs from videos or images. Convert videos to GIFs, edit GIFs, and share them with ease!",
+    images: [
+      {
+        url: "https://gifmagic.app/root.png",
+        width: 800,
+        height: 600,
+        alt: "GifMagic.app",
+      },
+    ],
+    siteName: "GifMagic.app",
+  },
 }
 export default function Home() {
   return (
