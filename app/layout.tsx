@@ -7,11 +7,6 @@ import GoogleAnalytics from "@/app/components/consent/GoogleAnalytics"
 import CookieBanner from "./components/consent/CookieBanner"
 import { Suspense } from "react"
 const inter = Inter({ subsets: ["latin"] })
-export const metadata: Metadata = {
-  title: "Turn any video into a GIF",
-  description:
-    "Convert videos to GIFs easily with this free online tool, and even customize the output with text and stickers.",
-}
 export default function RootLayout({
   children,
 }: Readonly<{

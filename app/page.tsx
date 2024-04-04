@@ -1,35 +1,25 @@
+import { Metadata } from "next"
 import Head from "next/head"
 import Link from "next/link"
 import { FaRegCopyright } from "react-icons/fa6"
+import { Footer } from "./components/ui/Footer"
+export const metadata: Metadata = {
+  title: "Free GIF Maker: Create GIFs from Videos or Images with GifMagic.app",
+  description:
+    "GifMagic.app is a free online GIF maker that lets you create GIFs from videos or images. Convert videos to GIFs, edit GIFs, and share them with ease!",
+  keywords: "gif maker, video, converter, editor, free gif maker, gif creator",
+}
 export default function Home() {
   return (
     <div>
-      <Head>
-        <title>
-          Convert Videos to GIFs | GifMagic - High-Quality, Fast, and Free
-        </title>
-        <meta
-          name="description"
-          content="GifMagic.app offers a powerful video to GIF converter that allows you to create high-quality GIFs. Customize frame rates, add text, and edit your GIFs with ease. Start creating for free today!"
-        />
-        <meta
-          name="keywords"
-          content="video to GIF, high-quality GIFs, GIF editing, free GIF converter, video converter, online GIF maker, edit GIFs, add text to GIF, GIF customization"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <main className="font-sans">
-        <section className="hero bg-base-200">
+        <section className="hero bg-base-200 mt-[62px] ">
           <div className="hero-content text-center">
             <div className="max-w-lg">
-              <h1 className="text-5xl font-bold">
-                Transform Videos into GIFs with Ease
-              </h1>
+              <h1 className="text-5xl font-bold">Free Online GIF Maker</h1>
               <p className="py-6">
-                Discover the simplest way to convert your videos into
-                high-quality GIFs. With GifMagic.app, you have the tools to
-                customize your GIFs to perfection. Start converting and editing
-                today for free!
+                Convert videos to GIFs, edit GIFs, and share them with ease
+                using GifMagic.app. No sign-up required!
               </p>
               <Link href="/video-to-gif" className="btn btn-primary">
                 Convert to GIF Now
@@ -42,26 +32,28 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-center mb-8">
               Why Choose GifMagic.app?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
-              <div className="card card-bordered min-w-[200px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
-                  <h3 className="card-title">High-Quality Conversion</h3>
+                  <h3 className="card-title">
+                    Easy to use high quality Online GIF maker
+                  </h3>
                   <p>
-                    Utilizes advanced algorithms for crisp, clear GIFs that
-                    capture every moment beautifully.
+                    Create high-quality GIFs from videos or images with just a
+                    few clicks. No sign-up required!
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">Fast and Easy</h3>
                   <p>
-                    Just a few clicks to transform your video into a GIF. No
-                    complicated processes.
+                    Most services like ezgif, imgflip, and giphy don't offer the
+                    same level of quality and ease of use as GifMagic.app.
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">Completely Free</h3>
                   <p>
@@ -70,21 +62,28 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
-                  <h3 className="card-title">Extensive Editing Tools</h3>
+                  <h3 className="card-title">Extensive Editing Tooling</h3>
                   <p>
-                    Customize your GIFs with text, adjustments, and filters.
-                    Make your GIFs stand out.
+                    GIFMagic.app offers a wide range of editing tools to help
+                    you. It allows you to perform video-to-gif, image-to-gif,
+                    and gif-to-video conversions. You can also add text To GIFs,
+                    adjust frame rates, and customize your GIFs to your liking.
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
-                  <h3 className="card-title">Support for Multiple Formats</h3>
+                  <h3 className="card-title">
+                    A Unique Feature: screen-to-video
+                  </h3>
                   <p>
-                    Supports a wide range of video formats for hassle-free
-                    conversions.
+                    GifMagic.app offers a unique screen-to-video feature that
+                    allows you to record your screen and convert it into a
+                    video. You can choose to record a window, a tab, or the
+                    entire screen. Also, you can edit the resolution of the
+                    video, and crop it to your liking.
                   </p>
                 </div>
               </div>
@@ -143,14 +142,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <footer className="footer footer-center p-4 bg-base-300 text-base-content">
-          <p>
-            <span className="flex justify-center items-center">
-              GIFMagic.app <FaRegCopyright className="mx-1" /> 2024. All rights
-              reserved.
-            </span>
-          </p>
-        </footer>
+        <Footer />
       </main>
     </div>
   )

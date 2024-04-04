@@ -2,33 +2,26 @@ import Head from "next/head"
 import Link from "next/link"
 import { FaRegCopyright } from "react-icons/fa6"
 import { Footer } from "@/app/components/ui/Footer"
+import { Metadata } from "next"
+export const metadata: Metadata = {
+  title: "Free Screen Recorder",
+  description:
+    "Record your screen, and save it as a video. You can choose different resolutions, and crop the video to the size you want. It's free and super simple.Then, you can download the video, and turn it into a GIF, or edit it further.",
+  keywords: "screen, recorder, free",
+}
 export default function ScreenToVideo() {
   return (
     <div>
-      <Head>
-        <title>Screen to Video Converter</title>
-        <meta
-          name="description"
-          content="Convert screen recordings to videos"
-        />
-        <meta
-          name="keywords"
-          content="screen, video, converter, editor, free"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="font-sans">
+      <main className="font-sans mt-[62px]">
         <section className="hero bg-base-200">
           <div className="hero-content text-center">
             <div className="max-w-lg">
-              <h1 className="text-5xl font-bold">
-                Convert Screen Recordings into Videos with Ease
-              </h1>
+              <h1 className="text-5xl font-bold">Screen To GIF Converter</h1>
               <p className="py-6">
-                Discover the simplest way to convert your screen recordings into
-                high-quality videos. With GifMagic.app, you have the tools to
-                customize your videos to perfection. Start converting and
-                editing today for free!
+                Record your screen and save it as a video. Choose different
+                resolutions and crop the video to the size you want. It's free
+                and super simple. Then, you can download the video and turn it
+                into a GIF or edit it further.
               </p>
               <Link
                 href="/screen-to-video/record-screen"
@@ -42,28 +35,29 @@ export default function ScreenToVideo() {
         <section className="py-16 w-full">
           <div className="container mx-auto px-4 w-full">
             <h2 className="text-3xl font-bold text-center mb-8">
-              Why Choose GifMagic.app?
+              Why Choose GifMagic.app for screen-to-video or screen-to-gif ?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
-              <div className="card card-bordered min-w-[200px]">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">High-Quality Conversion</h3>
                   <p>
-                    Utilizes advanced algorithms for crisp, clear GIFs that
-                    capture every moment beautifully.
+                    Create high-quality videos from your screen recordings with
+                    just a few clicks. No sign-up required!
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">Fast and Easy</h3>
                   <p>
-                    Just a few clicks to transform your video into a GIF. No
-                    complicated processes.
+                    Just with a few clicks, you can transform your screen
+                    recording into a video. And then, you can convert it into a
+                    GIF. No complicated processes.
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">Completely Free</h3>
                   <p>
@@ -72,7 +66,7 @@ export default function ScreenToVideo() {
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">
                     Extensive Conversion Functionality
@@ -80,11 +74,12 @@ export default function ScreenToVideo() {
                   <p>
                     Supports a wide range of video formats for hassle-free
                     conversions. Convert what you see on your screen into a
-                    video and share it with the world.
+                    video and share it with the world. You can record your whole
+                    screen, a browser tab, or just an application window.
                   </p>
                 </div>
               </div>
-              <div className="card card-bordered min-w-[200px]">
+              <div className="card card-bordered min-w-[300px]">
                 <div className="card-body">
                   <h3 className="card-title">Unlimited Conversions</h3>
                   <p>
