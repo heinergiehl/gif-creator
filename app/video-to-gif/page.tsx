@@ -22,11 +22,12 @@ export default function VideoToGif() {
               </h1>
               <p className="py-6">
                 Transform videos into high-quality, customized GIFs in just a
-                few clicks with GifMagic.app. Our intuitive editor allows you to
-                extract the precise images you want, add text in various fonts
-                and sizes, and embellish your GIF with unique elements and
-                images. Experience the magic of creating beautiful, customized
-                GIFs effortlessly and quickly, ready to download and share.
+                few clicks with GifMagic.app, our awesome gifmaker. Our
+                intuitive editor allows you to extract the precise images you
+                want, add text in various fonts and sizes, and embellish your
+                GIF with unique elements and images. Experience the magic of
+                creating beautiful, customized GIFs effortlessly and quickly,
+                ready to download and share.
               </p>
               <Link
                 href="/video-to-gif/converter-and-editor"
