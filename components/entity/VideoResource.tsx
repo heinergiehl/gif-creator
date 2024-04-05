@@ -19,7 +19,7 @@ export const VideoResource = observer(() => {
       resolution
     )
     // render first frame
-    store.setVideoFrames(extractedFrames)
+    store.frames = extractedFrames
     store.creatingGifFrames = false
   }
   async function extractFramesFromFile(

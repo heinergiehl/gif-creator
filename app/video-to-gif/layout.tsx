@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import React from "react"
+import RootNavigation from "../RootNavigation"
 export const metadata: Metadata = {
   title: "Free Video to GIF Converter and Editor",
   description:
@@ -7,6 +8,11 @@ export const metadata: Metadata = {
   keywords: "video, gif, converter, editor, free",
 }
 function Layout({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>
+  return (
+    <div>
+      <RootNavigation />
+      {children}
+    </div>
+  )
 }
 export default Layout

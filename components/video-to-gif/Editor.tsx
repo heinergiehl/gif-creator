@@ -13,7 +13,7 @@ import Navigation from "../nav/Navigation"
 import ElementsHistoryPanel from "../panels/ElementsHistoryPanel"
 import { FaPlayCircle, FaStopCircle } from "react-icons/fa"
 import { usePathname } from "next/navigation"
-import { path } from "animejs"
+import RootNavigation from "@/app/RootNavigation"
 export const EditorWithStore = () => {
   const [store] = useState(new Store())
   return (
@@ -128,7 +128,7 @@ export const Editor = observer(() => {
          grid-rows-[1fr_0px_0px]  grid-cols-[72px_150px_1fr_auto] 
       "
       >
-        <Navigation />
+        <RootNavigation />
         <div className="tile row-span-2 flex flex-col ">
           <Sidebar />
         </div>
@@ -138,7 +138,7 @@ export const Editor = observer(() => {
         <div className=" bg-slate-100 flex justify-center items-center  flex-col ">
           <div className="flex w-full justify-center items-center space-x-8">
             {store.creatingGifFrames && <ControlsSkeleton />}
-            {store.videoFrames.length !== 0 &&
+            {store.frames.length !== 0 &&
               store._editorElements.length !== 0 && (
                 <div className="flex flex-col">
                   <label

@@ -12,25 +12,17 @@ const ImageResource = observer(() => {
   const isVideoToGif = pathName.includes("video-to-gif")
   const store = React.useContext(StoreContext)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isVideoToGif) store.creatingGifFrames = true
     if (!e.target.files) return
     const reader = new FileReader()
     reader.readAsDataURL(e.target.files[0])
     reader.onloadend = () => {
-      if (isVideoToGif) store.imageResources.push(reader.result as string)
-      else {
-        store.videoFrames.push({
-          src: reader.result as string,
-          nestedObjects: [],
-        })
-        store.frames.push({
-          src: reader.result as string,
-          nestedObjects: [],
-        })
-        store.addImage(0, isVideoToGif)
+      if (isVideoToGif) {
+        store.imageResources.push(reader.result as string)
+      } else {
+        store.images.push(reader.result as string)
+        store.frames.push({ src: reader.result as string, nestedObjects: [] })
       }
     }
-    store.creatingGifFrames = false
   }
   return (
     <div className="p-4 space-y-2 h-screen">
@@ -49,7 +41,7 @@ const ImageResource = observer(() => {
             <div
               key={index}
               className="flex flex-col "
-              onClick={() => store.addImage(index, isVideoToGif)}
+              onClick={() => store.addImage(index, true)}
             >
               <Image
                 id={`imageResource-${index}`}
@@ -66,7 +58,11 @@ const ImageResource = observer(() => {
             <div
               key={index}
               className="flex flex-col "
-              onClick={() => store.addImage(index, !isVideoToGif)}
+              onClick={() => {
+                store.creatingGifFrames = true
+                store.addImage(index, false)
+                store.creatingGifFrames = false
+              }}
             >
               <Image
                 id={`image-${index}`}

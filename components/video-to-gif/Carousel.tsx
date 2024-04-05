@@ -47,7 +47,7 @@ export const Carousel = observer(() => {
     if (carouselRef.current) {
       setCarouselWidth(carouselRef.current.offsetWidth)
     }
-  }, [store.frames, store.videoFrames])
+  }, [store.frames, store._editorElements])
   useEffect(() => {
     const updateCardWidth = () => {
       const card = carouselRef.current?.querySelector(
@@ -63,7 +63,7 @@ export const Carousel = observer(() => {
       observer.observe(carouselRef.current, { childList: true })
     }
     return () => observer.disconnect()
-  }, [store.videoFrames, store.frames])
+  }, [store.frames])
   useEffect(() => {
     const scrollPosition = cardWidth * currentlySelectedFrame
     if (carouselRef.current) {

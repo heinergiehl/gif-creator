@@ -23,7 +23,7 @@ export class Store {
   audios: string[]
   videos: string[]
   images: string[]
-  videoFrames: VideoFrame[]
+  frames: VideoFrame[]
   _imageObject: fabric.Image | null
   _editorElements: EditorElement[]
   _selectedElement: EditorElement | null
@@ -56,7 +56,7 @@ export class Store {
     this.playInterval = null
     this.videos = []
     this.images = []
-    this.videoFrames = []
+    this.frames = []
     this.audios = []
     this._imageObject = null
     this._editorElements = []
@@ -82,10 +82,6 @@ export class Store {
   }
   get canvas() {
     return this._canvas
-  }
-  setVideoFrames(videoFrames: VideoFrame[]) {
-    this.videoFrames = videoFrames
-    this.frames = videoFrames
   }
   setSelectedMenuOption(selectedMenuOption: MenuOption) {
     this.selectedMenuOption = selectedMenuOption
@@ -159,16 +155,11 @@ export class Store {
         (element) => element.id === this._selectedElement?.id
       ) ?? null
   }
-  set frames(frames: VideoFrame[]) {
-    this.videoFrames = frames
-  }
-  get frames() {
-    return this.videoFrames
-  }
   addImage(index: number, isResource: boolean = false) {
     let imageElement: HTMLElement | null = null
     if (isResource) {
       imageElement = document.getElementById(`imageResource-${index}`)
+      console.log("6970!", imageElement)
     } else {
       imageElement = document.getElementById(`image-${index}`)
     }
@@ -219,7 +210,7 @@ export class Store {
     )
   }
   addImages() {
-    this.videoFrames.forEach((image, index) => {
+    this.frames.forEach((image, index) => {
       console.log("IMAGE69")
       this.addImage(index, false)
     })
@@ -380,7 +371,7 @@ export class Store {
     this._editorElements = this._editorElements.filter(
       (element, i) => i !== index
     )
-    this.videoFrames = this.frames
+    this.frames = this.frames
   }
   deleteNestedObjectOfCurrentFrame(index: number) {
     const currentVideoFrame = this.frames[this.currentKeyFrame]
