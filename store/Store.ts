@@ -36,7 +36,7 @@ export class Store {
   selectedVideoFormat: "mp4" | "webm"
   playInterval: NodeJS.Timeout | null
   speedFactor: number
-  _creatingGifFrames: boolean
+  creatingGifFrames: boolean
   textColor: string
   textFont: string
   imageResources: string[]
@@ -51,7 +51,7 @@ export class Store {
     this.textColor = "black"
     this.textFont = "Comic Sans MS"
     this.selectedMenuOption = "Text"
-    this._creatingGifFrames = false
+    this.creatingGifFrames = false
     this.speedFactor = 1
     this.playInterval = null
     this.videos = []
@@ -79,12 +79,6 @@ export class Store {
     if (this._canvas) {
       this._canvas.backgroundColor = this.backgroundColor
     }
-  }
-  set creatingGifFrames(isCreatingGifFrames: boolean) {
-    this._creatingGifFrames = isCreatingGifFrames
-  }
-  get creatingGifFrames() {
-    return this._creatingGifFrames
   }
   get canvas() {
     return this._canvas
@@ -191,13 +185,6 @@ export class Store {
     // Use the scale to calculate the actual dimensions to fit the canvas
     const imageWidth = imageElement.naturalWidth * scaleToFit
     const imageHeight = imageElement.naturalHeight * scaleToFit
-    console.log(
-      "SIZE69",
-      imageElement.naturalWidth,
-      imageElement.naturalHeight,
-      imageElement.width,
-      imageElement.height
-    )
     // Center the image on the canvas
     const left = canvasWidth / 2
     const top = canvasHeight / 2

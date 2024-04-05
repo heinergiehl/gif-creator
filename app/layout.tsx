@@ -6,6 +6,7 @@ import RootNavigation from "./RootNavigation"
 import GoogleAnalytics from "@/app/components/consent/GoogleAnalytics"
 import CookieBanner from "./components/consent/CookieBanner"
 import { Suspense } from "react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 const inter = Inter({ subsets: ["latin"] })
 export default function RootLayout({
   children,
@@ -21,7 +22,8 @@ export default function RootLayout({
         <RootNavigation />
         {children}
         <Analytics />
-        <CookieBanner />
+        <SpeedInsights />
+        {/* <CookieBanner /> */}
       </body>
     </html>
   )

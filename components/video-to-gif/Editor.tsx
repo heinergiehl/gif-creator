@@ -12,6 +12,8 @@ import { Sidebar } from "./Sidebar"
 import Navigation from "../nav/Navigation"
 import ElementsHistoryPanel from "../panels/ElementsHistoryPanel"
 import { FaPlayCircle, FaStopCircle } from "react-icons/fa"
+import { usePathname } from "next/navigation"
+import { path } from "animejs"
 export const EditorWithStore = () => {
   const [store] = useState(new Store())
   return (
@@ -56,6 +58,7 @@ export const Editor = observer(() => {
       window.removeEventListener("resize", resizeCanvas)
     }
   }, []) // Depend on the store.canvas to ensure it exists
+  const pathName = usePathname()
   useEffect(() => {
     // check if the canvas is already initialized
     if (store._canvas) {
@@ -95,14 +98,15 @@ export const Editor = observer(() => {
   }, [])
   useEffect(() => {
     if (
-      !store._creatingGifFrames &&
+      !store.creatingGifFrames &&
       store.cardItemHeight &&
-      store.cardItemWidth
+      store.cardItemWidth &&
+      pathName.includes("video-to-gif")
     ) {
       store.addImages()
       store.addCurrentGifFrameToCanvas()
     }
-  }, [store._creatingGifFrames, store.cardItemHeight, store.cardItemWidth])
+  }, [store.creatingGifFrames, store.cardItemHeight, store.cardItemWidth])
   const ControlsSkeleton = () => {
     return (
       <div className="flex flex-col gap-4">
@@ -133,7 +137,7 @@ export const Editor = observer(() => {
         </div>
         <div className=" bg-slate-100 flex justify-center items-center  flex-col ">
           <div className="flex w-full justify-center items-center space-x-8">
-            {store._creatingGifFrames && <ControlsSkeleton />}
+            {store.creatingGifFrames && <ControlsSkeleton />}
             {store.videoFrames.length !== 0 &&
               store._editorElements.length !== 0 && (
                 <div className="flex flex-col">

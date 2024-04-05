@@ -1,20 +1,36 @@
 // allows to add images to a specific gif frame (nested object)
 // Compare this snippet from components/panels/TexResourcesPanel.tsx:
 "use client"
-import React from "react"
+import React, { use } from "react"
 import { observer } from "mobx-react"
 import { StoreContext } from "@/store"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
+import { VideoFrame } from "@/store/Store"
 const ImageResource = observer(() => {
+  const pathName = usePathname()
+  const isVideoToGif = pathName.includes("video-to-gif")
   const store = React.useContext(StoreContext)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isVideoToGif) store.creatingGifFrames = true
     if (!e.target.files) return
-    const file = e.target.files[0]
     const reader = new FileReader()
+    reader.readAsDataURL(e.target.files[0])
     reader.onloadend = () => {
-      store.imageResources.push(reader.result as string)
+      if (isVideoToGif) store.imageResources.push(reader.result as string)
+      else {
+        store.videoFrames.push({
+          src: reader.result as string,
+          nestedObjects: [],
+        })
+        store.frames.push({
+          src: reader.result as string,
+          nestedObjects: [],
+        })
+        store.addImage(0, isVideoToGif)
+      }
     }
-    reader.readAsDataURL(file)
+    store.creatingGifFrames = false
   }
   return (
     <div className="p-4 space-y-2 h-screen">
@@ -23,27 +39,45 @@ const ImageResource = observer(() => {
       </span>
       <input
         type="file"
+        multiple // Allow multiple files
         className=" w-full max-w-xs mb-4"
         onChange={handleImageChange}
       />
-      {/* image preview; use tailwindcss or daisy ui to make it look good */}
       <div className="flex  flex-col items-center justify-center w-full mb-4 space-y-4">
-        {store.imageResources.map((image, index) => (
-          <div
-            key={index}
-            className="flex flex-col "
-            onClick={() => store.addImage(index, true)}
-          >
-            <Image
-              id={`imageResource-${index}`}
-              src={image}
-              width={100}
-              height={100}
-              alt="image resource"
-              className="rounded-lg w-40 h-40 object-cover"
-            />
-          </div>
-        ))}
+        {isVideoToGif &&
+          store.imageResources.map((image, index) => (
+            <div
+              key={index}
+              className="flex flex-col "
+              onClick={() => store.addImage(index, isVideoToGif)}
+            >
+              <Image
+                id={`imageResource-${index}`}
+                src={image}
+                width={100}
+                height={100}
+                alt={"imageResource"}
+                className="rounded-lg w-40 h-40 object-cover"
+              />
+            </div>
+          ))}
+        {!isVideoToGif &&
+          store.images.map((image, index) => (
+            <div
+              key={index}
+              className="flex flex-col "
+              onClick={() => store.addImage(index, !isVideoToGif)}
+            >
+              <Image
+                id={`image-${index}`}
+                src={image}
+                width={100}
+                height={100}
+                alt={"image"}
+                className="rounded-lg w-40 h-40 object-cover"
+              />
+            </div>
+          ))}
       </div>
     </div>
   )

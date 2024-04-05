@@ -20,6 +20,9 @@ function RootNavigation() {
           <Link href="/video-to-gif">
             <div className="text-white">Video-To-GIF</div>
           </Link>
+          <Link href="/image-to-gif">
+            <div className="text-white">Image-To-GIF</div>
+          </Link>
           <Link href="/screen-to-video">
             <div className="text-white">Screen-To-Video</div>
           </Link>

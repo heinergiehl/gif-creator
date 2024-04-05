@@ -106,3 +106,5 @@ export type MenuOption =
   | "Animation"
   | "Effect"
   | "Fill"
+  | "Video"
+  | "Image"

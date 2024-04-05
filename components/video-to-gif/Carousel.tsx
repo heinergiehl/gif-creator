@@ -280,7 +280,7 @@ const Timeline: React.FC<TimelineProps> = ({
   // Calculate the current position of the marker in percentage.
   const currentPositionPercent = markerWidthPercent * (currentFrame + 1)
   return (
-    <div className="flex  flex-col items-end ">
+    <div className="flex  flex-col items-end 6969">
       {/* display of current frame / total frames */}
       <div className="text-sm font-semibold text-gray-500">
         {currentFrame + 1} / {totalFrames}

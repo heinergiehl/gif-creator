@@ -1,5 +1,5 @@
 "use client"
-import React from "react"
+import React, { useEffect } from "react"
 import { StoreContext } from "@/store"
 import { observer } from "mobx-react"
 import {
@@ -13,7 +13,22 @@ import {
   MdMovieFilter,
 } from "react-icons/md"
 import { Store } from "@/store/Store"
+import { usePathname } from "next/navigation"
+type ConversionType = "videoToGif" | "imageToGif"
 export const Sidebar = observer(() => {
+  const pathName = usePathname()
+  const conversionType: ConversionType = pathName.includes("video-to-gif")
+    ? "videoToGif"
+    : "imageToGif"
+  console.log(conversionType)
+  const [conversionTypeState, setConversionTypeState] =
+    React.useState<ConversionType>(conversionType)
+  useEffect(() => {
+    setConversionTypeState(conversionType)
+    store.setSelectedMenuOption(
+      conversionTypeState === "videoToGif" ? "Video" : "Image"
+    )
+  }, [pathName])
   const store = React.useContext(StoreContext)
   return (
     <ul className="bg-white h-screen">
@@ -28,7 +43,9 @@ export const Sidebar = observer(() => {
           >
             <button
               disabled={
-                option.name !== "Video" && store._editorElements.length === 0
+                option.name === "Video" &&
+                store._editorElements.length === 0 &&
+                conversionTypeState !== "videoToGif"
               }
               onClick={() => option.action(store)}
               className={`flex flex-col items-center`}
