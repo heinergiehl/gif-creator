@@ -20,6 +20,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date().toISOString(),
     },
     {
+      url: "https://gifmagic.app/image-to-gif",
+      changeFrequency: "daily",
+      priority: 1,
+      lastModified: new Date().toISOString(),
+    },
+    {
+      url: "https://gifmagic.app/image-to-gif/converter-and-editor",
+      changeFrequency: "daily",
+      priority: 0.5,
+      lastModified: new Date().toISOString(),
+    },
+    {
       url: "https://gifmagic.app/screen-to-video",
       changeFrequency: "daily",
       priority: 1,
