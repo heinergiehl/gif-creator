@@ -14,6 +14,15 @@ import ElementsHistoryPanel from "../panels/ElementsHistoryPanel"
 import { FaPlayCircle, FaStopCircle } from "react-icons/fa"
 import { usePathname } from "next/navigation"
 import RootNavigation from "@/app/RootNavigation"
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  useDroppable,
+} from "@dnd-kit/core"
+import { set } from "animejs"
 export const EditorWithStore = () => {
   const [store] = useState(new Store())
   return (
@@ -121,10 +130,41 @@ export const Editor = observer(() => {
       </div>
     )
   }
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    //extract index from the id
+    console.log(active, over)
+    const index = parseInt(active.id.split("-")[1])
+    if (store.imageType === "Frame" && over?.id.includes("carousel")) {
+      // get the src from the image html element
+      const src = document.getElementById(active.id)?.getAttribute("src")
+      if (!src) return
+      store.frames.push({ src, nestedObjects: [] })
+      store.addImage(index, true)
+      store.currentKeyFrame = store.frames.length - 1
+    } else {
+      store.addImage(index, true)
+    }
+  }
+  const handleDragStart = (event: DragStartEvent) => {
+    console.log("drag start")
+  }
+  const handleDragOver = (event: DragOverEvent) => {
+    //check if over id is canvas-grid-container, if so set store.imageType to ObjectInFrame
+    if (event.over?.id === "grid-canvas-container") {
+      store.imageType = "ObjectInFrame"
+    } else {
+      store.imageType = "Frame"
+    }
+  }
   return (
-    <>
+    <DndContext
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+    >
       <main
-        className="overflow-hidden grid pt-[64px] lg:grid-rows-[1fr_auto] lg:grid-cols-[auto_300px_1fr_150px] 
+        className="overflow-hidden  grid pt-[64px] lg:grid-rows-[1fr_auto] lg:grid-cols-[75px_300px_1fr_150px] 
          grid-rows-[1fr_0px_0px]  grid-cols-[72px_150px_1fr_auto] 
       "
       >
@@ -174,17 +214,26 @@ export const Editor = observer(() => {
                   </button>{" "}
                 </div>
               )}
-            <div
-              id="grid-canvas-container"
-              className="   border-2 border-gray-300 drop-shadow-lg"
-            >
-              <canvas id="canvas" className="  " />
-            </div>
+            <Canvas />
           </div>
           <Carousel />
         </div>
         <ElementsHistoryPanel />
       </main>
-    </>
+    </DndContext>
   )
 })
+const Canvas = () => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: "grid-canvas-container",
+  })
+  return (
+    <div
+      id="grid-canvas-container"
+      ref={setNodeRef}
+      className="   border-2 border-gray-300 drop-shadow-lg"
+    >
+      <canvas id="canvas" className="  " />
+    </div>
+  )
+}

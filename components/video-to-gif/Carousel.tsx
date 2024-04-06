@@ -12,10 +12,16 @@ import { useEffect } from "react"
 import { gsap } from "gsap"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import React from "react"
+import { useDroppable } from "@dnd-kit/core"
 export const Carousel = observer(() => {
-  const [currentlySelectedFrame, setCurrentlySelectedFrame] = useState(0)
-  const carouselRef = useRef<HTMLDivElement>(null)
+  const { isOver, setNodeRef } = useDroppable({
+    id: "carousel",
+  })
   const store = React.useContext(StoreContext)
+  const [currentlySelectedFrame, setCurrentlySelectedFrame] = useState(
+    store.currentKeyFrame
+  )
+  const carouselRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
   const timelinePastRef = useRef<HTMLDivElement>(null)
   gsap.registerPlugin(ScrollToPlugin)
@@ -63,7 +69,7 @@ export const Carousel = observer(() => {
       observer.observe(carouselRef.current, { childList: true })
     }
     return () => observer.disconnect()
-  }, [store.frames])
+  }, [store.frames, store._editorElements])
   useEffect(() => {
     const scrollPosition = cardWidth * currentlySelectedFrame
     if (carouselRef.current) {
@@ -75,9 +81,7 @@ export const Carousel = observer(() => {
     }
   }, [currentlySelectedFrame, cardWidth])
   useEffect(() => {
-    if (store.currentKeyFrame !== currentlySelectedFrame) {
-      setCurrentlySelectedFrame(store.currentKeyFrame)
-    }
+    setCurrentlySelectedFrame(store.currentKeyFrame)
   }, [store.currentKeyFrame])
   const handleDeleteFrame = (index: number): void => {
     store.deleteFrame(index) // Assuming this method exists on the store
@@ -89,13 +93,12 @@ export const Carousel = observer(() => {
     }
   }
   return (
-    <div className="w-full p-4 space-y-4">
+    <div className="max-w-[850px] p-4 space-y-4" ref={setNodeRef}>
       {!creatingGifFrames && store.frames.length > 0 && (
         <div
-          className=""
+          className="max-w-[750px]  space-y-4"
           style={{
             width: carouselWidth,
-            margin: "auto",
           }}
         >
           <Timeline
@@ -149,7 +152,7 @@ export const Carousel = observer(() => {
                       <div
                         key={index}
                         className={cn([
-                          "relative carousel-item max-w-[60%]   transition-colors duration-200 ease-in-out cursor-pointer ",
+                          "relative carousel-item   transition-colors duration-200 ease-in-out cursor-pointer ",
                         ])}
                       >
                         <CardSkeleton />
@@ -158,10 +161,10 @@ export const Carousel = observer(() => {
                   )}
                 </div>
               )}
-              {!creatingGifFrames && store.frames.length > 0 && (
+              {!creatingGifFrames && (
                 <div
                   ref={carouselRef}
-                  className="min-w-[300px] xl:min-w-[850px] max-w-[60%]   carousel carousel-center p-4  bg-neutral rounded-box w-full space-x-4 "
+                  className="min-w-[300px] xl:min-w-[650px]   carousel carousel-center p-4  bg-neutral rounded-box  space-x-4 "
                 >
                   {
                     // display the frames
@@ -191,7 +194,7 @@ export const Carousel = observer(() => {
                           height={70}
                           src={videoFrame.src}
                           alt={`Frame ${index + 1}`}
-                          className=""
+                          className="max-h-[70px] max-w-[120px] rounded-lg object-cover"
                         />
                         {/* display the current frame number */}
                         <div className="absolute top-2 left-[50%] translate-x-[-50%] bg-primary text-white p-1 rounded-full">
