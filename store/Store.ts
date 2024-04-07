@@ -123,9 +123,10 @@ export class Store {
         element.fabricObject = fabricImage
         this._editorElements[this._editorElements.length - 1] = element
         if (fabricImage === undefined) return
+        if (!element.properties.elementId) return
+        if (!document.getElementById(element.properties.elementId)) return
         this.frames.push({
-          src: document.getElementById(element.properties.elementId)
-            .src as string,
+          src: document.getElementById(element.properties.elementId)?.src || "",
           nestedObjects: [],
         })
         this.selectedElement = this._editorElements[
