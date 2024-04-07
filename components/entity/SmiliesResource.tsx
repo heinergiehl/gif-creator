@@ -6,7 +6,14 @@ import { StoreContext } from "@/store"
 import { DndContext, useDraggable } from "@dnd-kit/core"
 import Image from "next/image"
 const API_KEY = "43266925-5f9d4a4a69a0b1f37c83e9c7a"
-const DraggableImage = observer(({ image, index }) => {
+interface ImageProps {
+  image: {
+    id: string
+    webformatURL: string
+  }
+  index: number
+}
+const DraggableImage = observer(({ image, index }: ImageProps) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `imageResource-${index}`,
   })
@@ -32,7 +39,9 @@ const DraggableImage = observer(({ image, index }) => {
   )
 })
 const SmiliesResource = observer(() => {
-  const [smilies, setSmilies] = useState([])
+  const [smilies, setSmilies] = useState<
+    { id: string; webformatURL: string }[]
+  >([])
   const [imageType, setImageType] = useState("vector")
   const store = useContext(StoreContext)
   useEffect(() => {
