@@ -125,8 +125,11 @@ export class Store {
         if (fabricImage === undefined) return
         if (!element.properties.elementId) return
         if (!document.getElementById(element.properties.elementId)) return
+        const imageElement = document.getElementById(
+          element.properties.elementId
+        ) as HTMLImageElement
         this.frames.push({
-          src: document.getElementById(element.properties.elementId)?.src || "",
+          src: imageElement.src,
           nestedObjects: [],
         })
         this.selectedElement = this._editorElements[
