@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { useReactMediaRecorder } from "react-media-recorder"
 import { fabric } from "fabric"
+import { cn } from "@/utils/cn"
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
   {
@@ -19,12 +20,13 @@ const RecordView = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const fabricCanvasRef = useRef<fabric.Canvas>()
   const cropRectRef = useRef<fabric.Rect>()
+  const [stoppedRecording, setStoppedRecording] = useState(false)
   useEffect(() => {
     if (canvasRef.current && !fabricCanvasRef.current) {
       fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
         height: 768,
         width: 1280,
-        backgroundColor: "white",
+        backgroundColor: "grey",
         preserveObjectStacking: true,
         selectionBorderColor: "blue",
         selection: true,
@@ -213,18 +215,23 @@ const RecordView = () => {
         width: newWidth,
         height: newHeight,
       })
+      console.log("newWidth", newWidth, "newHeight", newHeight)
       // keep the objects in the center of the canvas
       if (!fabricCanvasRef.current.item(0)) return
       fabricCanvasRef.current.renderAll() // Re-render the canvas to apply changes
     }
   }, [newWidth, newHeight])
+  const handleStopRecording = () => {
+    stopRecording()
+    setStoppedRecording(true)
+  }
   return (
-    <div className=" my-80">
+    <div className=" my-[80px] flex flex-col justify-center items-center h-full w-full ">
       <p>{status}</p>
       <button className="btn btn-primary m-2" onClick={startRecording}>
         Start Recording
       </button>
-      <button className="btn btn-secondary" onClick={stopRecording}>
+      <button className="btn btn-secondary" onClick={handleStopRecording}>
         Stop Recording
       </button>
       <video
@@ -272,11 +279,18 @@ const RecordView = () => {
         </label>
         <button onClick={handleResizeCanvas}>Apply Canvas Size</button>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-      />
+      <div
+        className={cn([
+          "relative border border-gray-300 rounded-lg overflow-hidden w-full h-full",
+          !stoppedRecording && "hidden",
+        ])}
+      >
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.width}
+          height={canvasSize.height}
+        />
+      </div>
     </div>
   )
 }
