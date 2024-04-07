@@ -5,6 +5,7 @@ import { observer } from "mobx-react"
 import { TextResourcesPanel } from "@/components/panels/TextResourcesPanel"
 import VideoResource from "../entity/VideoResource"
 import ImageResource from "../entity/ImageResource"
+import SmiliesResource from "../entity/SmiliesResource"
 import ExportPanel from "../panels/ExportPanel"
 import interact from "interactjs"
 export const Resources = observer(() => {
@@ -36,6 +37,7 @@ export const Resources = observer(() => {
       {selectedMenuOption === "Video" ? <VideoResource /> : null}
       {selectedMenuOption === "Image" ? <ImageResource /> : null}
       {selectedMenuOption === "Export" ? <ExportPanel /> : null}
+      {selectedMenuOption === "Smilies" ? <SmiliesResource /> : null}
     </aside>
   )
 })

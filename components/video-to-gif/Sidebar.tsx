@@ -14,6 +14,7 @@ import {
 } from "react-icons/md"
 import { Store } from "@/store/Store"
 import { usePathname } from "next/navigation"
+import { FaRegSmile } from "react-icons/fa"
 type ConversionType = "videoToGif" | "imageToGif"
 export const Sidebar = observer(() => {
   const pathName = usePathname()
@@ -78,6 +79,14 @@ const MENU_OPTIONS = [
     icon: MdImage,
     action: (store: Store) => {
       store.setSelectedMenuOption("Image")
+    },
+  },
+  // smilies
+  {
+    name: "Smilies",
+    icon: FaRegSmile,
+    action: (store: Store) => {
+      store.setSelectedMenuOption("Smilies")
     },
   },
   {

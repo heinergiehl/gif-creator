@@ -42,15 +42,18 @@ const ImageResource = observer(() => {
   const store = React.useContext(StoreContext)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const reader = new FileReader()
-    reader.readAsDataURL(e.target.files[0])
-    reader.onloadend = () => {
-      if (isVideoToGif) {
-        // store.frames.push({ src: reader.result as string, nestedObjects: [] })
-        store.images.push(reader.result as string)
-      } else {
-        store.images.push(reader.result as string)
-        // store.frames.push({ src: reader.result as string, nestedObjects: [] })
+    for (let i = 0; i < e.target.files.length; i++) {
+      const file = e.target.files[i]
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        if (isVideoToGif) {
+          // store.frames.push({ src: reader.result as string, nestedObjects: [] })
+          store.images.push(reader.result as string)
+        } else {
+          store.images.push(reader.result as string)
+          // store.frames.push({ src: reader.result as string, nestedObjects: [] })
+        }
       }
     }
   }
