@@ -2,43 +2,43 @@ import { MetadataRoute } from "next"
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: "https://gifmagic.app",
+      url: "https://www.gifmagic.app",
       changeFrequency: "daily",
       priority: 1,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/video-to-gif",
+      url: "https://www.gifmagic.app/video-to-gif",
       changeFrequency: "daily",
       priority: 1,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/video-to-gif/converter-and-editor",
+      url: "https://www.gifmagic.app/video-to-gif/converter-and-editor",
       changeFrequency: "daily",
       priority: 0.5,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/image-to-gif",
+      url: "https://www.gifmagic.app/image-to-gif",
       changeFrequency: "daily",
       priority: 1,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/image-to-gif/converter-and-editor",
+      url: "https://www.gifmagic.app/image-to-gif/converter-and-editor",
       changeFrequency: "daily",
       priority: 0.5,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/screen-to-video",
+      url: "https://www.gifmagic.app/screen-to-video",
       changeFrequency: "daily",
       priority: 1,
       lastModified: new Date().toISOString(),
     },
     {
-      url: "https://gifmagic.app/screen-to-video/record-screen",
+      url: "https://www.gifmagic.app/screen-to-video/record-screen",
       changeFrequency: "daily",
       priority: 0.5,
       lastModified: new Date().toISOString(),

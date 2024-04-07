@@ -99,8 +99,8 @@ export class Store {
     this._editorElements = [...this._editorElements, element]
     // this._selectedElement = this._editorElements[0]
     if (
-      isResource &&
-      element.type === "image" &&
+      ((isResource && element.type === "image") ||
+        (isResource && element.type === "smilies")) &&
       this.imageType === "ObjectInFrame"
     ) {
       let fabricImage: fabric.Image | undefined
@@ -152,7 +152,7 @@ export class Store {
       element.fabricObject = text
       this._editorElements[this._editorElements.length - 1] = element
       this.canvas?.add(text)
-    } else if (element.type === "image") {
+    } else if (element.type === "image" || element.type === "smilies") {
       const imgElement = document.getElementById(
         element.properties.elementId
       ) as HTMLImageElement
@@ -427,6 +427,7 @@ export class Store {
     if (this._editorElements.length === 0) {
       return
     }
+    this._canvas?.clear()
     // Get the current frame
     const gifFrame = this._editorElements[this.currentKeyFrame]
     // get all the nested objects for the current frame
@@ -436,7 +437,6 @@ export class Store {
     const nestedObjects = this._editorElements.filter((element) =>
       nestedObjectIds.some((nestedObject) => nestedObject.id === element.id)
     )
-    this._canvas?.clear()
     // Create a temporary canvas to draw the image
     if (!gifFrame.fabricObject) return
     console.log("NESTEDOBJECTS69!", gifFrame.fabricObject)
@@ -449,6 +449,7 @@ export class Store {
         this.canvas?.add(nestedObject.fabricObject)
       }
     })
+    this._canvas?.requestRenderAll()
   }
   playSequence() {
     if (this.playing) {
@@ -462,13 +463,14 @@ export class Store {
       let currentFrame = this.currentKeyFrame
       this.playInterval = setInterval(() => {
         if (currentFrame < this.frames.length) {
-          this.addCurrentGifFrameToCanvas()
           this.setCurrentKeyFrame(currentFrame)
+          this.addCurrentGifFrameToCanvas()
           currentFrame++
         } else {
           if (this.playInterval !== null) clearInterval(this.playInterval)
           this.setPlaying(false)
           this.setCurrentKeyFrame(0) // Optionally reset to start or keep the last frame
+          this.addCurrentGifFrameToCanvas()
         }
       }, 10000 / this.fps / this.speedFactor) // This aligns with the playback speed
     }

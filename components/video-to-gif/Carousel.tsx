@@ -32,7 +32,7 @@ export const Carousel = observer(() => {
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     // Implement frame selection logic based on the event
-    const newFrameIndex: number = 0 // This should be dynamically calculated
+    const newFrameIndex: number = 0 // Calculate the new frame index based on the event
     setCurrentlySelectedFrame(newFrameIndex)
     store.setCurrentKeyFrame(newFrameIndex)
     // Additional logic as necessary
@@ -81,7 +81,8 @@ export const Carousel = observer(() => {
     }
   }, [currentlySelectedFrame, cardWidth])
   useEffect(() => {
-    setCurrentlySelectedFrame(store.currentKeyFrame)
+    if (store.currentKeyFrame !== currentlySelectedFrame)
+      setCurrentlySelectedFrame(store.currentKeyFrame)
   }, [store.currentKeyFrame])
   const handleDeleteFrame = (index: number): void => {
     store.deleteFrame(index) // Assuming this method exists on the store
@@ -94,11 +95,12 @@ export const Carousel = observer(() => {
   }
   return (
     <div className="max-w-[850px] p-4 space-y-4" ref={setNodeRef}>
-      {!creatingGifFrames && store.frames.length > 0 && (
+      {!creatingGifFrames && (
         <div
           className="max-w-[750px]  space-y-4"
           style={{
             width: carouselWidth,
+            margin: "0 auto",
           }}
         >
           <Timeline
@@ -164,7 +166,7 @@ export const Carousel = observer(() => {
               {!creatingGifFrames && (
                 <div
                   ref={carouselRef}
-                  className="min-w-[300px] xl:min-w-[650px]   carousel carousel-center p-4  bg-neutral rounded-box  space-x-4 "
+                  className="min-w-[300px] xl:min-w-[650px] min-h-[120px]   carousel carousel-center p-4  bg-neutral rounded-box  space-x-4 "
                 >
                   {
                     // display the frames
@@ -279,14 +281,20 @@ const Timeline: React.FC<TimelineProps> = ({
   onSelectFrame,
   totalFrames,
 }) => {
+  const store = useContext(StoreContext)
   const markerWidthPercent = 100 / totalFrames
   // Calculate the current position of the marker in percentage.
-  const currentPositionPercent = markerWidthPercent * (currentFrame + 1)
+  let currentPositionPercent = 0
+  if (store.frames.length > 0) {
+    currentPositionPercent = markerWidthPercent * (currentFrame + 1)
+  } else {
+    currentPositionPercent = 0
+  }
   return (
     <div className="flex  flex-col items-end 6969">
       {/* display of current frame / total frames */}
       <div className="text-sm font-semibold text-gray-500">
-        {currentFrame + 1} / {totalFrames}
+        {store.frames.length ? currentFrame + 1 : 0} / {totalFrames}
       </div>
       <div
         className="z-10 relative w-full h-2 bg-gray-200 items-center justify-center flex rounded-lg"
