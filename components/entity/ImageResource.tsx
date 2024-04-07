@@ -8,15 +8,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { DndContext, DragOverlay, useDraggable } from "@dnd-kit/core"
 const DraggableImage = observer(
-  ({
-    image,
-    index,
-    imageType,
-  }: {
-    image: string
-    index: number
-    imageType: ""
-  }) => {
+  ({ image, index }: { image: string; index: number }) => {
     const { attributes, listeners, setNodeRef, isDragging, transform } =
       useDraggable({
         id: `imageResource-${index}`,
