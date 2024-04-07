@@ -44,6 +44,7 @@ export class Store {
   sidebarWidth: number
   cardItemWidth: number
   cardItemHeight: number
+  imageType: "Frame" | "ObjectInFrame"
   constructor() {
     this._canvas = null
     this.cardItemWidth = 0
@@ -72,6 +73,7 @@ export class Store {
     this.selectedVideoFormat = "mp4"
     this.imageResources = []
     this.sidebarWidth = 300
+    this.imageType = "Frame"
     makeAutoObservable(this)
   }
   set canvas(canvas: fabric.Canvas | null) {
@@ -96,17 +98,47 @@ export class Store {
   addEditorElement(element: EditorElement, isResource = false) {
     this._editorElements = [...this._editorElements, element]
     // this._selectedElement = this._editorElements[0]
-    if (isResource && element.type === "image") {
-      const currentVideoFrame = this.frames[this.currentKeyFrame]
-      currentVideoFrame.nestedObjects.push({ id: element.id })
-      const fabricImage = this.createFabricImage(
-        document.getElementById(
+    if (
+      isResource &&
+      element.type === "image" &&
+      this.imageType === "ObjectInFrame"
+    ) {
+      let fabricImage: fabric.Image | undefined
+      if (this.frames.length > 0 && this.frames[this.currentKeyFrame]) {
+        const currentVideoFrame = this.frames[this.currentKeyFrame]
+        currentVideoFrame.nestedObjects.push({ id: element.id })
+        fabricImage = this.createFabricImage(
+          document.getElementById(
+            element.properties.elementId
+          ) as HTMLImageElement
+        )
+        element.fabricObject = fabricImage
+        this._editorElements[this._editorElements.length - 1] = element
+      } else {
+        fabricImage = this.createFabricImage(
+          document.getElementById(
+            element.properties.elementId
+          ) as HTMLImageElement
+        )
+        element.fabricObject = fabricImage
+        this._editorElements[this._editorElements.length - 1] = element
+        if (fabricImage === undefined) return
+        if (!element.properties.elementId) return
+        if (!document.getElementById(element.properties.elementId)) return
+        const imageElement = document.getElementById(
           element.properties.elementId
         ) as HTMLImageElement
-      )
-      element.fabricObject = fabricImage
-      this._editorElements[this._editorElements.length - 1] = element
+        this.frames.push({
+          src: imageElement.src,
+          nestedObjects: [],
+        })
+        this.selectedElement = this._editorElements[
+          this._editorElements.length - 1
+        ] = element
+        this.currentKeyFrame = this.frames.length - 1
+      }
       // this.selectedElement = this._editorElements[0] = element
+      // this.currentKeyFrame = this.frames.length - 1
       if (fabricImage) this.canvas?.add(fabricImage)
     }
     //text
@@ -335,7 +367,6 @@ export class Store {
         this.canvas?.requestRenderAll()
       }
     }
-    this.canvas?.renderAll()
   }
   // This function is called when a change is made to an object on the canvas
   onObjectModified(e: fabric.IEvent) {
