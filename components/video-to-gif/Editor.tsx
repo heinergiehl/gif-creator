@@ -134,10 +134,12 @@ export const Editor = observer(() => {
     const { active, over } = event
     //extract index from the id
     console.log(active, over)
-    const index = parseInt(active.id.split("-")[1])
-    if (store.imageType === "Frame" && over?.id.includes("carousel")) {
+    const index = parseInt(String(active.id).split("-")[1])
+    if (store.imageType === "Frame" && String(over?.id).includes("carousel")) {
       // get the src from the image html element
-      const src = document.getElementById(active.id)?.getAttribute("src")
+      const src = document
+        .getElementById(String(active.id))
+        ?.getAttribute("src")
       if (!src) return
       store.frames.push({ src, nestedObjects: [] })
       store.addImage(index, true)

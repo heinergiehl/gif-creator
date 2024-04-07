@@ -7,6 +7,9 @@ export const Footer = () => {
         <Link href="/video-to-gif">
           <span>Video to GIF</span>
         </Link>
+        <Link href="/image-to-gif">
+          <span>Image to GIF</span>
+        </Link>
         <Link href="/screen-to-video">
           <span>Screen To Video</span>
         </Link>
