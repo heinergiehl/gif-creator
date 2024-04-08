@@ -68,9 +68,36 @@ export default function Home() {
         "After creating or editing your GIF on GifMagic.app, click the 'Download' button. This will save the GIF to your device's default download location. You can then view the GIF using any software that supports the GIF format.",
     },
   ]
+  const featuresData = [
+    {
+      title: "Easy to Use High-Quality Online GIF Maker",
+      description:
+        "Create high-quality GIFs from videos or images with just a few clicks. No sign-up required!",
+    },
+    {
+      title: "Fast and Easy",
+      description:
+        "Most services like ezgif, imgflip, and giphy don't offer the same level of quality and ease of use as GifMagic.app.",
+    },
+    {
+      title: "Completely Free",
+      description:
+        "Enjoy unlimited conversions and edits without any fees. Quality comes at no cost.",
+    },
+    {
+      title: "Extensive Editing Tooling",
+      description:
+        "GIFMagic.app offers a wide range of editing tools to help you. It allows you to perform video-to-gif, image-to-gif, and gif-to-video conversions. You can also add text to GIFs, adjust frame rates, and customize your GIFs to your liking.",
+    },
+    {
+      title: "A Unique Feature: Screen-to-Video",
+      description:
+        "GifMagic.app offers a unique screen-to-video feature that allows you to record your screen and convert it into a video. You can choose to record a window, a tab, or the entire screen. Also, you can edit the resolution of the video, and crop it to your liking.",
+    },
+  ]
   return (
-    <div className="flex flex-col ">
-      <section className="hero bg-base-200 mt-[62px] ">
+    <div className="flex flex-col bg-gradient-to-l from-gray-200 via-fuchsia-200 to-stone-100">
+      <section className="hero  mt-[62px] ">
         <div className="hero-content text-center">
           <div className="max-w-lg">
             <h1 className="text-5xl font-bold">Free Online GIF Maker</h1>
@@ -91,64 +118,25 @@ export default function Home() {
           </h2>
           <SmartPhone />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ">
-            <div className="card card-bordered min-w-[300px]">
-              <div className="card-body">
-                <h3 className="card-title">
-                  Easy to use high quality Online GIF maker
-                </h3>
-                <p>
-                  Create high-quality GIFs from videos or images with just a few
-                  clicks. No sign-up required!
-                </p>
+            {featuresData.map((feature, index) => (
+              <div className="max-w-[300px] mx-auto " key={index}>
+                <div className="relative group cursor-pointer">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-violet-600 rounded-lg blur  opacity-100 "></div>
+                  <div className="relative px-7 py-6 bg-white ring-1 ring-gray-900/5 rounded-lg leading-none flex items-top justify-start space-x-6">
+                    <div className="space-y-2 leading-6">
+                      <h3 className="text-xl font-bold text-slate-900">
+                        {index + 1}. {feature.title}
+                      </h3>
+                      <p className="text-slate-800">{feature.description}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="card card-bordered min-w-[300px]">
-              <div className="card-body">
-                <h3 className="card-title">Fast and Easy</h3>
-                <p>
-                  Most services like ezgif, imgflip, and giphy don't offer the
-                  same level of quality and ease of use as GifMagic.app.
-                </p>
-              </div>
-            </div>
-            <div className="card card-bordered min-w-[300px]">
-              <div className="card-body">
-                <h3 className="card-title">Completely Free</h3>
-                <p>
-                  Enjoy unlimited conversions and edits without any fees.
-                  Quality comes at no cost.
-                </p>
-              </div>
-            </div>
-            <div className="card card-bordered min-w-[300px]">
-              <div className="card-body">
-                <h3 className="card-title">Extensive Editing Tooling</h3>
-                <p>
-                  GIFMagic.app offers a wide range of editing tools to help you.
-                  It allows you to perform video-to-gif, image-to-gif, and
-                  gif-to-video conversions. You can also add text To GIFs,
-                  adjust frame rates, and customize your GIFs to your liking.
-                </p>
-              </div>
-            </div>
-            <div className="card card-bordered min-w-[300px]">
-              <div className="card-body">
-                <h3 className="card-title">
-                  A Unique Feature: screen-to-video
-                </h3>
-                <p>
-                  GifMagic.app offers a unique screen-to-video feature that
-                  allows you to record your screen and convert it into a video.
-                  You can choose to record a window, a tab, or the entire
-                  screen. Also, you can edit the resolution of the video, and
-                  crop it to your liking.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-      <section className="py-16 bg-gray-100">
+      <section className="py-16 ">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8">
             Frequently Asked Questions

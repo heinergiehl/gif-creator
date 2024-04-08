@@ -6,8 +6,8 @@ import React from "react"
 function RootNavigation() {
   const pathName = usePathname()
   return (
-    <nav className="fixed z-[100]  h-16 inset-0 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-      <div className="relative w-full h-full">
+    <nav className="fixed z-[100]  h-16 inset-0 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500  ">
+      <div className="relative w-full h-full flex">
         <Link href="/">
           <Image
             src="/logo.png"
