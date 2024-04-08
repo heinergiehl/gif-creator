@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     "Convert images to GIFs, and edit them. This means you can add other elemens to the GIF, like text, images, and more.",
   keywords: "image, gif, converter, editor, free",
+  alternates: { canonical: "https://www.gifmagic.app/image-to-gif" },
 }
 export default function ImageToGif() {
   return (

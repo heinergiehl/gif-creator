@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Easily convert your videos to high-quality GIFs with GifMagic.app. Extract precise images, add text, elements, and more. Customize your GIFs effortlessly with our intuitive editor. Ready in seconds, no sign-up required.",
   keywords:
     "video to GIF converter, convert video, GIF maker, online GIF editor, customize GIF, add text to GIF, free GIF converter, GifMagic.app",
+  alternates: { canonical: "https://www.gifmagic.app/video-to-gif" },
 }
 export default function VideoToGif() {
   return (

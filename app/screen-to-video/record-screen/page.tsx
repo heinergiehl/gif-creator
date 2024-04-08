@@ -1,16 +1,19 @@
 "use client"
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { useReactMediaRecorder } from "react-media-recorder"
 import { fabric } from "fabric"
 import { cn } from "@/utils/cn"
+import { StoreContext } from "@/store"
+import { observer } from "mobx-react"
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
   {
     ssr: false,
   }
 )
-const RecordView = () => {
+const RecordView = observer(() => {
+  const screenToVideoStore = useContext(StoreContext).screenToVideoStore
   const { status, startRecording, stopRecording, mediaBlobUrl, previewStream } =
     useReactMediaRecorder({
       screen: true,
@@ -21,11 +24,12 @@ const RecordView = () => {
   const fabricCanvasRef = useRef<fabric.Canvas>()
   const cropRectRef = useRef<fabric.Rect>()
   const [stoppedRecording, setStoppedRecording] = useState(false)
+  const [startedRecording, setStartedRecording] = useState(false)
   useEffect(() => {
     if (canvasRef.current && !fabricCanvasRef.current) {
       fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
-        height: 768,
-        width: 1280,
+        height: 1280,
+        width: 720,
         backgroundColor: "grey",
         preserveObjectStacking: true,
         selectionBorderColor: "blue",
@@ -53,10 +57,10 @@ const RecordView = () => {
         // Decide whether to scale to width or height
         if (videoAspectRatio > canvasAspectRatio) {
           // Scale to width
-          scaleRatio = canvas.width / videoRef.current.videoWidth
+          scaleRatio = canvas.width / videoRef.current.width
         } else {
           // Scale to height
-          scaleRatio = canvas.height / videoRef.current.videoHeight
+          scaleRatio = canvas.height / videoRef.current.height
         }
         console.log(
           "scaleRatio",
@@ -67,8 +71,8 @@ const RecordView = () => {
         const videoElement = new fabric.Image(videoRef.current, {
           left: 0,
           top: 0,
-          scaleX: scaleRatio,
-          scaleY: scaleRatio,
+          width: videoRef.current.width,
+          height: videoRef.current.height,
           originX: "left",
           originY: "top",
           objectCaching: false,
@@ -134,6 +138,7 @@ const RecordView = () => {
     fabricCanvasRef.current.discardActiveObject()
     // Apply the transformations and re-render the canvas
     fabricCanvasRef.current.requestRenderAll()
+    setCropped(true)
   }
   const enableCropMode = (canvas: fabric.Canvas) => {
     if (cropRectRef.current) return
@@ -164,7 +169,9 @@ const RecordView = () => {
     console.log("mediaBlobUrl", mediaBlobUrl)
     previewVideoRef.current.srcObject = previewStream
     previewVideoRef.current.width = 1280
-    previewVideoRef.current.height = 768
+    previewVideoRef.current.height = 720
+    if (screenToVideoStore.currentStep === 3) return
+    screenToVideoStore.currentStep = 2
   }, [previewStream])
   // create function to create a video from the canvas stream, which will be the final edited video
   const createFinalVideo = () => {
@@ -189,9 +196,10 @@ const RecordView = () => {
       mediaRecorder.stop()
     }, 5000)
   }
-  const [canvasSize, setCanvasSize] = useState({ width: 1280, height: 768 })
+  const [canvasSize, setCanvasSize] = useState({ width: 1280, height: 720 })
   const [newWidth, setNewWidth] = useState(1280)
-  const [newHeight, setNewHeight] = useState(768)
+  const [newHeight, setNewHeight] = useState(720)
+  const [cropped, setCropped] = useState(false)
   const handleResizeCanvas = () => {
     const newDimensions = { width: newWidth, height: newHeight }
     if (fabricCanvasRef.current) {
@@ -205,6 +213,7 @@ const RecordView = () => {
     }
     // Update state to re-render component if necessary
     setCanvasSize(newDimensions)
+    screenToVideoStore.currentStep = 4
   }
   useEffect(() => {
     // Reactively update canvas size
@@ -223,75 +232,158 @@ const RecordView = () => {
   }, [newWidth, newHeight])
   const handleStopRecording = () => {
     stopRecording()
+    // get canvas size by using the video dimensions
     setStoppedRecording(true)
+    screenToVideoStore.currentStep = 3
   }
+  // when stopped recording, adjust canvas size to fit the video
+  useEffect(() => {
+    if (startedRecording) {
+      if (previewVideoRef.current) {
+        setNewWidth(previewVideoRef.current.videoWidth)
+        setNewHeight(previewVideoRef.current.videoHeight)
+      }
+    }
+  }, [startedRecording])
   return (
-    <div className=" my-[80px] flex flex-col justify-center items-center h-full w-full ">
-      <p>{status}</p>
-      <button className="btn btn-primary m-2" onClick={startRecording}>
-        Start Recording
-      </button>
-      <button className="btn btn-secondary" onClick={handleStopRecording}>
-        Stop Recording
-      </button>
-      <video
-        ref={videoRef}
-        src={mediaBlobUrl ?? ""}
-        width={1280}
-        height={768}
-        controls
-        autoPlay
-        loop
-        style={{ display: "none" }}
-      />
-      {previewStream && !mediaBlobUrl && (
+    <div className=" my-[80px] container  h-full  flex  ">
+      <div className="flex flex-col mx-4">
+        <Stepper />
+        <div className="flex flex-col text-sm">
+          <label className="label text-gray-700 ">
+            Width:
+            <input
+              type="number"
+              value={newWidth}
+              onChange={(e) => setNewWidth(parseInt(e.target.value, 10))}
+            />
+          </label>
+          <label className="label text-gray-700">
+            Height:
+            <input
+              type="number"
+              value={newHeight}
+              onChange={(e) => setNewHeight(parseInt(e.target.value, 10))}
+            />
+          </label>
+          <button
+            className="btn  btn-xs  max-w-[150px] 
+            "
+            onClick={handleResizeCanvas}
+          >
+            Apply Canvas Size
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col justify-start ">
+        {!startedRecording && (
+          <button
+            className="btn btn-primary m-2 max-w-[150px]"
+            onClick={() => {
+              setStartedRecording(true)
+              startRecording()
+            }}
+          >
+            Start Recording
+          </button>
+        )}
+        {startedRecording && !stoppedRecording && (
+          <button
+            className="btn btn-secondary max-w-[150px]"
+            onClick={handleStopRecording}
+          >
+            Stop Recording
+          </button>
+        )}
         <video
-          ref={previewVideoRef}
+          ref={videoRef}
+          src={mediaBlobUrl ?? ""}
           width={1280}
-          height={768}
+          height={720}
           controls
           autoPlay
           loop
+          style={{ display: "none" }}
         />
-      )}
-      <button className="btn btn-secondary m-2" onClick={handleCrop}>
-        Crop
-      </button>
-      <button className="btn btn-secondary m-2" onClick={createFinalVideo}>
-        Create Final Video
-      </button>
-      <div>
-        <label>
-          Width:
-          <input
-            type="number"
-            value={newWidth}
-            onChange={(e) => setNewWidth(parseInt(e.target.value, 10))}
+        {previewStream && !mediaBlobUrl && (
+          <video ref={previewVideoRef} controls autoPlay loop />
+        )}
+        {stoppedRecording && cropped && (
+          <button className="btn btn-secondary m-2" onClick={handleCrop}>
+            Crop
+          </button>
+        )}
+        {stoppedRecording && (
+          <button className="btn btn-secondary m-2" onClick={createFinalVideo}>
+            Create Final Video
+          </button>
+        )}
+        <div
+          className={cn([
+            "relative border border-gray-300 rounded-lg overflow-hidden ",
+            !stoppedRecording && "hidden",
+          ])}
+        >
+          <canvas
+            ref={canvasRef}
+            width={canvasSize.width}
+            height={canvasSize.height}
           />
-        </label>
-        <label>
-          Height:
-          <input
-            type="number"
-            value={newHeight}
-            onChange={(e) => setNewHeight(parseInt(e.target.value, 10))}
-          />
-        </label>
-        <button onClick={handleResizeCanvas}>Apply Canvas Size</button>
-      </div>
-      <div
-        className={cn([
-          "relative border border-gray-300 rounded-lg overflow-hidden w-full h-full",
-          !stoppedRecording && "hidden",
-        ])}
-      >
-        <canvas
-          ref={canvasRef}
-          width={canvasSize.width}
-          height={canvasSize.height}
-        />
+        </div>
       </div>
     </div>
   )
-}
+})
+const Stepper = observer(() => {
+  const [steps, setSteps] = useState([
+    {
+      text: "Start Recording: Choose from Tab, Window or Screen",
+      isPrimary: true,
+    },
+    {
+      text: "Stop Recording: Stop once you are done recording",
+      isPrimary: false,
+    },
+    {
+      text: "Choose Resolution: Choose a resolution you like to save the video in",
+      isPrimary: false,
+    },
+    {
+      text: "Crop Video: Crop the video, if you like to have a specific part of the video magnified.",
+      isPrimary: false,
+    },
+  ])
+  const root = useContext(StoreContext)
+  const store = root.screenToVideoStore
+  const currentStep = store.currentStep
+  useEffect(() => {
+    const newSteps = steps.map((step, index) => {
+      if (index + 1 === currentStep) {
+        return {
+          ...step,
+          isPrimary: true,
+        }
+      }
+      return {
+        ...step,
+        isPrimary: false,
+      }
+    })
+    setSteps(newSteps)
+  }, [currentStep])
+  return (
+    <ul className="steps steps-vertical max-w-[400px] text-sm">
+      {steps.map((step, index) => (
+        <li
+          key={index}
+          className={`step ${
+            step.isPrimary ? "step-primary font-bold" : "text-gray-400"
+          }`}
+        >
+          {step.text}
+        </li>
+      ))}
+    </ul>
+  )
+})
 export default RecordView
