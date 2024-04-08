@@ -1,11 +1,11 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 import { getLocalStorage, setLocalStorage } from "@/app/lib/storageHelper"
 import Link from "next/link"
 import { cn } from "@/utils/cn"
 export default function CookieBanner() {
-  const [cookieConsent, setCookieConsent] = useState<boolean | null>(false)
-  useEffect(() => {
+  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null)
+  useLayoutEffect(() => {
     const storedCookieConsent = getLocalStorage("cookie_consent", null)
     setCookieConsent(storedCookieConsent)
   }, [setCookieConsent])
@@ -20,14 +20,15 @@ export default function CookieBanner() {
     //For Testing
     console.log("Cookie Consent: ", cookieConsent)
   }, [cookieConsent])
+  if (cookieConsent === true) return null
   return (
     <div
       className={cn([
         `my-10 mx-auto max-w-max md:max-w-screen-sm
                         fixed bottom-0 left-0 right-0 
-                        flex px-3 md:px-4 py-3 justify-between items-center flex-col sm:flex-row gap-4  
-                         bg-gray-700 rounded-lg shadow`,
-        cookieConsent ? "hidden" : "block",
+                         px-3 md:px-4 py-3 justify-between items-center flex-col sm:flex-row gap-4  
+                         bg-gray-700 rounded-lg shadow `,
+        cookieConsent === null ? "flex" : "hidden",
       ])}
     >
       <div className="text-center">

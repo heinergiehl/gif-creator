@@ -4,10 +4,16 @@ import "./globals.css"
 import { Analytics } from "@vercel/analytics/react"
 import RootNavigation from "./RootNavigation"
 import GoogleAnalytics from "@/app/components/consent/GoogleAnalytics"
-import CookieBanner from "./components/consent/CookieBanner"
 import { Suspense } from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import dynamic from "next/dynamic"
 const inter = Inter({ subsets: ["latin"] })
+const CookieBanner = dynamic(
+  () => import("@/app/components/consent/CookieBanner"),
+  {
+    ssr: false,
+  }
+)
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,7 +29,7 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
-        {/* <CookieBanner /> */}
+        <CookieBanner />
       </body>
     </html>
   )
