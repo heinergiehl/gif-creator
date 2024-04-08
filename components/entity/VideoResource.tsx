@@ -3,7 +3,8 @@ import { VideoFrame } from "@/store/Store"
 import React from "react"
 import { observer } from "mobx-react"
 export const VideoResource = observer(() => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const [frameRate, setFrameRate] = React.useState(1)
   const [resolution, setResolution] = React.useState(1)
   const handleFileChange = async (

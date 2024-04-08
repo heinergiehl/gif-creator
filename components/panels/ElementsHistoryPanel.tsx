@@ -5,7 +5,8 @@ import { MdImage, MdTextFields } from "react-icons/md"
 import { CiImageOn } from "react-icons/ci"
 const ElementsHistoryPanel = observer(() => {
   // display all the nested elements of the current gif frame in the history panel
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const currentFrame = store.frames[store.currentKeyFrame]
   let nestedElementsIds: { id: string }[] = []
   console.log(store.currentKeyFrame)

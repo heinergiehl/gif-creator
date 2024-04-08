@@ -7,7 +7,7 @@ import { ScreenToVideoStore } from "./ScreenToVideoStore"
 configure({
   enforceActions: "never",
 })
-class RootStore {
+export class RootStore {
   store: Store
   screenToVideoStore: ScreenToVideoStore
   constructor() {

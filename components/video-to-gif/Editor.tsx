@@ -1,7 +1,7 @@
 "use client"
 import { fabric } from "fabric"
 import React, { use, useEffect, useRef, useState } from "react"
-import { StoreContext } from "@/store"
+import { RootStore, StoreContext } from "@/store"
 import { observer } from "mobx-react"
 import { Store } from "@/store/Store"
 import "@/utils/fabric-utils"
@@ -24,7 +24,7 @@ import {
 } from "@dnd-kit/core"
 import { set } from "animejs"
 export const EditorWithStore = () => {
-  const [store] = useState(new Store())
+  const [store] = useState(new RootStore())
   return (
     <StoreContext.Provider value={store}>
       <Editor></Editor>
@@ -32,7 +32,8 @@ export const EditorWithStore = () => {
   )
 }
 export const Editor = observer(() => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const resizeCanvas = () => {
     const canvasContainer = document.getElementById("grid-canvas-container")
     if (!canvasContainer || !store.canvas) return

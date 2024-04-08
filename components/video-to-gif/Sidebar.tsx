@@ -18,10 +18,10 @@ import { FaRegSmile } from "react-icons/fa"
 type ConversionType = "videoToGif" | "imageToGif"
 export const Sidebar = observer(() => {
   const pathName = usePathname()
+  const store = React.useContext(StoreContext).store
   const conversionType: ConversionType = pathName.includes("video-to-gif")
     ? "videoToGif"
     : "imageToGif"
-  console.log(conversionType)
   const [conversionTypeState, setConversionTypeState] =
     React.useState<ConversionType>(conversionType)
   useEffect(() => {
@@ -30,7 +30,6 @@ export const Sidebar = observer(() => {
       conversionTypeState === "videoToGif" ? "Video" : "Image"
     )
   }, [pathName])
-  const store = React.useContext(StoreContext)
   return (
     <ul className="bg-white h-screen">
       {MENU_OPTIONS.map((option) => {

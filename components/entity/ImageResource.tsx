@@ -39,7 +39,8 @@ const DraggableImage = observer(
 const ImageResource = observer(() => {
   const pathName = usePathname()
   const isVideoToGif = pathName.includes("video-to-gif")
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     for (let i = 0; i < e.target.files.length; i++) {

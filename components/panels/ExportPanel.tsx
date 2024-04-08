@@ -3,7 +3,8 @@ import Link from "next/link"
 import React, { useState } from "react"
 import { observer } from "mobx-react"
 const ExportPanel = observer(() => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const [gifUrl, setGifUrl] = useState<string | null>(null)
   const handleCreateGif = async () => {
     const url = await store.handleSaveAsGif()

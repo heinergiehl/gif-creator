@@ -9,7 +9,8 @@ import SmiliesResource from "../entity/SmiliesResource"
 import ExportPanel from "../panels/ExportPanel"
 import interact from "interactjs"
 export const Resources = observer(() => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const selectedMenuOption = store.selectedMenuOption
   const sidebarRef = React.useRef<HTMLDivElement>(null)
   const [sidebarWidth, setSidebarWidth] = React.useState(300)

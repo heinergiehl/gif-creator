@@ -17,7 +17,8 @@ export const Carousel = observer(() => {
   const { isOver, setNodeRef } = useDroppable({
     id: "carousel",
   })
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const [currentlySelectedFrame, setCurrentlySelectedFrame] = useState(
     store.currentKeyFrame
   )
@@ -281,7 +282,7 @@ const Timeline: React.FC<TimelineProps> = ({
   onSelectFrame,
   totalFrames,
 }) => {
-  const store = useContext(StoreContext)
+  const store = useContext(StoreContext).store
   const markerWidthPercent = 100 / totalFrames
   // Calculate the current position of the marker in percentage.
   let currentPositionPercent = 0

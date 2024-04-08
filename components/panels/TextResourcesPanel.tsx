@@ -56,7 +56,8 @@ const TEXT_RESOURCES = [
   },
 ]
 export const FontPicker = () => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     store.textFont = event.target.value
   }
@@ -84,7 +85,8 @@ export const FontPicker = () => {
   )
 }
 export const TextResourcesPanel = observer(() => {
-  const store = React.useContext(StoreContext)
+  const rootStore = React.useContext(StoreContext)
+  const store = rootStore.store
   return (
     <div className="bg-slate-200 h-full p-4">
       <div className="flex justify-between items-center space-y-4">

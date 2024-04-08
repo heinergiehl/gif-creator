@@ -10,7 +10,8 @@ type TextResourceProps = {
 }
 export const TextResource = observer(
   ({ fontSize, fontWeight, sampleText }: TextResourceProps) => {
-    const store = React.useContext(StoreContext)
+    const rootStore = React.useContext(StoreContext)
+    const store = rootStore.store
     return (
       <div className="items-center m-[15px] flex flex-row h-full">
         <div
