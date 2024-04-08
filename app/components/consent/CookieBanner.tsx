@@ -4,7 +4,7 @@ import { getLocalStorage, setLocalStorage } from "@/app/lib/storageHelper"
 import Link from "next/link"
 import { cn } from "@/utils/cn"
 export default function CookieBanner() {
-  const [cookieConsent, setCookieConsent] = useState(false)
+  const [cookieConsent, setCookieConsent] = useState<boolean | null>(false)
   useEffect(() => {
     const storedCookieConsent = getLocalStorage("cookie_consent", null)
     setCookieConsent(storedCookieConsent)
