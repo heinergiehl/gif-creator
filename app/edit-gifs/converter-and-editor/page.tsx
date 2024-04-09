@@ -1,4 +1,3 @@
-"use client"
 import React from "react"
 import dynamic from "next/dynamic"
 const DynmaicEditor = dynamic(
@@ -7,11 +6,7 @@ const DynmaicEditor = dynamic(
     ssr: false,
   }
 )
-function page() {
-  return (
-    <>
-      <DynmaicEditor />
-    </>
-  )
+function Page() {
+  return <DynmaicEditor />
 }
-export default page
+export default Page

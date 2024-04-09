@@ -23,7 +23,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core"
 import { set } from "animejs"
-export const EditorWithStore = () => {
+const EditorWithStore = () => {
   const [store] = useState(new RootStore())
   return (
     <StoreContext.Provider value={store}>
@@ -31,7 +31,8 @@ export const EditorWithStore = () => {
     </StoreContext.Provider>
   )
 }
-export const Editor = observer(() => {
+export default EditorWithStore
+const Editor = observer(() => {
   const rootStore = React.useContext(StoreContext)
   const store = rootStore.store
   const resizeCanvas = () => {
@@ -108,10 +109,14 @@ export const Editor = observer(() => {
   }, [])
   useEffect(() => {
     if (
-      !store.creatingGifFrames &&
-      store.cardItemHeight &&
-      store.cardItemWidth &&
-      pathName.includes("video-to-gif")
+      (!store.creatingGifFrames &&
+        store.cardItemHeight &&
+        store.cardItemWidth &&
+        pathName.includes("video-to-gif")) ||
+      (!store.creatingGifFrames &&
+        store.cardItemHeight &&
+        store.cardItemWidth &&
+        pathName.includes("edit-gifs"))
     ) {
       store.addImages()
       store.addCurrentGifFrameToCanvas()

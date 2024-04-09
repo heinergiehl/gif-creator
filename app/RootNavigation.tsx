@@ -39,5 +39,6 @@ const Links: { name: string; path: string }[] = [
   { name: "Video-To-GIF", path: "/video-to-gif" },
   { name: "Image-To-GIF", path: "/image-to-gif" },
   { name: "Screen-To-Video", path: "/screen-to-video" },
+  { name: "Edit GIFs", path: "/edit-gifs" },
 ]
 export default RootNavigation

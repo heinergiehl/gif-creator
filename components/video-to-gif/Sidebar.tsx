@@ -15,20 +15,41 @@ import {
 import { Store } from "@/store/Store"
 import { usePathname } from "next/navigation"
 import { FaRegSmile } from "react-icons/fa"
-type ConversionType = "videoToGif" | "imageToGif"
+type ConversionType = "videoToGif" | "imageToGif" | "gifToGif"
 export const Sidebar = observer(() => {
   const pathName = usePathname()
   const store = React.useContext(StoreContext).store
-  const conversionType: ConversionType = pathName.includes("video-to-gif")
-    ? "videoToGif"
-    : "imageToGif"
+  let conversionType: ConversionType = "videoToGif"
+  switch (pathName) {
+    case "/image-to-gif":
+      conversionType = "imageToGif"
+      break
+    case "/video-to-gif":
+      conversionType = "videoToGif"
+      break
+    case "/edit-gifs":
+      conversionType = "gifToGif"
+      break
+    default:
+      break
+  }
   const [conversionTypeState, setConversionTypeState] =
     React.useState<ConversionType>(conversionType)
   useEffect(() => {
     setConversionTypeState(conversionType)
-    store.setSelectedMenuOption(
-      conversionTypeState === "videoToGif" ? "Video" : "Image"
-    )
+    switch (conversionType) {
+      case "videoToGif":
+        store.setSelectedMenuOption("Video")
+        break
+      case "imageToGif":
+        store.setSelectedMenuOption("Image")
+        break
+      case "gifToGif":
+        store.setSelectedMenuOption("Gif")
+        break
+      default:
+        break
+    }
   }, [pathName])
   return (
     <ul className="bg-white h-screen">
@@ -42,11 +63,6 @@ export const Sidebar = observer(() => {
             }`}
           >
             <button
-              disabled={
-                option.name === "Video" &&
-                store._editorElements.length === 0 &&
-                conversionTypeState !== "videoToGif"
-              }
               onClick={() => option.action(store)}
               className={`flex flex-col items-center`}
             >
@@ -78,6 +94,13 @@ const MENU_OPTIONS = [
     icon: MdImage,
     action: (store: Store) => {
       store.setSelectedMenuOption("Image")
+    },
+  },
+  {
+    name: "Gif",
+    icon: MdTransform,
+    action: (store: Store) => {
+      store.setSelectedMenuOption("Gif")
     },
   },
   // smilies

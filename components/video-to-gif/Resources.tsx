@@ -6,6 +6,7 @@ import { TextResourcesPanel } from "@/components/panels/TextResourcesPanel"
 import VideoResource from "../entity/VideoResource"
 import ImageResource from "../entity/ImageResource"
 import SmiliesResource from "../entity/SmiliesResource"
+import GifResource from "../entity/GifResource"
 import ExportPanel from "../panels/ExportPanel"
 import interact from "interactjs"
 export const Resources = observer(() => {
@@ -13,25 +14,6 @@ export const Resources = observer(() => {
   const store = rootStore.store
   const selectedMenuOption = store.selectedMenuOption
   const sidebarRef = React.useRef<HTMLDivElement>(null)
-  const [sidebarWidth, setSidebarWidth] = React.useState(300)
-  // useEffect(() => {
-  //   if (sidebarRef.current) {
-  //     interact(sidebarRef.current)
-  //       .resizable({
-  //         edges: { left: true, right: true, bottom: false, top: false },
-  //         modifiers: [
-  //           interact.modifiers.restrictSize({
-  //             min: { width: 10, height: 0 },
-  //             max: { width: 500, height: 2000 },
-  //           }),
-  //         ],
-  //       })
-  //       .on("resizemove", (event) => {
-  //         store.sidebarWidth = event.rect.width
-  //         event.target.style.width = event.rect.width + "px"
-  //       })
-  //   }
-  // }, [])
   return (
     <aside className="bg-slate-200  h-screen" ref={sidebarRef}>
       {selectedMenuOption === "Text" ? <TextResourcesPanel /> : null}
@@ -39,6 +21,7 @@ export const Resources = observer(() => {
       {selectedMenuOption === "Image" ? <ImageResource /> : null}
       {selectedMenuOption === "Export" ? <ExportPanel /> : null}
       {selectedMenuOption === "Smilies" ? <SmiliesResource /> : null}
+      {selectedMenuOption === "Gif" ? <GifResource /> : null}
     </aside>
   )
 })

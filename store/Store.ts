@@ -103,6 +103,7 @@ export class Store {
         (isResource && element.type === "smilies")) &&
       this.imageType === "ObjectInFrame"
     ) {
+      console.log("YOYOY67")
       let fabricImage: fabric.Image | undefined
       if (this.frames.length > 0 && this.frames[this.currentKeyFrame]) {
         const currentVideoFrame = this.frames[this.currentKeyFrame]
@@ -115,6 +116,7 @@ export class Store {
         element.fabricObject = fabricImage
         this._editorElements[this._editorElements.length - 1] = element
       } else {
+        console.log("YOYOY68")
         fabricImage = this.createFabricImage(
           document.getElementById(
             element.properties.elementId
@@ -152,10 +154,15 @@ export class Store {
       element.fabricObject = text
       this._editorElements[this._editorElements.length - 1] = element
       this.canvas?.add(text)
-    } else if (element.type === "image" || element.type === "smilies") {
+    } else if (
+      element.type === "image" ||
+      element.type === "smilies" ||
+      element.type === "gif"
+    ) {
       const imgElement = document.getElementById(
         element.properties.elementId
       ) as HTMLImageElement
+      console.log("YOYOY69", imgElement)
       const fabricImage = this.createFabricImage(imgElement)
       element.fabricObject = fabricImage
       this._editorElements[this._editorElements.length - 1] = element

@@ -30,6 +30,15 @@ export type SmiliesEditorElement = EditorElementBase<
     effect: Effect
   }
 >
+export type GifEditorElement = EditorElementBase<
+  "gif",
+  {
+    src: string
+    elementId: string
+    imageObject?: fabric.Object
+    effect: Effect
+  }
+>
 export type AudioEditorElement = EditorElementBase<
   "audio",
   { src: string; elementId: string }
@@ -49,6 +58,7 @@ export type EditorElement =
   | AudioEditorElement
   | TextEditorElement
   | SmiliesEditorElement
+  | GifEditorElement
 export type Placement = {
   x: number
   y: number
@@ -119,3 +129,4 @@ export type MenuOption =
   | "Video"
   | "Image"
   | "Smilies"
+  | "Gif"

@@ -13,6 +13,9 @@ export const Footer = () => {
         <Link href="/screen-to-video">
           <span>Screen To Video</span>
         </Link>
+        <Link href="/edit-gifs">
+          <span>Edit GIFs</span>
+        </Link>
       </div>
       {/* links to the pages */}
       <div className="flex justify-center items-center space-x-4">
