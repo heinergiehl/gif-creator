@@ -27,7 +27,7 @@ const GifResource = observer(() => {
     const superGif = new SuperGif(image, { auto_play: false })
     superGif.load(() => {
       const frames: Frame[] = []
-      const nestedObjects = []
+      const nestedObjects: { id: string }[] = []
       for (let i = 0; i < superGif.getLength(); i++) {
         superGif.moveTo(i)
         const canvas = superGif.getCanvas()
