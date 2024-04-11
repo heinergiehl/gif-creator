@@ -32,6 +32,7 @@ export const TextResource = observer(
               text: sampleText,
               fontSize: fontSize,
               fontWeight: fontWeight,
+              addTextToAllFrames: true,
             })
           }}
         >

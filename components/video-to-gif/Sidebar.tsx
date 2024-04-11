@@ -11,6 +11,7 @@ import {
   MdAudiotrack,
   MdOutlineFormatColorFill,
   MdMovieFilter,
+  MdAnimation,
 } from "react-icons/md"
 import { Store } from "@/store/Store"
 import { usePathname } from "next/navigation"
@@ -116,6 +117,13 @@ const MENU_OPTIONS = [
     icon: MdTitle,
     action: (store: Store) => {
       store.setSelectedMenuOption("Text")
+    },
+  },
+  {
+    name: "Animation",
+    icon: MdAnimation,
+    action: (store: Store) => {
+      store.setSelectedMenuOption("Animation")
     },
   },
   {

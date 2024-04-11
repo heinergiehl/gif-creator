@@ -62,13 +62,13 @@ export const VideoResource = observer(() => {
   }
   return (
     <div className="p-4 h-screen">
-      {/* if store._editorelements, make sure to provide option for deleting all  frames and resetting the editor */}
-      {store.frames.length > 0 && store._editorElements.length > 0 && (
+      {/* if store.editorElements, make sure to provide option for deleting all  frames and resetting the editor */}
+      {store.frames.length > 0 && store.editorElements.length > 0 && (
         <div className="flex flex-col  w-full mb-4">
           <button
             onClick={() => {
               store.frames = []
-              store._editorElements = []
+              store.editorElements = []
               store._canvas?.clear()
             }}
             className="btn btn-primary"

@@ -1,5 +1,5 @@
 "use client"
-import { useCallback, useContext, useState } from "react"
+import { use, useCallback, useContext, useState } from "react"
 import Image from "next/image"
 import { cn } from "@/utils/cn"
 import { Store } from "@/store/Store"
@@ -23,8 +23,6 @@ export const Carousel = observer(() => {
     store.currentKeyFrame
   )
   const carouselRef = useRef<HTMLDivElement>(null)
-  const timelineRef = useRef<HTMLDivElement>(null)
-  const timelinePastRef = useRef<HTMLDivElement>(null)
   gsap.registerPlugin(ScrollToPlugin)
   const [cardWidth, setCardWidth] = useState(120) // State to store dynamic card width
   const cardRef = useRef<HTMLDivElement>(null)
@@ -54,7 +52,7 @@ export const Carousel = observer(() => {
     if (carouselRef.current) {
       setCarouselWidth(carouselRef.current.offsetWidth)
     }
-  }, [store.frames, store._editorElements])
+  }, [store.frames, store.editorElements])
   useEffect(() => {
     const updateCardWidth = () => {
       const card = carouselRef.current?.querySelector(
@@ -70,7 +68,7 @@ export const Carousel = observer(() => {
       observer.observe(carouselRef.current, { childList: true })
     }
     return () => observer.disconnect()
-  }, [store.frames, store._editorElements])
+  }, [store.frames, store.editorElements])
   useEffect(() => {
     const scrollPosition = cardWidth * currentlySelectedFrame
     if (carouselRef.current) {
@@ -124,11 +122,6 @@ export const Carousel = observer(() => {
                       duration: 1,
                       ease: "sine.inOut",
                     })
-                    console.log(
-                      "currentlySelectedFrame",
-                      currentlySelectedFrame,
-                      cardWidth
-                    )
                     if (currentlySelectedFrame > 0) {
                       setCurrentlySelectedFrame(
                         (currentlySelectedFrame - 1 + store.frames.length) %
@@ -166,8 +159,9 @@ export const Carousel = observer(() => {
               )}
               {!creatingGifFrames && (
                 <div
+                  id="carousel"
                   ref={carouselRef}
-                  className="min-w-[300px] xl:min-w-[650px] min-h-[120px]   carousel carousel-center p-4  bg-neutral rounded-box  space-x-4 "
+                  className="min-w-[300px] xl:min-w-[650px] min-h-[120px]   carousel carousel-center   bg-neutral rounded-box   flex items-center"
                 >
                   {
                     // display the frames
@@ -277,39 +271,74 @@ interface TimelineProps {
   onSelectFrame: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
   totalFrames: number
 }
-const Timeline: React.FC<TimelineProps> = ({
-  currentFrame,
-  onSelectFrame,
-  totalFrames,
-}) => {
-  const store = useContext(StoreContext).store
-  const markerWidthPercent = 100 / totalFrames
-  // Calculate the current position of the marker in percentage.
-  let currentPositionPercent = 0
-  if (store.frames.length > 0) {
-    currentPositionPercent = markerWidthPercent * (currentFrame + 1)
-  } else {
-    currentPositionPercent = 0
-  }
-  return (
-    <div className="flex  flex-col items-end 6969">
-      {/* display of current frame / total frames */}
-      <div className="text-sm font-semibold text-gray-500">
-        {store.frames.length ? currentFrame + 1 : 0} / {totalFrames}
-      </div>
+const Timeline: React.FC<TimelineProps> = observer(
+  ({ currentFrame, onSelectFrame, totalFrames }) => {
+    const store = useContext(StoreContext).store
+    const markerWidthPercent = 100 / totalFrames
+    const [tooltipContent, setTooltipContent] = useState("")
+    const timelineRef = useRef<HTMLDivElement>(null)
+    const [frameNumber, setFrameNumber] = useState(0)
+    // mouse position on the timeline
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+    const handleMouseMove = (
+      event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => {
+      if (timelineRef.current) {
+        const { left, width } = timelineRef.current.getBoundingClientRect()
+        setMousePosition({
+          x: event.clientX - left,
+          y: event.clientY,
+        })
+        const mouseXRelativeToTimeline = event.clientX - left // Mouse X position relative to the timeline start
+        const frameNumber = Math.ceil(
+          (mouseXRelativeToTimeline / width) * totalFrames
+        )
+        setTooltipContent(`Frame: ${frameNumber}`)
+        setFrameNumber(frameNumber)
+      }
+    }
+    let currentPositionPercent = 0
+    if (store.frames.length > 0) {
+      currentPositionPercent = markerWidthPercent * currentFrame
+    } else {
+      currentPositionPercent = 0
+    }
+    const tooltip = useRef<HTMLDivElement>(null)
+    return (
       <div
-        className="z-10 relative w-full h-2 bg-gray-200 items-center justify-center flex rounded-lg"
-        onClick={onSelectFrame}
+        onMouseMove={handleMouseMove}
+        className="flex  flex-col items-end 6969 relative "
+        onClick={() => {
+          store.currentKeyFrame = frameNumber - 1
+          store.addCurrentGifFrameToCanvas()
+        }}
       >
+        {/* display of current frame / total frames */}
+        <div className="text-sm font-semibold text-gray-500">
+          {store.frames.length ? store.currentKeyFrame + 1 : 0} / {totalFrames}
+        </div>
         <div
-          className="z-20 absolute top-0 left-0 h-2 bg-blue-500 rounded-lg"
-          style={{ width: `${currentPositionPercent}%` }}
-        ></div>
+          ref={tooltip}
+          data-tip={tooltipContent}
+          // make sure the tooltips is being displayed, where the mouse is on the x-axis
+          style={{ left: `${mousePosition.x}px` }}
+          className="tooltip w-20 h-20 absolute z-[100]"
+        />
         <div
-          className="z-[30] absolute w-2 h-2 bg-red-500 rounded-full"
-          style={{ left: `calc(${currentPositionPercent}% - 5px)` }}
-        ></div>
+          ref={timelineRef}
+          className="z-10 relative w-full h-4 bg-gray-200 items-center justify-center flex rounded-lg "
+          onClick={onSelectFrame}
+        >
+          <div
+            className="z-10 absolute  left-0 h-2 bg-blue-500 rounded-lg"
+            style={{ width: `${currentPositionPercent}%` }}
+          ></div>
+          <div
+            className="z-[30] absolute w-2 h-2 bg-red-500 rounded-full"
+            style={{ left: `calc(${currentPositionPercent}% - 5px)` }}
+          ></div>
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
+)

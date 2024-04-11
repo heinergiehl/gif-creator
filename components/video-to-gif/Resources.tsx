@@ -8,7 +8,17 @@ import ImageResource from "../entity/ImageResource"
 import SmiliesResource from "../entity/SmiliesResource"
 import GifResource from "../entity/GifResource"
 import ExportPanel from "../panels/ExportPanel"
-import interact from "interactjs"
+import { AnimationsPanel } from "../panels/AnimationsPanel"
+const ANIMATION_TYPE_TO_LABEL: Record<string, string> = {
+  fadeIn: "Fade In",
+  fadeOut: "Fade Out",
+  slideIn: "Slide In",
+  slideOut: "Slide Out",
+  breath: "Breath",
+}
+export type AnimationResourceProps = {
+  animation: Animation
+}
 export const Resources = observer(() => {
   const rootStore = React.useContext(StoreContext)
   const store = rootStore.store
@@ -22,6 +32,7 @@ export const Resources = observer(() => {
       {selectedMenuOption === "Export" ? <ExportPanel /> : null}
       {selectedMenuOption === "Smilies" ? <SmiliesResource /> : null}
       {selectedMenuOption === "Gif" ? <GifResource /> : null}
+      {selectedMenuOption === "Animation" ? <AnimationsPanel /> : null}
     </aside>
   )
 })

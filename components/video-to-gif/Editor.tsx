@@ -23,6 +23,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core"
 import { set } from "animejs"
+import { EditorElement } from "@/types"
 const EditorWithStore = () => {
   const [store] = useState(new RootStore())
   return (
@@ -30,6 +31,15 @@ const EditorWithStore = () => {
       <Editor></Editor>
     </StoreContext.Provider>
   )
+}
+// make sure the getActiveObject return type is correct and includes the id
+declare module "fabric" {
+  interface Canvas {
+    getActiveObject(): fabric.Object | null
+  }
+  interface Object {
+    id: string
+  }
 }
 export default EditorWithStore
 const Editor = observer(() => {
@@ -95,6 +105,16 @@ const Editor = observer(() => {
       console.log("object added69!")
       console.log(e.target)
     })
+    // canvas.on("selection:updated", (e) => {
+    //   console.log("object selected", canvas.getActiveObject())
+    //   // only if selected on is text
+    //   if (canvas.getActiveObject()?.type === "textbox") {
+    //     store._selectedElement = store.editorElements.find((element) => {
+    //       if (canvas.getActiveObject() === null) return false
+    //       element.id === canvas.getActiveObject()?.id
+    //     }) as EditorElement
+    //   }
+    // })
     canvas.on("object:resizing", function (e) {})
     fabric.Object.prototype.transparentCorners = false
     fabric.Object.prototype.cornerColor = "blue"
@@ -186,42 +206,39 @@ const Editor = observer(() => {
         <div className=" bg-slate-100 flex justify-center items-center  flex-col ">
           <div className="flex w-full justify-center items-center space-x-8">
             {store.creatingGifFrames && <ControlsSkeleton />}
-            {store.frames.length !== 0 &&
-              store._editorElements.length !== 0 && (
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="speed"
-                    className="flex flex-col font-semibold  "
+            {store.frames.length !== 0 && store.editorElements.length !== 0 && (
+              <div className="flex flex-col">
+                <label
+                  htmlFor="speed"
+                  className="flex flex-col font-semibold  "
+                >
+                  <span className="text-sm text-gray-600">Playback Speed</span>
+                  <select
+                    id="speed"
+                    onChange={(e) =>
+                      store.setSpeedFactor(parseFloat(e.target.value))
+                    }
+                    defaultValue="1"
                   >
-                    <span className="text-sm text-gray-600">
-                      Playback Speed
-                    </span>
-                    <select
-                      id="speed"
-                      onChange={(e) =>
-                        store.setSpeedFactor(parseFloat(e.target.value))
-                      }
-                      defaultValue="1"
-                    >
-                      <option value="0.25">0.25x</option>
-                      <option value="0.5">0.5x</option>
-                      <option value="1">1x (Normal)</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="2">2x</option>
-                    </select>
-                  </label>
-                  <button
-                    onClick={() => store.playSequence()}
-                    className="play-button mt-8"
-                  >
-                    {store.playing ? (
-                      <FaStopCircle size={54} className="" />
-                    ) : (
-                      <FaPlayCircle size={54} />
-                    )}
-                  </button>{" "}
-                </div>
-              )}
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="1">1x (Normal)</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                  </select>
+                </label>
+                <button
+                  onClick={() => store.playSequence()}
+                  className="play-button mt-8"
+                >
+                  {store.playing ? (
+                    <FaStopCircle size={54} className="" />
+                  ) : (
+                    <FaPlayCircle size={54} />
+                  )}
+                </button>{" "}
+              </div>
+            )}
             <Canvas />
           </div>
           <Carousel />

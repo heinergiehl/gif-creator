@@ -47,7 +47,7 @@ const ExportPanel = observer(() => {
           onChange={(e) => (store.gifQuality = parseFloat(e.target.value))}
         />
       </>
-      {store._editorElements.some((el) => el.fabricObject) && !gifUrl && (
+      {store.editorElements.some((el) => el.fabricObject) && !gifUrl && (
         <button onClick={handleCreateGif} className="btn btn-primary">
           Create Gif
         </button>
