@@ -1,53 +1,25 @@
-import { StoreContext } from "@/store"
-import React from "react"
-import { observer } from "mobx-react"
-import { MdImage, MdTextFields } from "react-icons/md"
-import { CiImageOn } from "react-icons/ci"
+import React from 'react';
+import { observer } from 'mobx-react';
+import { MdImage, MdTextFields } from 'react-icons/md';
+import { useStores } from '@/store';
 const ElementsHistoryPanel = observer(() => {
   // display all the nested elements of the current gif frame in the history panel
-  const rootStore = React.useContext(StoreContext)
-  const store = rootStore.store
-  const currentFrame = store.frames[store.currentKeyFrame]
-  let nestedElementsIds: { id: string }[] = []
-  console.log(store.currentKeyFrame)
-  if (currentFrame) {
-    nestedElementsIds = currentFrame.nestedObjects
-  }
-  const nestedElements = store.editorElements.filter((element) => {
-    return nestedElementsIds.some((id) => id.id === element.id)
-  })
+  const rootStore = useStores();
+  const store = rootStore.editorStore;
   const Icon = (type: string) => {
     switch (type) {
-      case "text":
-        return <MdTextFields size="20" />
-      case "image":
-        return <MdImage size="20" />
+      case 'text':
+        return <MdTextFields size="20" />;
+      case 'image':
+        return <MdImage size="20" />;
       default:
-        return <MdTextFields size="20" />
+        return <MdTextFields size="20" />;
     }
-  }
+  };
   return (
-    <div className=" h-full bg-slate-200">
-      <span className="text-gray-500 p-4">History</span>
-      <ul className=" ">
-        {nestedElements.map((element, index) => (
-          <li
-            key={element.id}
-            className="flex items-center justify-start  text-gray-700 font-semibold px-2 py-1 hover:bg-gray-300 cursor-pointer"
-          >
-            {Icon(element.type)}
-            <span className="text-xs">{element.name}</span>
-            {/* delete element */}
-            <button
-              onClick={() => store.deleteNestedObjectOfCurrentFrame(index)}
-              className="ml-auto"
-            >
-              x
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="h-full w-full bg-slate-200">
+      <span className="p-4 text-gray-500">History</span>
     </div>
-  )
-})
-export default ElementsHistoryPanel
+  );
+});
+export default ElementsHistoryPanel;

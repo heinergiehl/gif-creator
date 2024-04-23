@@ -1,7 +1,7 @@
 "use client"
+import { useStores } from "@/store"
 import { observer } from "mobx-react"
 import { useContext, useEffect, useState } from "react"
-import { StoreContext } from "@/store"
 const Stepper = observer(() => {
   const [steps, setSteps] = useState([
     {
@@ -21,7 +21,7 @@ const Stepper = observer(() => {
       isPrimary: false,
     },
   ])
-  const root = useContext(StoreContext)
+  const root = useStores()
   const store = root.screenToVideoStore
   const currentStep = store.currentStep
   useEffect(() => {

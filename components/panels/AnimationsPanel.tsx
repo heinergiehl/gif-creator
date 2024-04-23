@@ -1,12 +1,12 @@
 "use client"
 import React from "react"
-import { StoreContext } from "@/store"
 import { observer } from "mobx-react"
 import { AnimationResource } from "../entity/AnimationResource"
 import { getUid } from "@/utils"
+import { useStores } from "@/store"
 export const AnimationsPanel = observer(() => {
-  const store = React.useContext(StoreContext).store
-  const selectedElement = store._selectedElement
+  const store = useStores().animationStore
+  const selectedElement = store.editorStore.selectedElement
   const selectedElementAnimations = store.animations.filter((animation) => {
     return animation.targetId === selectedElement?.id
   })
@@ -35,10 +35,10 @@ export const AnimationsPanel = observer(() => {
           className="text-sm px-[16px] py-[8px] font-semibold hover:bg-slate-700 hover:text-white cursor-pointer"
           onClick={() => {
             store.addAnimation({
-              type: "fadeIn",
-              duration: 1000,
-              targetId: selectedElement.id,
               id: getUid(),
+              type: "fadeIn",
+              targetId: selectedElement?.id ?? "",
+              duration: 1000,
               properties: {},
             })
           }}
@@ -51,10 +51,10 @@ export const AnimationsPanel = observer(() => {
           className="text-sm px-[16px] py-[8px] font-semibold hover:bg-slate-700 hover:text-white cursor-pointer"
           onClick={() => {
             store.addAnimation({
-              type: "fadeOut",
-              duration: 1000,
-              targetId: selectedElement.id,
               id: getUid(),
+              type: "fadeOut",
+              targetId: selectedElement?.id ?? "",
+              duration: 1000,
               properties: {},
             })
           }}
@@ -67,10 +67,10 @@ export const AnimationsPanel = observer(() => {
           className="text-sm px-[16px] py-[8px] font-semibold hover:bg-slate-700 hover:text-white cursor-pointer"
           onClick={() => {
             store.addAnimation({
-              type: "slideIn",
-              duration: 1000,
-              targetId: selectedElement.id,
               id: getUid(),
+              type: "slideIn",
+              targetId: selectedElement?.id ?? "",
+              duration: 1000,
               properties: {
                 direction: "left",
                 useClipPath: false,
@@ -87,12 +87,12 @@ export const AnimationsPanel = observer(() => {
           className="text-sm px-[16px] py-[8px] font-semibold hover:bg-slate-700 hover:text-white cursor-pointer"
           onClick={() => {
             store.addAnimation({
-              type: "slideOut",
-              duration: 1000,
-              targetId: selectedElement.id,
               id: getUid(),
+              type: "slideOut",
+              targetId: selectedElement?.id ?? "",
+              duration: 1000,
               properties: {
-                direction: "left",
+                direction: "right",
                 useClipPath: false,
                 textType: "none",
               },
@@ -107,14 +107,11 @@ export const AnimationsPanel = observer(() => {
           className="text-sm px-[16px] py-[8px] font-semibold hover:bg-slate-700 hover:text-white cursor-pointer"
           onClick={() => {
             store.addAnimation({
-              type: "breathe",
-              duration: 1000,
-              targetId: selectedElement.id,
               id: getUid(),
-              properties: {
-                breathType: "constant",
-                breathSize: 1,
-              },
+              type: "breathe",
+              targetId: selectedElement?.id ?? "",
+              duration: 1000,
+              properties: {},
             })
           }}
         >

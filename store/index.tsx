@@ -1,25 +1,33 @@
-"use client"
-import React, { createContext } from "react"
-import { Store } from "./Store"
-import { Provider } from "mobx-react"
-import { configure } from "mobx"
-import { ScreenToVideoStore } from "./ScreenToVideoStore"
+'use client';
+import React, { createContext, useContext } from 'react';
+import { configure } from 'mobx';
+import { ScreenToVideoStore } from './ScreenToVideoStore';
+import { AnimationStore } from './AnimationStore';
+import { EditorStore } from './EditorStore';
+import { TimelineStore } from './TimelineStore';
+import { UIStore } from './UIStore';
+import { EditorCarouselStore } from './EditorCarouselStore';
+import { FileStore } from './FileStore';
 configure({
-  enforceActions: "never",
-})
+  enforceActions: 'never',
+});
 export class RootStore {
-  store: Store
-  screenToVideoStore: ScreenToVideoStore
-  constructor() {
-    this.store = new Store()
-    this.screenToVideoStore = new ScreenToVideoStore()
-  }
+  screenToVideoStore = new ScreenToVideoStore();
+  editorStore = new EditorStore();
+  animationStore = new AnimationStore(this.editorStore);
+  timelineStore = new TimelineStore(this.animationStore);
+  editorCarouselStore = new EditorCarouselStore(this.timelineStore);
+  fileStore = new FileStore(this.animationStore);
+  uiStore = new UIStore();
+  constructor() {}
 }
-export const StoreContext = createContext(new RootStore())
-export function StoreProvider(props: { children: React.ReactNode }) {
-  return (
-    <StoreContext.Provider value={new RootStore()}>
-      {props.children}
-    </StoreContext.Provider>
-  )
-}
+const StoreContext = createContext<RootStore | undefined>(undefined);
+export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const rootStore = new RootStore();
+  return <StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>;
+};
+export const useStores = (): RootStore => {
+  const store = useContext(StoreContext);
+  if (!store) throw new Error('useStores must be used within a StoreProvider');
+  return store;
+};

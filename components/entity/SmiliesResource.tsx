@@ -2,9 +2,9 @@
 "use client"
 import React, { useEffect, useState, useContext } from "react"
 import { observer } from "mobx-react"
-import { StoreContext } from "@/store"
 import { DndContext, useDraggable } from "@dnd-kit/core"
 import Image from "next/image"
+import { useStores } from "@/store"
 const API_KEY = "43266925-5f9d4a4a69a0b1f37c83e9c7a"
 interface ImageProps {
   image: {
@@ -43,7 +43,7 @@ const SmiliesResource = observer(() => {
     { id: string; webformatURL: string }[]
   >([])
   const [imageType, setImageType] = useState("vector")
-  const store = useContext(StoreContext)
+  const store = useStores().editorStore
   useEffect(() => {
     const fetchSmilies = async () => {
       try {

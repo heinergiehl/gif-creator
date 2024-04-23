@@ -1,9 +1,14 @@
 import { fabric } from "fabric"
+export type Position = {
+  top: number | undefined
+  left: number | undefined
+}
 export type EditorElementBase<T extends string, P> = {
   readonly id: string
   fabricObject?: fabric.Object
   name: string
   readonly type: T
+  isFrame?: boolean
   placement: Placement
   timeFrame: TimeFrame
   properties: P
@@ -49,6 +54,10 @@ export type TextEditorElement = EditorElementBase<
     text: string
     fontSize: number
     fontWeight: number
+    fontFamily: string
+    fontColor: string
+    textBackground: string
+    fontStyle: string
     splittedTexts: fabric.Text[]
   }
 >

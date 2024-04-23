@@ -1,7 +1,5 @@
 "use client"
 import React from "react"
-import { StoreContext } from "@/store"
-// import { formatTimeToMinSec } from "@/utils";
 import { observer } from "mobx-react"
 import { MdDelete } from "react-icons/md"
 import {
@@ -13,6 +11,7 @@ import {
   SlideOutAnimation,
   SlideTextType,
 } from "@/types"
+import { useStores } from "@/store"
 const ANIMATION_TYPE_TO_LABEL: Record<string, string> = {
   fadeIn: "Fade In",
   fadeOut: "Fade Out",
@@ -24,7 +23,7 @@ export type AnimationResourceProps = {
   animation: Animation
 }
 export const AnimationResource = observer((props: AnimationResourceProps) => {
-  const store = React.useContext(StoreContext).store
+  const store = useStores().animationStore
   return (
     <div className="rounded-lg overflow-hidden items-center bg-slate-800 m-[15px] flex flex-col relative min-h-[100px] p-2">
       <div className="flex flex-row justify-between w-full">
@@ -55,7 +54,7 @@ export const AnimationResource = observer((props: AnimationResourceProps) => {
 })
 export const FadeAnimation = observer(
   (props: { animation: FadeInAnimation | FadeOutAnimation }) => {
-    const store = React.useContext(StoreContext).store
+    const store = useStores().animationStore
     return (
       <div className="flex flex-col w-full items-start">
         {/* duration */}
@@ -87,7 +86,7 @@ export const FadeAnimation = observer(
 // These properties can be selected by select element
 export const SlideAnimation = observer(
   (props: { animation: SlideInAnimation | SlideOutAnimation }) => {
-    const store = React.useContext(StoreContext).store
+    const store = useStores().animationStore
     return (
       <div className="flex flex-col w-full items-start">
         {/* duration */}

@@ -3,14 +3,12 @@ import { useContext, useEffect, useRef, useState } from "react"
 import { useReactMediaRecorder } from "react-media-recorder"
 import { fabric } from "fabric"
 import { cn } from "@/utils/cn"
-import { StoreContext } from "@/store"
 import { observer } from "mobx-react"
-import dynamic from "next/dynamic"
-const Stepper = dynamic(() => import("@/app/components/recorder/Stepper"), {
-  ssr: false,
-})
+import { StoreProvider, useStores } from "@/store"
+import Stepper from "./Stepper"
 const RecordComponent = observer(() => {
-  const screenToVideoStore = useContext(StoreContext).screenToVideoStore
+  const screenToVideoStore = useStores().screenToVideoStore
+  console.log(screenToVideoStore)
   const { status, startRecording, stopRecording, mediaBlobUrl, previewStream } =
     useReactMediaRecorder({
       screen: true,
@@ -59,12 +57,6 @@ const RecordComponent = observer(() => {
           // Scale to height
           scaleRatio = canvas.height / videoRef.current.height
         }
-        console.log(
-          "scaleRatio",
-          scaleRatio,
-          videoRef.current.videoWidth,
-          videoRef.current.videoHeight
-        )
         const videoElement = new fabric.Image(videoRef.current, {
           left: 0,
           top: 0,
@@ -163,7 +155,6 @@ const RecordComponent = observer(() => {
     if (!previewStream) return
     if (!previewVideoRef.current) return
     previewVideoRef.current.style.display = "block"
-    console.log("mediaBlobUrl", mediaBlobUrl)
     previewVideoRef.current.srcObject = previewStream
     previewVideoRef.current.width = 1280
     previewVideoRef.current.height = 720
@@ -221,7 +212,6 @@ const RecordComponent = observer(() => {
         width: newWidth,
         height: newHeight,
       })
-      console.log("newWidth", newWidth, "newHeight", newHeight)
       // keep the objects in the center of the canvas
       if (!fabricCanvasRef.current.item(0)) return
       fabricCanvasRef.current.renderAll() // Re-render the canvas to apply changes
@@ -331,4 +321,11 @@ const RecordComponent = observer(() => {
     </div>
   )
 })
-export default RecordComponent
+const RecordComponentWithState = () => {
+  return (
+    <StoreProvider>
+      <RecordComponent />
+    </StoreProvider>
+  )
+}
+export default RecordComponentWithState

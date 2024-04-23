@@ -3,10 +3,10 @@
 "use client"
 import React, { use } from "react"
 import { observer } from "mobx-react"
-import { StoreContext } from "@/store"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { DndContext, DragOverlay, useDraggable } from "@dnd-kit/core"
+import { useStores } from "@/store"
 const DraggableImage = observer(
   ({ image, index }: { image: string; index: number }) => {
     const { attributes, listeners, setNodeRef, isDragging, transform } =
@@ -39,8 +39,8 @@ const DraggableImage = observer(
 const ImageResource = observer(() => {
   const pathName = usePathname()
   const isVideoToGif = pathName.includes("video-to-gif")
-  const rootStore = React.useContext(StoreContext)
-  const store = rootStore.store
+  const rootStore = useStores()
+  const store = rootStore.editorStore
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     for (let i = 0; i < e.target.files.length; i++) {

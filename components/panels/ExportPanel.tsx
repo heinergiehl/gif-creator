@@ -1,53 +1,52 @@
-import { StoreContext } from "@/store"
-import Link from "next/link"
-import React, { useState } from "react"
-import { observer } from "mobx-react"
+'use client';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react';
+import { useStores } from '@/store';
 const ExportPanel = observer(() => {
-  const rootStore = React.useContext(StoreContext)
-  const store = rootStore.store
-  const [gifUrl, setGifUrl] = useState<string | null>(null)
+  const rootStore = useStores();
+  const store = rootStore.editorStore;
+  const animtionStore = rootStore.animationStore;
+  const fileStore = rootStore.fileStore;
+  const [gifUrl, setGifUrl] = useState<string | null>(null);
   const handleCreateGif = async () => {
-    const url = await store.handleSaveAsGif()
-    setGifUrl(url) // Store the URL in state
-  }
+    const url = await fileStore.handleSaveAsGif();
+    setGifUrl(url); // Store the URL in state
+  };
   return (
-    <div className="p-4 flex flex-col space-y-2">
-      <span className="text-xs font-semibold text-gray-700">
-        Configure and Export Your GIFs
-      </span>
+    <div className="flex flex-col space-y-2 p-4">
+      <span className="text-xs font-semibold text-gray-700">Configure and Export Your GIFs</span>
       <>
         <input
           type="range"
           step={1}
           min="1"
           max="24"
-          defaultValue={1}
-          value={store.fps}
-          onChange={(e) => (store.fps = parseFloat(e.target.value))}
+          value={animtionStore.fps}
+          onChange={(e) => (animtionStore.fps = parseFloat(e.target.value))}
         />
         <>
-          <span className="text-xs text-gray-600 label flex flex-col items-start">
-            <span className="font-bold"> {store.fps} fps</span> (Be careful with
-            higher values. A GIF with 24 fps and 24 frames will only last 1
-            second to go through all frames)
+          <span className="label flex flex-col items-start text-xs text-gray-600">
+            <span className="font-bold"> {animtionStore.fps} fps</span> (Be careful with higher
+            values. A GIF with 24 fps and 24 frames will only last 1 second to go through all
+            frames)
           </span>
         </>
       </>
       <>
-        <span className="font-bold text-xs text-gray-600 label">
-          {" "}
-          {store.gifQuality} GIF quality
+        <span className="label text-xs font-bold text-gray-600">
+          {' '}
+          {fileStore.gifQuality} GIF quality
         </span>
         <input
           type="range"
           min="1"
           max="10"
-          defaultValue={5}
-          value={store.gifQuality}
-          onChange={(e) => (store.gifQuality = parseFloat(e.target.value))}
+          value={fileStore.gifQuality}
+          onChange={(e) => (fileStore.gifQuality = parseFloat(e.target.value))}
         />
       </>
-      {store.editorElements.some((el) => el.fabricObject) && !gifUrl && (
+      {store.elements.some((el) => el.fabricObject) && !gifUrl && (
         <button onClick={handleCreateGif} className="btn btn-primary">
           Create Gif
         </button>
@@ -58,6 +57,6 @@ const ExportPanel = observer(() => {
         </a>
       )}
     </div>
-  )
-})
-export default ExportPanel
+  );
+});
+export default ExportPanel;

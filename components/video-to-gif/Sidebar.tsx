@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect } from "react"
-import { StoreContext } from "@/store"
+import { useStores } from "@/store"
 import { observer } from "mobx-react"
 import {
   MdDownload,
@@ -13,13 +13,13 @@ import {
   MdMovieFilter,
   MdAnimation,
 } from "react-icons/md"
-import { Store } from "@/store/Store"
 import { usePathname } from "next/navigation"
 import { FaRegSmile } from "react-icons/fa"
+import { UIStore } from "@/store/UIStore"
 type ConversionType = "videoToGif" | "imageToGif" | "gifToGif"
 export const Sidebar = observer(() => {
   const pathName = usePathname()
-  const store = React.useContext(StoreContext).store
+  const store = useStores().uiStore
   let conversionType: ConversionType = "videoToGif"
   switch (pathName) {
     case "/image-to-gif":
@@ -36,24 +36,24 @@ export const Sidebar = observer(() => {
   }
   const [conversionTypeState, setConversionTypeState] =
     React.useState<ConversionType>(conversionType)
-  useEffect(() => {
-    setConversionTypeState(conversionType)
-    switch (conversionType) {
-      case "videoToGif":
-        store.setSelectedMenuOption("Video")
-        break
-      case "imageToGif":
-        store.setSelectedMenuOption("Image")
-        break
-      case "gifToGif":
-        store.setSelectedMenuOption("Gif")
-        break
-      default:
-        break
-    }
-  }, [pathName])
+  // useEffect(() => {
+  //   setConversionTypeState(conversionType)
+  //   switch (conversionType) {
+  //     case "videoToGif":
+  //       store.setSelectedMenuOption("Video")
+  //       break
+  //     case "imageToGif":
+  //       store.setSelectedMenuOption("Image")
+  //       break
+  //     case "gifToGif":
+  //       store.setSelectedMenuOption("Gif")
+  //       break
+  //     default:
+  //       break
+  //   }
+  // }, [pathName])
   return (
-    <ul className="bg-white h-screen">
+    <ul className="bg-white lg:h-screen  flex sm:flex-col lg:flex-col">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name
         return (
@@ -86,21 +86,21 @@ const MENU_OPTIONS = [
   {
     name: "Video",
     icon: MdVideoLibrary,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Video")
     },
   },
   {
     name: "Image",
     icon: MdImage,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Image")
     },
   },
   {
     name: "Gif",
     icon: MdTransform,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Gif")
     },
   },
@@ -108,35 +108,35 @@ const MENU_OPTIONS = [
   {
     name: "Smilies",
     icon: FaRegSmile,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Smilies")
     },
   },
   {
     name: "Text",
     icon: MdTitle,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Text")
     },
   },
   {
     name: "Animation",
     icon: MdAnimation,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Animation")
     },
   },
   {
     name: "Effect",
     icon: MdMovieFilter,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Effect")
     },
   },
   {
     name: "Export",
     icon: MdDownload,
-    action: (store: Store) => {
+    action: (store: UIStore) => {
       store.setSelectedMenuOption("Export")
     },
   },

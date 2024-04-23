@@ -1,8 +1,8 @@
 "use client"
-import React from "react"
-import { StoreContext } from "@/store"
+import React, { use, useEffect } from "react"
 import { observer } from "mobx-react"
 import { MdAdd } from "react-icons/md"
+import { useStores } from "@/store"
 type TextResourceProps = {
   fontSize: number
   fontWeight: number
@@ -10,8 +10,7 @@ type TextResourceProps = {
 }
 export const TextResource = observer(
   ({ fontSize, fontWeight, sampleText }: TextResourceProps) => {
-    const rootStore = React.useContext(StoreContext)
-    const store = rootStore.store
+    const store = useStores().editorStore
     return (
       <div className="items-center m-[15px] flex flex-row h-full">
         <div
@@ -20,7 +19,7 @@ export const TextResource = observer(
             fontSize: `${fontSize}px`,
             fontWeight: `${fontWeight}`,
             color: store.textColor,
-            fontFamily: store.textFont,
+            fontFamily: store.fontFamily,
           }}
         >
           {sampleText}
@@ -32,7 +31,11 @@ export const TextResource = observer(
               text: sampleText,
               fontSize: fontSize,
               fontWeight: fontWeight,
-              addTextToAllFrames: true,
+              fontColor: store.textColor,
+              fontFamily: store.fontFamily,
+              fontStyle: "normal",
+              textBackground: "",
+              isFrame: false,
             })
           }}
         >
