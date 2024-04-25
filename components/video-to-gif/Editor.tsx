@@ -147,25 +147,29 @@ const Editor = observer(() => {
     return () => {
       window.removeEventListener('resize', resizeEditor);
     };
-  }, []);
+  }, [
+    store.frames.length,
+    editorCarouselStore.cardItemWidth,
+    editorCarouselStore.cardItemHeight,
+    containerWidth,
+  ]);
   return (
     <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} onDragOver={handleDragOver}>
       <main
-        className="grid  grid-cols-[75px_300px_200px_1fr_150px]    overflow-hidden pt-16
+        className="grid grid-cols-[75px_200px_auto_150px] overflow-hidden pt-16   md:grid-cols-[75px_300px_200px_1fr_150px] 
       "
       >
-        <RootNavigation />
         <div className="row-start-1 flex flex-col sm:col-span-1">
           <Sidebar />
         </div>
-        <div className=" row-span-1 row-start-1 sm:col-span-1">
+        <div className="row-span-4 sm:col-span-1">
           <Resources />
         </div>
-        <div className="col-span-3 col-start-3 grid  grid-cols-subgrid ">
+        <div className="col-span-3 col-start-3 grid grid-cols-subgrid " id="editor-container">
           <div className="col-span-4 col-start-1 ">
             <EditResource />
           </div>
-          <div className="col-span-1 col-start-1 row-span-1 row-start-2 pt-16 ">
+          <div className="col-span-2 col-start-1 row-span-1 row-start-3 items-center justify-center pt-16 lg:col-span-1 lg:row-start-2 ">
             <div className="flex h-full flex-col items-center justify-center">
               <label htmlFor="speed" className="flex flex-col font-semibold ">
                 <span className="text-sm text-gray-600">FPS of your GIF</span>
@@ -196,13 +200,13 @@ const Editor = observer(() => {
               </button>{' '}
             </div>
           </div>
-          <div className="col-span-1 ">
-            <Canvas />
+          <div className="col-span-2 row-start-2 h-full content-center justify-center md:col-span-1 xl:col-span-2 xl:items-center xl:justify-center">
+            <Canvas containerWidth={containerWidth} />
           </div>
-          <div className="col-span-2" id="editor-container">
+          <div className="col-span-2 row-start-4 content-center justify-center lg:row-start-3">
             <EditorCarousel containerWidth={containerWidth} />
           </div>
-          <div className="col-span-1 col-start-5 row-span-4 row-start-1 h-full flex-col">
+          <div className="col-span-1 col-start-5 row-span-5 row-start-1 h-full flex-col">
             <ElementsHistoryPanel />
           </div>
         </div>
@@ -210,7 +214,7 @@ const Editor = observer(() => {
     </DndContext>
   );
 });
-const Canvas = observer(() => {
+const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
   const { setNodeRef } = useDroppable({
     id: 'grid-canvas-container',
   });
@@ -218,7 +222,6 @@ const Canvas = observer(() => {
   const store = rootStore.editorStore;
   const editorCarouselStore = rootStore.editorCarouselStore;
   const canvas = store.canvas;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const resizeCanvas = () => {
     const canvasContainer = document.getElementById('grid-canvas-container');
     if (!canvasContainer || !canvas) return;
@@ -253,7 +256,13 @@ const Canvas = observer(() => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [editorCarouselStore.cardItemHeight, editorCarouselStore.cardItemWidth, canvas]); // Depend on the canvas to ensure it exists
+  }, [
+    store.canvas,
+    store.frames.length,
+    editorCarouselStore.cardItemWidth,
+    editorCarouselStore.cardItemHeight,
+    containerWidth,
+  ]); // Depend on the canvas to ensure it exists
   const animationStore = rootStore.animationStore;
   useEffect(() => {
     if (store.canvas === null) {
@@ -285,8 +294,19 @@ const Canvas = observer(() => {
       store.onObjectModified(e);
       //
     });
-    c.on('object:selected', (e) => {
-      console.log(e.target, 'object:selected');
+    c.on('selection:created', (e) => {
+      const selectedObject = e.target;
+      if (!selectedObject) return;
+      store.selectedElement = store.elements.find((element) => element.id === selectedObject.id);
+      console.log(e, store.selectedElement);
+    });
+    c.on('selection:updated', (e) => {
+      const selectedObject = e.target;
+      if (!selectedObject) return;
+      store.selectedElement = store.elements.find((element) => element.id === selectedObject.id);
+    });
+    c.on('selection:cleared', (e) => {
+      store.selectedElement = null;
     });
     return () => store.canvas?.remove();
   }, []);
@@ -313,7 +333,7 @@ const Canvas = observer(() => {
     store.isDragging,
   ]);
   return (
-    <div id="grid-canvas-container" ref={setNodeRef} className="flex items-center ">
+    <div id="grid-canvas-container" ref={setNodeRef} className="p-4">
       <canvas id="canvas" className="justify-center border-2 drop-shadow-lg" />
     </div>
   );

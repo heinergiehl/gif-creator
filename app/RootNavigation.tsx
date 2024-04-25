@@ -1,44 +1,123 @@
-"use client"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import React from "react"
-function RootNavigation() {
-  const pathName = usePathname()
+'use client';
+import * as React from 'react';
+import Link from 'next/link';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
+import { cn } from '@/lib/utils';
+import { ModeToggle } from './components/ui/DarkToggle';
+const sections = [
+  {
+    section: 'Convert',
+    links: [
+      {
+        title: 'Video to GIF',
+        href: '/video-to-gif',
+        description: 'Convert your videos into GIF format effortlessly.',
+      },
+      {
+        title: 'Image to GIF',
+        href: '/image-to-gif',
+        description: 'Turn your images into GIFs quickly and easily.',
+      },
+      {
+        title: 'Screen to Video',
+        href: '/screen-to-video',
+        description: 'Record your screen and save as video.',
+      },
+    ],
+  },
+  {
+    section: 'Tools',
+    links: [
+      {
+        title: 'Video to GIF Editor',
+        href: '/video-to-gif/converter-and-editor',
+        description: 'Edit your GIFs created from videos.',
+      },
+      {
+        title: 'Image to GIF Editor',
+        href: '/image-to-gif/converter-and-editor',
+        description: 'Edit and enhance your image-based GIFs.',
+      },
+      {
+        title: 'Screen Recording',
+        href: '/screen-to-video/record-screen',
+        description: 'Record your screen with advanced options.',
+      },
+    ],
+  },
+  {
+    section: 'Documentation',
+    href: '/docs',
+    description: 'Access detailed documentation and developer guides.',
+  },
+];
+export default function NavigationMenuDemo() {
   return (
-    <nav className="fixed z-[100]  h-16 inset-0 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500  ">
-      <div className="relative w-full h-full flex">
-        <Link href="/">
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={140}
-            height={140}
-            className="absolute top-[50%] translate-y-[-50%] left-4"
-          />
-        </Link>
-        {/* video to gif */}
-        <div className="w-full flex ml-[200px] justify-start items-center h-full space-x-8">
-          {Links.map((link) => (
-            <Link key={link.name} href={link.path}>
-              <span
-                className={`text-white font-semibold text-lg ${
-                  pathName.includes(link.path) ? "underline" : ""
-                }`}
-              >
-                {link.name}
-              </span>
-            </Link>
+    <div
+      className=" fixed inset-0
+                    z-[999] flex    h-[70px]  items-center 
+                      justify-center  bg-white p-4 text-lg text-black backdrop-blur lg:grid-cols-2 dark:bg-gray-800 dark:text-white"
+    >
+      <NavigationMenu className="">
+        <NavigationMenuList>
+          {sections.map((section) => (
+            <NavigationMenuItem key={section.section}>
+              <NavigationMenuTrigger className="text-lg ">{section.section}</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <>
+                  <ul
+                    className="grid  w-[400px] gap-3  bg-white md:w-[500px] lg:w-[800px]  dark:bg-gray-800  
+                     "
+                  >
+                    {section.links ? (
+                      section.links.map((link) => (
+                        <ListItem key={link.title} href={link.href} title={link.title}>
+                          {link.description}
+                        </ListItem>
+                      ))
+                    ) : (
+                      <ListItem href={section.href} title={section.section}>
+                        {section.description}
+                      </ListItem>
+                    )}
+                  </ul>
+                </>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
           ))}
-        </div>
-      </div>
-    </nav>
-  )
+        </NavigationMenuList>
+      </NavigationMenu>
+      <ModeToggle />
+    </div>
+  );
 }
-const Links: { name: string; path: string }[] = [
-  { name: "Video-To-GIF", path: "/video-to-gif" },
-  { name: "Image-To-GIF", path: "/image-to-gif" },
-  { name: "Screen-To-Video", path: "/screen-to-video" },
-  { name: "Edit GIFs", path: "/edit-gifs" },
-]
-export default RootNavigation
+const ListItem = React.forwardRef<
+  React.ElementRef<'a'>,
+  { href: string; title: string; children?: React.ReactNode }
+>(({ href, title, children, ...props }, ref) => {
+  return (
+    <Link href={href} legacyBehavior passHref>
+      <NavigationMenuLink
+        className={cn([navigationMenuTriggerStyle(), ' my-4 rounded-md text-lg'])}
+      >
+        <span
+          ref={ref}
+          className="cursor-pointer rounded-md p-4 transition-colors duration-200 ease-in-out hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+          {...props}
+        >
+          <div className="font-medium leading-none ">{title}</div>
+          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">{children}</p>
+        </span>
+      </NavigationMenuLink>
+    </Link>
+  );
+});
+ListItem.displayName = 'ListItem';

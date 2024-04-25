@@ -3,6 +3,8 @@ import { observer } from 'mobx-react';
 import { useStores } from '@/store';
 import { Frame } from '@/store/EditorStore';
 import { getUid } from '@/utils';
+import { InputFile } from '@/app/components/ui/FileInput';
+import { Label } from '../ui/label';
 export const VideoResource = observer(() => {
   const rootStore = useStores();
   const store = rootStore.editorStore;
@@ -74,20 +76,11 @@ export const VideoResource = observer(() => {
         </div>
       )}
       <>
-        <span className="text-xs font-semibold text-gray-700">
-          Upload a video to extract frames
-        </span>
-        <div className="mb-4 flex w-full flex-col items-center justify-center text-xs text-gray-700">
-          <input
-            type="file"
-            accept="video/*"
-            className="mb-4 w-full max-w-xs "
-            onChange={handleFileChange}
-          />
-          <label className="form-control w-full max-w-xs">
-            <div className="label">
-              <span className="">Frame extraction rate (frames per second):</span>
-            </div>
+        <h2 className="font-semibold text-gray-700">Upload a video to extract frames</h2>
+        <div className="flex w-full flex-col items-center justify-center gap-y-4 text-xs text-gray-700">
+          <InputFile type="video" onChange={handleFileChange} />
+          <Label className="form-control w-full max-w-xs gap-y-4">
+            <span className="">Frame extraction rate (frames per second):</span>
             <span className="text-xs font-semibold">{frameRate} fps</span>
             <input
               type="range"
@@ -98,7 +91,7 @@ export const VideoResource = observer(() => {
               onChange={(e) => setFrameRate(parseFloat(e.target.value))}
               className=""
             />
-          </label>
+          </Label>
           <label className="form-control w-full max-w-xs">
             <div className="label flex flex-col items-start">
               <span className=""> Resolution scale (1 for full, 0.5 for half, etc.):</span>

@@ -107,8 +107,6 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       store.currentKeyFrame = oldIndex;
       store.updateFramesOrder(oldIndex, newIndex);
       store.currentKeyFrame = newIndex;
-      // animationStore.addCurrentGifFrameToCanvas();
-      animationStore.editorStore.canvas.renderAll();
     }
   };
   //while dragging an element out of the carousel, the carousel should scroll
@@ -177,36 +175,44 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 1) || 1}]`;
     } else if (carouselWidth <= 900) {
       // Medium carousel
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 2) || 1}]`;
+      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
     } else {
       // Large carousel
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
+      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 4) || 1}]`;
     }
   };
   return (
-    <div className=" flex flex-col  items-center justify-center gap-y-4">
+    <div className="flex flex-col items-center justify-center gap-y-4 px-16">
       <Timeline
-        width={containerWidth - 150}
+        maxWidth={containerWidth - 150}
+        minWidth={containerWidth - 300}
         currentFrame={store.currentKeyFrame}
         onSelectFrame={() => handleSelectFrame(store.currentKeyFrame)}
         totalFrames={store.frames.length}
       />
-      <div className="flex flex-col items-start justify-start ">
-        <Skeleton className="bg-gray-200 " />
+      <div
+        className="flex flex-col items-center justify-center "
+        style={{
+          maxWidth: containerWidth - 150 + 'px',
+          minWidth: containerWidth - 300 + 'px',
+          minHeight: '120px',
+        }}
+      >
         <Carousel
           style={{
             maxWidth: containerWidth - 150 + 'px',
-            minWidth: containerWidth - 150 + 'px',
+            minWidth: containerWidth - 300 + 'px',
             minHeight: '120px',
           }}
           ref={setNodeRef}
           setApi={setApi}
           opts={{
-            align: 'center',
+            align: 'start',
             dragFree: true,
             watchDrag: false,
+            watchSlides: true,
           }}
-          className="flex   items-start justify-start  rounded-lg bg-gray-400"
+          className="flex items-start justify-start rounded-lg bg-gray-400"
           orientation="horizontal"
         >
           <DndContext
@@ -282,8 +288,10 @@ const SortableItem: React.FC<SortableItemProps> = observer(
             )}
             <CardContent className="flex h-full items-center justify-center p-0">
               <Image
+                quality={1}
                 src={src}
                 alt={`Frame ${index}`}
+                loading="eager"
                 onLoad={(image) => {
                   store.cardItemHeight = image.currentTarget.naturalHeight;
                   store.cardItemWidth = image.currentTarget.naturalWidth;

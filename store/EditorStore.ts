@@ -2,11 +2,13 @@ import { makeAutoObservable } from 'mobx';
 import { EditorElement, Placement, TextEditorElement } from '@/types';
 import { fabric } from 'fabric';
 import { getUid, isHtmlImageElement } from '@/utils';
+import { AnimationStore } from './AnimationStore';
 export interface Frame {
   id: string;
   src: string;
 }
 export class EditorStore {
+  private animationStore?: AnimationStore;
   elements: EditorElement[] = [];
   selectedElement: EditorElement | null = null;
   canvas: fabric.Canvas | null = null;
@@ -24,12 +26,15 @@ export class EditorStore {
   isPlaying = false;
   playInterval: NodeJS.Timeout | null = null;
   currentTimeInMs = 0;
-  maxTime = 10000;
+  maxTime = 0;
   textColor = '#000000';
   imageType: 'Frame' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
   constructor() {
     makeAutoObservable(this);
+  }
+  initialize(animationStore: AnimationStore) {
+    this.animationStore = animationStore;
   }
   addElement(element: EditorElement): void {
     this.elements.push(element);
@@ -42,6 +47,9 @@ export class EditorStore {
         ...changes,
       } as EditorElement;
     }
+  }
+  updateMaxTime() {
+    this.maxTime = this.frames.length * this.animationStore!.timePerFrameInMs;
   }
   updateFramesOrder(oldIndex: number, newIndex: number) {
     const movedFrame = this.frames[oldIndex];
@@ -145,7 +153,6 @@ export class EditorStore {
     if (!isHtmlImageElement(imageElement)) {
       return;
     }
-    const aspectRatio = imageElement.naturalWidth / imageElement.naturalHeight;
     const id = getUid();
     // make sure its perfectly centered
     const placement: Placement = {
@@ -164,8 +171,8 @@ export class EditorStore {
       type: 'image',
       placement,
       timeFrame: {
-        start: 0,
-        end: this.maxTime,
+        start: (index * this.maxTime) / this.frames.length,
+        end: this.maxTime / this.frames.length,
       },
       properties: {
         elementId: `image-${id}`,
@@ -230,6 +237,7 @@ export class EditorStore {
       this.addImage(i + startIndex, id, true);
     });
     if (!this.elements.length) return;
+    this.updateMaxTime();
     this.selectElement(this.elements[0].id);
   }
   private createFabricImage(image: HTMLImageElement | null): fabric.Image | undefined {
@@ -259,6 +267,12 @@ export class EditorStore {
         transparentCorners: true,
         originX: 'left',
         originY: 'top',
+        id: image.id,
+        customProperty: {
+          id: image.id,
+          isFrame: true,
+          name: image.id,
+        },
         // clipPath: new fabric.Rect({
         //   width: originalWidth,
         //   height: originalHeight,
@@ -279,11 +293,41 @@ export class EditorStore {
     this.selectedElement = this.elements.find((el) => el.id === id) || null;
   }
   removeElement(id: string): void {
+    if (this.selectedElement?.id === id) {
+      this.selectedElement = null;
+      this.elements = this.elements.filter((el) => el.id !== id);
+    }
     this.elements = this.elements.filter((el) => el.id !== id);
+    // animations that are related to this element should be removed
+    this.animationStore?.removeAnimationsByTargetId(id);
   }
   deleteFrame(index: number) {
     this.frames = this.frames.filter((frame, i) => i !== index);
     this.elements = this.elements.filter((element, i) => i !== index);
     this.frames = this.frames;
   }
+  updateFromCanvas(): void {
+    if (!this.canvas) return;
+    this.canvas.getObjects().map((obj) => {
+      const scaleX = obj.scaleX || 1;
+      const scaleY = obj.scaleY || 1;
+      const width = (obj.width || 0) * scaleX;
+      const height = (obj.height || 0) * scaleY;
+      this.elements = this.elements.map((element) => {
+        if (element.id === obj.id) {
+          element.placement = {
+            x: obj.left || 0,
+            y: obj.top || 0,
+            width,
+            height,
+            rotation: obj.angle || 0,
+            scaleX,
+            scaleY,
+          };
+        }
+        return element;
+      });
+    });
+  }
+  // Additional methods...
 }

@@ -7,10 +7,11 @@ interface TimelineProps {
   currentFrame: number;
   onSelectFrame: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   totalFrames: number;
-  width: number;
+  minWidth: number;
+  maxWidth: number;
 }
 const Timeline: React.FC<TimelineProps> = observer(
-  ({ currentFrame, onSelectFrame, totalFrames, width }) => {
+  ({ currentFrame, onSelectFrame, totalFrames, minWidth = 300, maxWidth = 800 }) => {
     const editorStore = useStores().editorStore;
     const animationStore = useStores().animationStore;
     const editorCarouselStore = useStores().editorCarouselStore;
@@ -52,11 +53,10 @@ const Timeline: React.FC<TimelineProps> = observer(
       currentPositionPercent = 0;
     }
     const tooltip = useRef<HTMLDivElement>(null);
-    console.log('WIDTH&9', width);
     return (
       <>
         <div
-          style={{ width: `${width}px` }}
+          style={{ maxWidth: `${maxWidth}px`, minWidth: `${minWidth}px` }}
           onMouseMove={handleMouseMove}
           className="relative m-auto flex flex-col items-end"
           onClick={() => {
@@ -67,7 +67,8 @@ const Timeline: React.FC<TimelineProps> = observer(
           {/* display current time */}
           <div className="flex space-x-4">
             <div className="text-sm font-semibold text-gray-500">
-              {editorCarouselStore.timelineStore.formatCurrentTime()}
+              {editorCarouselStore?.timelineStore &&
+                editorCarouselStore?.timelineStore?.formatCurrentTime()}
             </div>
             {/* display of current frame / total frames */}
             <div className="text-sm font-semibold text-gray-500">
@@ -83,7 +84,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           />
           <div
             ref={timelineRef}
-            className="relative z-10 flex h-4 w-full items-center justify-center  bg-gray-300 "
+            className="relative z-10 flex h-4 w-full items-center justify-center bg-gray-300 "
             onClick={onSelectFrame}
           >
             <div
@@ -100,13 +101,16 @@ const Timeline: React.FC<TimelineProps> = observer(
           type="always"
           className=" flex h-[80px] items-center justify-center rounded-md border bg-gray-200"
           style={{
-            width: `${width}px`,
+            maxWidth: `${maxWidth - 150}px`,
+            height: '80px',
+            minWidth: `${minWidth - 300}px`,
           }}
         >
           <div
-            className=" flex flex-col  p-4 "
+            className="flex flex-col p-4 "
             style={{
-              width: `${width}px`,
+              width: `${maxWidth - 150}px`,
+              minWidth: `${minWidth - 300}px`,
             }}
           >
             {editorStore.elements.map(

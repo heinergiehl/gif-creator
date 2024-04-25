@@ -17,7 +17,7 @@ const ElementsHistoryPanel = observer(() => {
     }
   };
   return (
-    <div className="h-full w-full bg-slate-200">
+    <div className="h-screen w-full bg-slate-200">
       <span className="p-4 text-gray-500">History</span>
     </div>
   );

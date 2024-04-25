@@ -3,13 +3,15 @@ import { EditorStore } from './EditorStore';
 import GIF from '@/dist/gif.js';
 import { AnimationStore } from './AnimationStore';
 export class FileStore {
-  editorStore: EditorStore;
-  animationStore: AnimationStore;
+  private editorStore?: EditorStore;
+  private animationStore?: AnimationStore;
   gifQuality = 10;
-  constructor(animationStore: AnimationStore) {
-    this.editorStore = animationStore.editorStore;
-    this.animationStore = animationStore;
+  constructor() {
     makeAutoObservable(this);
+  }
+  initialize(editorStore: EditorStore, animationStore: AnimationStore) {
+    this.editorStore = editorStore;
+    this.animationStore = animationStore;
   }
   async createGifFromEditorElements(): Promise<string> {
     const gif = new GIF({
@@ -17,9 +19,10 @@ export class FileStore {
       quality: this.gifQuality,
       workerScript: '/gif.worker.js',
     });
-    const frames = this.editorStore.elements.filter((el) => el.isFrame === true);
-    const ObjectsInFrame = this.editorStore.elements.filter((el) => el.isFrame === false);
+    const frames = this.editorStore?.elements.filter((el) => el.isFrame === true);
+    const ObjectsInFrame = this.editorStore?.elements.filter((el) => el.isFrame === false);
     // only draw the objects in the frame that are in the timeframe of the frame
+    if (!frames || !ObjectsInFrame) return '';
     for (let i = 0; i < frames.length; i++) {
       const currentFrame = frames[i];
       // get all object within the timeframe of the frame
@@ -29,7 +32,7 @@ export class FileStore {
           obj.timeFrame.end >= currentFrame.timeFrame.end,
       );
       const tempCanvas = document.createElement('canvas');
-      const canvas = this.editorStore.canvas;
+      const canvas = this.editorStore?.canvas;
       tempCanvas.width = canvas?.getWidth() || 800;
       tempCanvas.height = canvas?.getHeight() || 500;
       const tempCanvasContext = tempCanvas.getContext('2d');
@@ -37,7 +40,8 @@ export class FileStore {
         // Clear the canvas
         tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
         // Draw the background color
-        tempCanvasContext.fillStyle = this.editorStore.backgroundColor;
+        if (this.editorStore?.backgroundColor)
+          tempCanvasContext.fillStyle = this.editorStore?.backgroundColor;
         tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
         // Draw the image, meaning draw the frame and the objects in the frame
         if (currentFrame.fabricObject) {
@@ -52,7 +56,8 @@ export class FileStore {
           }
         });
         // Add the canvas frame to the GIF
-        gif.addFrame(tempCanvas, { delay: 1000 / this.animationStore.fps });
+        if (this.animationStore?.fps)
+          gif.addFrame(tempCanvas, { delay: 1000 / this.animationStore?.fps });
       }
     }
     // for (let i = 0; i < this.editorStore.elements.length; i++) {

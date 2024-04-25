@@ -21,6 +21,7 @@
       "@/*": ["./*"]
     }
   },
+  "darkMode": "class",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
