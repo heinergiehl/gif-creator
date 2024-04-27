@@ -58,7 +58,7 @@ const Timeline: React.FC<TimelineProps> = observer(
         <div
           style={{ maxWidth: `${maxWidth}px`, minWidth: `${minWidth}px` }}
           onMouseMove={handleMouseMove}
-          className="relative m-auto flex flex-col items-end"
+          className="relative flex flex-col items-end m-auto"
           onClick={() => {
             editorStore.currentKeyFrame = frameNumber - 1;
             animationStore.addCurrentGifFrameToCanvas();
@@ -84,11 +84,11 @@ const Timeline: React.FC<TimelineProps> = observer(
           />
           <div
             ref={timelineRef}
-            className="relative z-10 flex h-4 w-full items-center justify-center bg-gray-300 "
+            className="relative z-10 flex items-center justify-center w-full h-4 bg-gray-300 "
             onClick={onSelectFrame}
           >
             <div
-              className="absolute left-0 z-10 h-2 rounded-lg bg-blue-500"
+              className="absolute left-0 z-10 h-2 bg-blue-500 rounded-lg"
               style={{ width: `${currentPositionPercent}%` }}
             ></div>
             <div
@@ -99,7 +99,9 @@ const Timeline: React.FC<TimelineProps> = observer(
         </div>
         <ScrollArea
           type="always"
-          className=" flex h-[80px] items-center justify-center rounded-md border bg-gray-200"
+          className=" flex h-[80px] items-center justify-center rounded-md border bg-slate-100
+          dark:bg-slate-800
+          "
           style={{
             maxWidth: `${maxWidth - 150}px`,
             height: '80px',

@@ -27,8 +27,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "public/extractFramesWorker.js",
-    "public/extractFramesWorker.js",
+    "public/videoWorker.js",
+    "public(/.*)?.(js|ts|tsx)",
     "tailwind.config.js"
   ],
   "exclude": ["node_modules"]

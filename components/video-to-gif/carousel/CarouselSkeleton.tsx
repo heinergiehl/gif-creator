@@ -24,7 +24,7 @@ export default function CarouselSkeleton({
     <div
       ref={skeletonCarouselRef}
       className={cn([
-        'carousel carousel-center min-h-[120px] w-[60%]  min-w-[300px] justify-center rounded-box  bg-neutral p-4  xl:min-w-[650px] ',
+        'carousel carousel-center rounded-box bg-neutral  min-h-[120px] w-[60%] min-w-[300px]  justify-center p-4  xl:min-w-[650px] ',
       ])}
     >
       {Array.from({ length: cardsFitInCarousel }).map((_, index) => (

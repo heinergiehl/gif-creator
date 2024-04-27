@@ -1,27 +1,31 @@
-"use client"
-import React, { useEffect, useState } from "react"
-import { observer } from "mobx-react"
-import { TextResource } from "../entity/TextResource"
-import { useStores } from "@/store"
-import { useDraggable } from "@dnd-kit/core"
-import { set } from "animejs"
+'use client';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+import { TextResource } from '../entity/TextResource';
+import { useStores } from '@/store';
+import { useDraggable } from '@dnd-kit/core';
+import { set } from 'animejs';
+import { Label } from '../ui/label';
+import { CustomSelect } from '@/app/components/ui/CustomSelect';
+import { Input } from '../ui/input';
+import CustomSlider from '@/app/components/ui/CustomSlider';
 const TEXT_RESOURCES = [
   {
-    name: "Title",
+    name: 'Title',
     fontSize: 28,
     fontWeight: 600,
   },
-]
+];
 type TextResourceProps = {
-  fontSize: number
-  fontWeight: number
-  fontFamily: string
-  fontColor: string
-  fontStyle: string
-  textBackground: string
-  sampleText: string
-  fill: string
-}
+  fontSize: number;
+  fontWeight: number;
+  fontFamily: string;
+  fontColor: string;
+  fontStyle: string;
+  textBackground: string;
+  sampleText: string;
+  fill: string;
+};
 const DraggableText = observer(
   ({
     fontSize,
@@ -34,18 +38,17 @@ const DraggableText = observer(
     fill,
     index,
   }: TextResourceProps & { index: number }) => {
-    const { attributes, listeners, setNodeRef, isDragging, transform } =
-      useDraggable({
-        id: `textResource-${index}`,
-      })
+    const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
+      id: `textResource-${index}`,
+    });
     const style = transform
       ? {
           transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
           zIndex: 999,
-          cursor: "grab",
+          cursor: 'grab',
         }
-      : { cursor: "grab" }
-    const store = useStores().editorStore
+      : { cursor: 'grab' };
+    const store = useStores().editorStore;
     return (
       <div ref={setNodeRef} {...listeners} {...attributes} style={style}>
         <div
@@ -64,67 +67,82 @@ const DraggableText = observer(
           {sampleText}
         </div>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 // FontPicker component for selecting fonts
 const FontPicker = observer(() => {
-  const store = useStores().editorStore
-  const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    store.fontFamily = event.target.value
-  }
+  const fontOptions = [
+    { value: 'Arial', label: 'Arial' },
+    { value: 'Verdana', label: 'Verdana' },
+    { value: 'Georgia', label: 'Georgia' },
+    { value: 'Courier New', label: 'Courier New' },
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Comic Sans MS', label: 'Comic Sans MS' },
+    { value: 'Impact', label: 'Impact' },
+  ];
+  const store = useStores().editorStore;
+  const handleFontChange = (value: string) => {
+    store.fontFamily = value;
+  };
   return (
-    <div className="flex flex-col items-center">
-      <label htmlFor="fontPicker" className="mb-2">
-        Choose a font:
-      </label>
-      <select
-        id="fontPicker"
-        value={store.fontFamily}
-        onChange={handleFontChange}
-        className="select rounded-md select-bordered min-h-[2rem] h-[2rem]"
-      >
-        {/* Font options */}
-        <option value="Arial">Arial</option>
-        <option value="Verdana">Verdana</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Comic Sans MS">Comic Sans MS</option>
-        <option value="Impact">Impact</option>
-      </select>
+    <div className="flex flex-col items-center ">
+      <Label htmlFor="fontPicker" className="space-y-4 ">
+        <span className="">Font</span>
+        <CustomSelect
+          options={fontOptions}
+          trigger={store.fontFamily}
+          value={store.fontFamily}
+          onChange={handleFontChange}
+        />
+      </Label>
     </div>
-  )
-})
+  );
+});
 // TextResourcesPanel component
 export const TextResourcesPanel = observer(() => {
-  const store = useStores().editorStore
-  const [fontSize, setFontSize] = useState(14)
-  const [fontWeight, setFontWeight] = useState("400")
-  const [fontColor, setFontColor] = useState("#000000")
+  const store = useStores().editorStore;
+  const [fontSize, setFontSize] = useState(14);
+  const [fontWeight, setFontWeight] = useState('400');
+  const [fontColor, setFontColor] = useState('#000000');
   useEffect(() => {
-    store.fontColor = fontColor
-    store.fontSize = fontSize
-  }, [fontColor, fontSize])
+    store.fontColor = fontColor;
+    store.fontSize = fontSize;
+  }, [fontColor, fontSize]);
   return (
-    <div className="bg-slate-200 h-full p-4 ">
-      <div className="flex flex-col justify-between items-start space-y-4 w-full">
+    <div className="flex flex-col w-full h-full p-8 space-y-8 bg-slate-100 text-foreground dark:bg-slate-900 ">
+      <div className="flex flex-col items-start justify-between w-full space-y-8">
         <FontPicker />
         {/* Additional controls like color picker and font size range */}
-        <input
-          type="color"
-          id="textColor"
-          name="textColor"
-          value={fontColor}
-          onChange={(e) => setFontColor(e.target.value)}
-        />
-        <input
+        <Label htmlFor="textColor" className="flex flex-col mb-2">
+          <span className="pb-4">Text Color</span>
+          <Input
+            type="color"
+            id="textColor"
+            name="textColor"
+            value={fontColor}
+            onChange={(e) => setFontColor(e.target.value)}
+          />
+        </Label>
+        {/* <input
           type="range"
           min="10"
           max="100"
           value={fontSize}
           onChange={(e) => setFontSize(parseFloat(e.target.value))}
-        />
+        /> */}
+        <Label htmlFor="fontSize" className="flex flex-col mb-2">
+          <span className="pb-4">Font Size</span>
+          <Input
+            type="range"
+            id="fontSize"
+            name="fontSize"
+            min="10"
+            max="100"
+            value={fontSize}
+            onChange={(e) => setFontSize(parseFloat(e.target.value))}
+          />
+        </Label>
       </div>
       <div className="flex flex-col space-y-4">
         {TEXT_RESOURCES.map((resource, index) => (
@@ -134,7 +152,7 @@ export const TextResourcesPanel = observer(() => {
             fontFamily={store.fontFamily}
             fontColor={store.fontColor}
             fontStyle="normal"
-            textBackground=""
+            textBackground="dark:bg-inherit dark:text-white bg-inherit text-black"
             fontWeight={resource.fontWeight}
             sampleText={resource.name}
             fill={store.textColor}
@@ -143,5 +161,5 @@ export const TextResourcesPanel = observer(() => {
         ))}
       </div>
     </div>
-  )
-})
+  );
+});

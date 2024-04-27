@@ -1,7 +1,7 @@
 'use client';
 import { fabric } from 'fabric';
 import React, { use, useEffect, useRef, useState } from 'react';
-import { RootStore, StoreProvider, useStores } from '@/store';
+import { StoreProvider, useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { Resources } from './Resources';
 import { Sidebar } from './Sidebar';
@@ -156,21 +156,26 @@ const Editor = observer(() => {
   return (
     <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} onDragOver={handleDragOver}>
       <main
-        className="grid grid-cols-[75px_200px_auto_150px] overflow-hidden pt-16   md:grid-cols-[75px_300px_200px_1fr_150px] 
+        className="relative
+        grid  grid-cols-[90px_200px_auto_150px]
+        overflow-hidden   md:grid-cols-[90px_300px_200px_1fr_150px] 
       "
       >
-        <div className="row-start-1 flex flex-col sm:col-span-1">
+        <div className="flex flex-col row-start-1 sm:col-span-1">
           <Sidebar />
         </div>
         <div className="row-span-4 sm:col-span-1">
           <Resources />
         </div>
-        <div className="col-span-3 col-start-3 grid grid-cols-subgrid " id="editor-container">
-          <div className="col-span-4 col-start-1 ">
+        <div
+          className="grid col-span-3 col-start-3 grid-cols-subgrid dark:bg-slate-900 "
+          id="editor-container"
+        >
+          <div className="col-span-4 col-start-1 pt-[70px]">
             <EditResource />
           </div>
-          <div className="col-span-2 col-start-1 row-span-1 row-start-3 items-center justify-center pt-16 lg:col-span-1 lg:row-start-2 ">
-            <div className="flex h-full flex-col items-center justify-center">
+          <div className="items-center justify-center col-span-2 col-start-1 row-span-1 row-start-3 pt-16 lg:col-span-1 lg:row-start-2 ">
+            <div className="flex flex-col items-center justify-center h-full">
               <label htmlFor="speed" className="flex flex-col font-semibold ">
                 <span className="text-sm text-gray-600">FPS of your GIF</span>
                 <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
@@ -190,7 +195,7 @@ const Editor = observer(() => {
                   if (store.isPlaying) store.isPaused = !store.isPaused;
                   editorCarouselStore.timelineStore.playSequence();
                 }}
-                className="play-button mt-8"
+                className="mt-8 play-button"
               >
                 {store.isPlaying ? (
                   <FaStopCircle size={54} className="" />
@@ -200,13 +205,13 @@ const Editor = observer(() => {
               </button>{' '}
             </div>
           </div>
-          <div className="col-span-2 row-start-2 h-full content-center justify-center md:col-span-1 xl:col-span-2 xl:items-center xl:justify-center">
+          <div className="content-center justify-center h-full col-span-2 row-start-2 md:col-span-1 xl:col-span-2 xl:items-center xl:justify-center">
             <Canvas containerWidth={containerWidth} />
           </div>
-          <div className="col-span-2 row-start-4 content-center justify-center lg:row-start-3">
+          <div className="content-center justify-center col-span-2 row-start-4 lg:row-start-3">
             <EditorCarousel containerWidth={containerWidth} />
           </div>
-          <div className="col-span-1 col-start-5 row-span-5 row-start-1 h-full flex-col">
+          <div className="flex-col h-full col-span-1 col-start-5 row-span-5 row-start-1">
             <ElementsHistoryPanel />
           </div>
         </div>
@@ -226,7 +231,7 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
     const canvasContainer = document.getElementById('grid-canvas-container');
     if (!canvasContainer || !canvas) return;
     const ratio = canvas.getWidth() / canvas.getHeight();
-    const containerWidth = window.innerWidth / 3;
+    const containerWidth = window.innerWidth / 3.2;
     const containerHeight = containerWidth / ratio;
     const scale = containerWidth / canvas.getWidth();
     canvas.setWidth(containerWidth);
@@ -273,7 +278,7 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
         selection: true,
         selectionBorderColor: 'blue',
         width: 500,
-        height: 400,
+        height: 350,
         preserveObjectStacking: true,
         enableRetinaScaling: true,
         imageSmoothingEnabled: true,

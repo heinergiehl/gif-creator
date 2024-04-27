@@ -17,8 +17,11 @@ const ElementsHistoryPanel = observer(() => {
     }
   };
   return (
-    <div className="h-screen w-full bg-slate-200">
-      <span className="p-4 text-gray-500">History</span>
+    <div className="relative w-full h-screen opacity-100 bg-slate-300 dark:bg-slate-900 ">
+      <div className="absolute -inset-0.5   rounded-md bg-pink-600 bg-gradient-to-r from-pink-500 to-purple-600 opacity-60 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-500"></div>
+      <span className="absolute z-[100] h-full w-full p-4 text-gray-500 opacity-100 dark:bg-slate-900">
+        History
+      </span>
     </div>
   );
 });

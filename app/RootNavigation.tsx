@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './components/ui/DarkToggle';
+import CustomNavigation from './components/ui/CustomNavigation';
 const sections = [
   {
     section: 'Convert',
@@ -59,65 +60,6 @@ const sections = [
     description: 'Access detailed documentation and developer guides.',
   },
 ];
-export default function NavigationMenuDemo() {
-  return (
-    <div
-      className=" fixed inset-0
-                    z-[999] flex    h-[70px]  items-center 
-                      justify-center  bg-white p-4 text-lg text-black backdrop-blur lg:grid-cols-2 dark:bg-gray-800 dark:text-white"
-    >
-      <NavigationMenu className="">
-        <NavigationMenuList>
-          {sections.map((section) => (
-            <NavigationMenuItem key={section.section}>
-              <NavigationMenuTrigger className="text-lg ">{section.section}</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <>
-                  <ul
-                    className="grid  w-[400px] gap-3  bg-white md:w-[500px] lg:w-[800px]  dark:bg-gray-800  
-                     "
-                  >
-                    {section.links ? (
-                      section.links.map((link) => (
-                        <ListItem key={link.title} href={link.href} title={link.title}>
-                          {link.description}
-                        </ListItem>
-                      ))
-                    ) : (
-                      <ListItem href={section.href} title={section.section}>
-                        {section.description}
-                      </ListItem>
-                    )}
-                  </ul>
-                </>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
-      <ModeToggle />
-    </div>
-  );
+export default function RootNavigation() {
+  return <CustomNavigation sections={sections} />;
 }
-const ListItem = React.forwardRef<
-  React.ElementRef<'a'>,
-  { href: string; title: string; children?: React.ReactNode }
->(({ href, title, children, ...props }, ref) => {
-  return (
-    <Link href={href} legacyBehavior passHref>
-      <NavigationMenuLink
-        className={cn([navigationMenuTriggerStyle(), ' my-4 rounded-md text-lg'])}
-      >
-        <span
-          ref={ref}
-          className="cursor-pointer rounded-md p-4 transition-colors duration-200 ease-in-out hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-          {...props}
-        >
-          <div className="font-medium leading-none ">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">{children}</p>
-        </span>
-      </NavigationMenuLink>
-    </Link>
-  );
-});
-ListItem.displayName = 'ListItem';

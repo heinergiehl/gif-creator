@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './components/ui/DarkToggle';
+import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 const CookieBanner = dynamic(() => import('@/app/components/consent/CookieBanner'), {
   ssr: false,
@@ -26,7 +27,7 @@ export default function RootLayout({
       <body
         className={cn([
           inter.className,
-          'bg-white font-sans text-black antialiased  transition-colors duration-500 ease-in-out dark:bg-black dark:text-white',
+          ' font-sans text-black antialiased  transition-colors duration-500 ease-in-out  dark:text-white',
         ])}
       >
         <ThemeProvider

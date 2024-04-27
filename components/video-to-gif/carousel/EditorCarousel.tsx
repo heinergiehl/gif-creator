@@ -175,14 +175,14 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 1) || 1}]`;
     } else if (carouselWidth <= 900) {
       // Medium carousel
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
+      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 2) || 1}]`;
     } else {
       // Large carousel
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 4) || 1}]`;
+      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
     }
   };
   return (
-    <div className="flex flex-col items-center justify-center gap-y-4 px-16">
+    <div className="flex flex-col items-center justify-center px-16 gap-y-4">
       <Timeline
         maxWidth={containerWidth - 150}
         minWidth={containerWidth - 300}
@@ -200,7 +200,7 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       >
         <Carousel
           style={{
-            maxWidth: containerWidth - 150 + 'px',
+            maxWidth: containerWidth - 300 + 'px',
             minWidth: containerWidth - 300 + 'px',
             minHeight: '120px',
           }}
@@ -212,7 +212,7 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
             watchDrag: false,
             watchSlides: true,
           }}
-          className="flex items-start justify-start rounded-lg bg-gray-400"
+          className="flex items-start justify-start rounded-lg bg-muted"
           orientation="horizontal"
         >
           <DndContext
@@ -282,16 +282,14 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         }}
       >
         <div className="p-1">
-          <Card className="relative flex h-full items-center justify-center">
+          <Card className="relative flex items-center justify-center h-full">
             {isSelected && (
-              <div className="absolute inset-0 rounded-lg bg-primary opacity-50 transition-all duration-300"></div>
+              <div className="absolute inset-0 transition-all duration-300 rounded-lg opacity-50 bg-slate-600"></div>
             )}
-            <CardContent className="flex h-full items-center justify-center p-0">
+            <CardContent className="flex items-center justify-center h-full p-0">
               <Image
-                quality={1}
                 src={src}
                 alt={`Frame ${index}`}
-                loading="eager"
                 onLoad={(image) => {
                   store.cardItemHeight = image.currentTarget.naturalHeight;
                   store.cardItemWidth = image.currentTarget.naturalWidth;
@@ -306,11 +304,11 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                   e.stopPropagation(); // Prevent triggering onSelect when clicking delete
                   onFrameDelete(index);
                 }}
-                className="absolute right-2 top-2 z-20 text-white"
+                className="absolute z-20 text-white right-2 top-2"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

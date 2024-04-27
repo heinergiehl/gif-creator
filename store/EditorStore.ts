@@ -30,6 +30,10 @@ export class EditorStore {
   textColor = '#000000';
   imageType: 'Frame' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
+  progress = {
+    conversion: 0,
+    rendering: 0,
+  };
   constructor() {
     makeAutoObservable(this);
   }
@@ -99,6 +103,7 @@ export class EditorStore {
     property: K,
     value: fabric.ITextOptions[K],
   ): void {
+    console.log('updateTextProperties', property, value);
     const fabricElement = this.selectedElement?.fabricObject;
     if (fabricElement && this.selectedElement?.type === 'text') {
       const textElement = fabricElement as fabric.Text;
@@ -112,6 +117,7 @@ export class EditorStore {
         }
         return element;
       });
+      this.selectElement(this.selectedElement.id);
       // this.canvas?.fire('object:modified', { target: fabricElement });
     }
   }
@@ -230,6 +236,7 @@ export class EditorStore {
   addImages() {
     // if there are already, adjust the index
     const startIndex = this.elements.length > 0 ? this.elements.length : 0;
+    console.log('startIndex', startIndex, this.frames);
     this.frames.forEach((fr, i) => {
       const id = fr.id;
       // check if the image is already added, if so skip

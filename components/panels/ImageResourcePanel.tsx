@@ -1,6 +1,6 @@
-import React from "react"
-import ImageResource from "../entity/ImageResource"
+import React from 'react';
+import ImageResource from '../entity/ImageResource';
 function ImageResourcePanel() {
-  return <ImageResource />
+  return <ImageResource />;
 }
-export default ImageResourcePanel
+export default ImageResourcePanel;

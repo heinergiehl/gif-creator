@@ -1,8 +1,8 @@
-import { makeAutoObservable } from "mobx"
+import { makeAutoObservable } from 'mobx';
 // store for screen to video editor and converter
 export class ScreenToVideoStore {
-  currentStep: 1 | 2 | 3 | 4 = 1
+  currentStep: 1 | 2 | 3 | 4 = 1;
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 }

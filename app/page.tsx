@@ -7,6 +7,7 @@ import Image from 'next/image';
 import CustomCard from './components/ui/CustomCard';
 import { Button } from '@/components/ui/button';
 import { CustomAccordion } from './components/ui/CustomAccordion';
+import CustomH1 from './components/ui/CustomH1';
 export const metadata: Metadata = {
   title: 'Free GIF Maker: Create GIFs from Videos or Images with GifMagic.app',
   description:
@@ -98,42 +99,57 @@ export default function Home() {
     },
   ];
   return (
-    <div className="flex flex-col bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-200 ">
-      <section className="hero  mt-[100px] ">
-        <div className="flex w-full justify-center">
-          <div className="t max-w-xl">
-            <h1 className="text-5xl font-bold">Free Online GIF Maker</h1>
-            <p className="py-6">
-              Convert videos to GIFs, edit GIFs, and share them with ease using GifMagic.app. No
-              sign-up required!
-            </p>
-            <Button variant={'link'}>
-              <Link href="/video-to-gif">Convert to GIF Now</Link>
-            </Button>
+    <div className="relative z-40 h-full w-full text-black dark:text-white ">
+      <div
+        className="absolute inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
+       [background:radial-gradient(125%_125%_at_50%_50%,#fdfdfd_30%,#63e_100%)]
+   dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]
+      "
+      ></div>
+      <div
+        className="absolute bottom-0 left-0 right-0 top-0  z-[20] h-full bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] 
+        bg-[size:24px_24px] opacity-30
+        dark:bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
+        dark:bg-[size:24px_24px] dark:opacity-100
+      "
+      ></div>
+      <div className="relative z-40 flex flex-col opacity-100">
+        <section className="  mt-[100px] ">
+          <div className="flex w-full justify-center">
+            <div className="max-w-xl ">
+              <CustomH1 text={'Free Online GIF Maker'}></CustomH1>
+              <p className="py-6">
+                Convert videos to GIFs, edit GIFs, and share them with ease using GifMagic.app. No
+                sign-up required!
+              </p>
+              <Button variant={'link'}>
+                <Link href="/video-to-gif">Convert to GIF Now</Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
-      <section className="w-full py-16">
-        <div className="container mx-auto flex w-full flex-col px-4">
-          <h2 className="mb-8 text-center text-3xl font-bold">Why Choose GifMagic.app?</h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 ">
-            {featuresData.map((feature, index) => (
-              <CustomCard key={index} title={feature.title} description={feature.description} />
-            ))}
+        </section>
+        <section className="w-full py-16">
+          <div className="container mx-auto flex w-full flex-col px-4">
+            <h2 className="mb-8 text-center text-3xl font-bold">Why Choose GifMagic.app?</h2>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {featuresData.map((feature, index) => (
+                <CustomCard key={index} title={feature.title} description={feature.description} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-      <section className="py-16 ">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
-          <div className="join join-vertical space-y-2">
-            {faqData.map((faq, index) => (
-              <CustomAccordion key={index} trigger={faq.question} content={faq.answer} />
-            ))}
+        </section>
+        <section className="py-16 ">
+          <div className="container mx-auto px-4">
+            <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
+            <div className="join join-vertical space-y-2">
+              {faqData.map((faq, index) => (
+                <CustomAccordion key={index} trigger={faq.question} content={faq.answer} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-      <Footer />
+        </section>
+        <Footer />
+      </div>
     </div>
   );
 }
