@@ -3,7 +3,7 @@ import { TimelineStore } from './TimelineStore';
 import { EditorStore } from './EditorStore';
 export class EditorCarouselStore {
   timelineStore?: TimelineStore;
-  private editorStore?: EditorStore;
+  editorStore?: EditorStore;
   cardItemWidth: number = 0;
   cardItemHeight: number = 0;
   isCreatingGifs: boolean = false;

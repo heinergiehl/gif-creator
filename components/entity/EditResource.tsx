@@ -51,7 +51,7 @@ const EditResource = observer(() => {
               type="color"
               id="textColor"
               name="textColor"
-              value={store.selectElement?.fabricObject?.fill || '#000000'}
+              value={'#000000'}
               onChange={debounce((e) => handleChange(e), DEBOUNCE_TIME_IN_MS)}
             />
           </div>

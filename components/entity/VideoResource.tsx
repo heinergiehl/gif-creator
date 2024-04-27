@@ -145,7 +145,7 @@ export const VideoResource = observer(() => {
           img.onerror = reject;
           console.warn('blobUrl', blobUrl);
         })
-          .then((img: HTMLImageElement) => {
+          .then(() => {
             // const canvas = document.createElement('canvas');
             // const ctx = canvas.getContext('2d');
             // if (!ctx) throw new Error('Failed to get canvas context');

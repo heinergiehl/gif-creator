@@ -183,7 +183,8 @@ const Editor = observer(() => {
                   id="speed"
                   onChange={(e) => {
                     animationStore.fps = parseFloat(e.target.value);
-                    editorCarouselStore.timelineStore.formatCurrentTime();
+                    if (editorCarouselStore?.timelineStore)
+                      editorCarouselStore?.timelineStore.formatCurrentTime();
                   }}
                   type="range"
                   min="1"
@@ -193,7 +194,8 @@ const Editor = observer(() => {
               <button
                 onClick={() => {
                   if (store.isPlaying) store.isPaused = !store.isPaused;
-                  editorCarouselStore.timelineStore.playSequence();
+                  if (editorCarouselStore.timelineStore)
+                    editorCarouselStore.timelineStore.playSequence();
                 }}
                 className="mt-8 play-button"
               >
@@ -302,18 +304,20 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
     c.on('selection:created', (e) => {
       const selectedObject = e.target;
       if (!selectedObject) return;
-      store.selectedElement = store.elements.find((element) => element.id === selectedObject.id);
+      if (!store?.selectElement) return;
+      store.selectedElement =
+        store.elements.find((element) => element.id === selectedObject.id) || null;
       console.log(e, store.selectedElement);
     });
     c.on('selection:updated', (e) => {
       const selectedObject = e.target;
       if (!selectedObject) return;
-      store.selectedElement = store.elements.find((element) => element.id === selectedObject.id);
+      store.selectedElement =
+        store.elements.find((element) => element.id === selectedObject.id) || null;
     });
     c.on('selection:cleared', (e) => {
       store.selectedElement = null;
     });
-    return () => store.canvas?.remove();
   }, []);
   const uiStore = rootStore.uiStore;
   useEffect(() => {

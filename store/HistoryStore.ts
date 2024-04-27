@@ -62,7 +62,7 @@ export class HistoryStore {
         this.editorStore.canvas.clear();
         this.editorStore.elements.forEach((element) => {
           if (element.fabricObject) {
-            this.editorStore.canvas!.add(element.fabricObject);
+            this.editorStore?.canvas!.add(element.fabricObject);
           }
         });
         this.editorStore.canvas.requestRenderAll();

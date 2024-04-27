@@ -8,7 +8,7 @@ import { set } from 'animejs';
 import { Label } from '../ui/label';
 import { CustomSelect } from '@/app/components/ui/CustomSelect';
 import { Input } from '../ui/input';
-import CustomSlider from '@/app/components/ui/CustomSlider';
+
 const TEXT_RESOURCES = [
   {
     name: 'Title',

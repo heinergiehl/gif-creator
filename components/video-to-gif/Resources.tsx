@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { TextResourcesPanel } from '@/components/panels/TextResourcesPanel';
@@ -9,13 +9,7 @@ import SmiliesResource from '../entity/SmiliesResource';
 import GifResource from '../entity/GifResource';
 import ExportPanel from '../panels/ExportPanel';
 import { AnimationsPanel } from '../panels/AnimationsPanel';
-const ANIMATION_TYPE_TO_LABEL: Record<string, string> = {
-  fadeIn: 'Fade In',
-  fadeOut: 'Fade Out',
-  slideIn: 'Slide In',
-  slideOut: 'Slide Out',
-  breath: 'Breath',
-};
+
 export type AnimationResourceProps = {
   animation: Animation;
 };

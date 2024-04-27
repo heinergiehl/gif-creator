@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
 import {
@@ -33,8 +33,6 @@ export const Sidebar = observer(() => {
     default:
       break;
   }
-  const [conversionTypeState, setConversionTypeState] =
-    React.useState<ConversionType>(conversionType);
   // useEffect(() => {
   //   setConversionTypeState(conversionType)
   //   switch (conversionType) {

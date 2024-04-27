@@ -6,7 +6,7 @@ import { getUid } from '@/utils';
 import { useStores } from '@/store';
 export const AnimationsPanel = observer(() => {
   const store = useStores().animationStore;
-  const selectedElement = store.editorStore.selectedElement;
+  const selectedElement = store?.editorStore?.selectedElement;
   const selectedElementAnimations = store.animations.filter((animation) => {
     return animation.targetId === selectedElement?.id;
   });

@@ -3,13 +3,14 @@ import {
   Animation,
   EditorElement,
   FadeInAnimation,
+  FadeOutAnimation,
   SlideInAnimation,
   SlideOutAnimation,
 } from '@/types';
 import { EditorStore } from './EditorStore';
 import { HistoryStore } from './HistoryStore';
 export class AnimationStore {
-  private editorStore?: EditorStore;
+  editorStore?: EditorStore;
   private historyStore?: HistoryStore;
   animations: Animation[] = [];
   fps = 4;
@@ -105,7 +106,7 @@ export class AnimationStore {
           this.animateSlideOut(animation);
           break;
         case 'fadeOut':
-          this.animateSlideOut(animation);
+          this.animateFadeOut(animation as FadeOutAnimation, options);
           break;
         case 'fadeIn':
           this.animateFadeIn(animation);
@@ -353,7 +354,7 @@ export class AnimationStore {
     if (fabObject !== undefined) {
       if (this.animations.length > 0) {
         this.animations.forEach((animation) => {
-          this.applyAnimation(animation, animation.type, animation.duration, 0);
+          this.applyAnimation(animation, animation.type);
           this.editorStore?.canvas?.add(fabObject);
         });
       } else {
