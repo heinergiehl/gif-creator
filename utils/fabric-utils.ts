@@ -1,5 +1,4 @@
 import { EditorElement, EffecType } from '@/types';
-import e from 'express';
 import { fabric } from 'fabric';
 // https://jsfiddle.net/i_prikot/pw7yhaLf/
 export const CoverImage = fabric.util.createClass(fabric.Image, {
