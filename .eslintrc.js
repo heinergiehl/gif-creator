@@ -8,7 +8,8 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: 'module',
   },
-  rules: {
-    // Add your custom ESLint rules here
-  },
+  "rules": {
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-page-custom-font": "off"
+  }
 }
