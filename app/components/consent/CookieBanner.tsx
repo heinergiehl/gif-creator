@@ -1,57 +1,56 @@
-"use client"
-import { useEffect, useLayoutEffect, useState } from "react"
-import { getLocalStorage, setLocalStorage } from "@/app/lib/storageHelper"
-import Link from "next/link"
-import { cn } from "@/utils/cn"
+'use client';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { getLocalStorage, setLocalStorage } from '@/app/lib/storageHelper';
+import Link from 'next/link';
+import { cn } from '@/utils/cn';
 export default function CookieBanner() {
-  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null)
+  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null);
   useLayoutEffect(() => {
-    const storedCookieConsent = getLocalStorage("cookie_consent", null)
-    setCookieConsent(storedCookieConsent)
-  }, [setCookieConsent])
+    const storedCookieConsent = getLocalStorage('cookie_consent', null);
+    setCookieConsent(storedCookieConsent);
+  }, [setCookieConsent]);
   useEffect(() => {
-    const newValue = cookieConsent ? "granted" : "denied"
-    if (typeof window === "undefined") return
-    if (!window.gtag) return
-    window.gtag("consent", "update", {
+    const newValue = cookieConsent ? 'granted' : 'denied';
+    if (typeof window === 'undefined') return;
+    if (!window.gtag) return;
+    window.gtag('consent', 'update', {
       analytics_storage: newValue,
-    })
-    setLocalStorage("cookie_consent", cookieConsent)
+    });
+    setLocalStorage('cookie_consent', cookieConsent);
     //For Testing
-  }, [cookieConsent])
-  if (cookieConsent === true) return null
+  }, [cookieConsent]);
+  if (cookieConsent === true) return null;
   return (
     <div
       className={cn([
-        `my-10 mx-auto max-w-max md:max-w-screen-sm
-                        fixed bottom-0 left-0 right-0 
-                         px-3 md:px-4 py-3 justify-between items-center flex-col sm:flex-row gap-4  
-                         bg-gray-700 rounded-lg shadow `,
-        cookieConsent === null ? "flex" : "hidden",
+        `fixed bottom-0 left-0 right-0
+                        mx-auto my-10 max-w-max flex-col 
+                         items-center justify-between gap-4 rounded-lg bg-gray-700 px-3 py-3 shadow  
+                         sm:flex-row md:max-w-screen-sm md:px-4 `,
+        cookieConsent === null ? 'flex' : 'hidden',
       ])}
     >
       <div className="text-center">
         <Link href="/info/cookies">
           <p>
-            We use <span className="font-bold text-sky-400">cookies</span> on
-            our site.
+            We use <span className="font-bold text-sky-400">cookies</span> on our site.
           </p>
         </Link>
       </div>
       <div className="flex gap-2">
         <button
           onClick={() => setCookieConsent(false)}
-          className="px-5 py-2 text-gray-300 rounded-md border-gray-900"
+          className="rounded-md border-gray-900 px-5 py-2 text-gray-300"
         >
           Decline
         </button>
         <button
           onClick={() => setCookieConsent(true)}
-          className="bg-gray-900 px-5 py-2 text-white rounded-lg"
+          className="rounded-lg bg-gray-900 px-5 py-2 text-white"
         >
           Allow Cookies
         </button>
       </div>
     </div>
-  )
+  );
 }

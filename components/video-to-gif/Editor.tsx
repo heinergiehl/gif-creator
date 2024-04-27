@@ -1,7 +1,7 @@
 'use client';
 import { fabric } from 'fabric';
 import React, { use, useEffect, useRef, useState } from 'react';
-import { RootStore, StoreProvider, useStores } from '@/store';
+import { StoreProvider, useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { Resources } from './Resources';
 import { Sidebar } from './Sidebar';
@@ -147,26 +147,35 @@ const Editor = observer(() => {
     return () => {
       window.removeEventListener('resize', resizeEditor);
     };
-  }, []);
+  }, [
+    store.frames.length,
+    editorCarouselStore.cardItemWidth,
+    editorCarouselStore.cardItemHeight,
+    containerWidth,
+  ]);
   return (
     <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} onDragOver={handleDragOver}>
       <main
-        className="grid  grid-cols-[75px_300px_200px_1fr_150px]    overflow-hidden pt-16
+        className="relative
+        grid  grid-cols-[90px_200px_auto_150px]
+        overflow-hidden   md:grid-cols-[90px_300px_200px_1fr_150px] 
       "
       >
-        <RootNavigation />
-        <div className="row-start-1 flex flex-col sm:col-span-1">
+        <div className="flex flex-col row-start-1 sm:col-span-1">
           <Sidebar />
         </div>
-        <div className=" row-span-1 row-start-1 sm:col-span-1">
+        <div className="row-span-4 sm:col-span-1">
           <Resources />
         </div>
-        <div className="col-span-3 col-start-3 grid  grid-cols-subgrid ">
-          <div className="col-span-4 col-start-1 ">
+        <div
+          className="grid col-span-3 col-start-3 grid-cols-subgrid dark:bg-slate-900 "
+          id="editor-container"
+        >
+          <div className="col-span-4 col-start-1 pt-[70px]">
             <EditResource />
           </div>
-          <div className="col-span-1 col-start-1 row-span-1 row-start-2 pt-16 ">
-            <div className="flex h-full flex-col items-center justify-center">
+          <div className="items-center justify-center col-span-2 col-start-1 row-span-1 row-start-3 pt-16 lg:col-span-1 lg:row-start-2 ">
+            <div className="flex flex-col items-center justify-center h-full">
               <label htmlFor="speed" className="flex flex-col font-semibold ">
                 <span className="text-sm text-gray-600">FPS of your GIF</span>
                 <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
@@ -174,7 +183,8 @@ const Editor = observer(() => {
                   id="speed"
                   onChange={(e) => {
                     animationStore.fps = parseFloat(e.target.value);
-                    editorCarouselStore.timelineStore.formatCurrentTime();
+                    if (editorCarouselStore?.timelineStore)
+                      editorCarouselStore?.timelineStore.formatCurrentTime();
                   }}
                   type="range"
                   min="1"
@@ -184,9 +194,10 @@ const Editor = observer(() => {
               <button
                 onClick={() => {
                   if (store.isPlaying) store.isPaused = !store.isPaused;
-                  editorCarouselStore.timelineStore.playSequence();
+                  if (editorCarouselStore.timelineStore)
+                    editorCarouselStore.timelineStore.playSequence();
                 }}
-                className="play-button mt-8"
+                className="mt-8 play-button"
               >
                 {store.isPlaying ? (
                   <FaStopCircle size={54} className="" />
@@ -196,13 +207,13 @@ const Editor = observer(() => {
               </button>{' '}
             </div>
           </div>
-          <div className="col-span-1 ">
-            <Canvas />
+          <div className="content-center justify-center h-full col-span-2 row-start-2 md:col-span-1 xl:col-span-2 xl:items-center xl:justify-center">
+            <Canvas containerWidth={containerWidth} />
           </div>
-          <div className="col-span-2" id="editor-container">
+          <div className="content-center justify-center col-span-2 row-start-4 lg:row-start-3">
             <EditorCarousel containerWidth={containerWidth} />
           </div>
-          <div className="col-span-1 col-start-5 row-span-4 row-start-1 h-full flex-col">
+          <div className="flex-col h-full col-span-1 col-start-5 row-span-5 row-start-1">
             <ElementsHistoryPanel />
           </div>
         </div>
@@ -210,7 +221,7 @@ const Editor = observer(() => {
     </DndContext>
   );
 });
-const Canvas = observer(() => {
+const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
   const { setNodeRef } = useDroppable({
     id: 'grid-canvas-container',
   });
@@ -218,12 +229,11 @@ const Canvas = observer(() => {
   const store = rootStore.editorStore;
   const editorCarouselStore = rootStore.editorCarouselStore;
   const canvas = store.canvas;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const resizeCanvas = () => {
     const canvasContainer = document.getElementById('grid-canvas-container');
     if (!canvasContainer || !canvas) return;
     const ratio = canvas.getWidth() / canvas.getHeight();
-    const containerWidth = window.innerWidth / 3;
+    const containerWidth = window.innerWidth / 3.2;
     const containerHeight = containerWidth / ratio;
     const scale = containerWidth / canvas.getWidth();
     canvas.setWidth(containerWidth);
@@ -253,7 +263,13 @@ const Canvas = observer(() => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [editorCarouselStore.cardItemHeight, editorCarouselStore.cardItemWidth, canvas]); // Depend on the canvas to ensure it exists
+  }, [
+    store.canvas,
+    store.frames.length,
+    editorCarouselStore.cardItemWidth,
+    editorCarouselStore.cardItemHeight,
+    containerWidth,
+  ]); // Depend on the canvas to ensure it exists
   const animationStore = rootStore.animationStore;
   useEffect(() => {
     if (store.canvas === null) {
@@ -264,7 +280,7 @@ const Canvas = observer(() => {
         selection: true,
         selectionBorderColor: 'blue',
         width: 500,
-        height: 400,
+        height: 350,
         preserveObjectStacking: true,
         enableRetinaScaling: true,
         imageSmoothingEnabled: true,
@@ -285,10 +301,23 @@ const Canvas = observer(() => {
       store.onObjectModified(e);
       //
     });
-    c.on('object:selected', (e) => {
-      console.log(e.target, 'object:selected');
+    c.on('selection:created', (e) => {
+      const selectedObject = e.target;
+      if (!selectedObject) return;
+      if (!store?.selectElement) return;
+      store.selectedElement =
+        store.elements.find((element) => element.id === selectedObject.id) || null;
+      console.log(e, store.selectedElement);
     });
-    return () => store.canvas?.remove();
+    c.on('selection:updated', (e) => {
+      const selectedObject = e.target;
+      if (!selectedObject) return;
+      store.selectedElement =
+        store.elements.find((element) => element.id === selectedObject.id) || null;
+    });
+    c.on('selection:cleared', (e) => {
+      store.selectedElement = null;
+    });
   }, []);
   const uiStore = rootStore.uiStore;
   useEffect(() => {
@@ -313,7 +342,7 @@ const Canvas = observer(() => {
     store.isDragging,
   ]);
   return (
-    <div id="grid-canvas-container" ref={setNodeRef} className="flex items-center ">
+    <div id="grid-canvas-container" ref={setNodeRef} className="p-4">
       <canvas id="canvas" className="justify-center border-2 drop-shadow-lg" />
     </div>
   );

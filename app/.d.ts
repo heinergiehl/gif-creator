@@ -1,9 +1,9 @@
 interface Window {
-  gtag: (...args: any[]) => void
-  dataLayer: Record<string, any>
+  gtag: (...args: any[]) => void;
+  dataLayer: Record<string, any>;
 }
-declare module "fabric" {
+declare module 'fabric' {
   export interface IObjectOptions {
-    id?: string
+    id?: string;
   }
 }

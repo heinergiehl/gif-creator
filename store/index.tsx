@@ -8,18 +8,30 @@ import { TimelineStore } from './TimelineStore';
 import { UIStore } from './UIStore';
 import { EditorCarouselStore } from './EditorCarouselStore';
 import { FileStore } from './FileStore';
+import { HistoryStore } from './HistoryStore';
 configure({
   enforceActions: 'never',
 });
-export class RootStore {
+class RootStore {
   screenToVideoStore = new ScreenToVideoStore();
   editorStore = new EditorStore();
-  animationStore = new AnimationStore(this.editorStore);
-  timelineStore = new TimelineStore(this.animationStore);
-  editorCarouselStore = new EditorCarouselStore(this.timelineStore);
-  fileStore = new FileStore(this.animationStore);
+  historyStore = new HistoryStore();
+  animationStore = new AnimationStore();
+  timelineStore = new TimelineStore();
+  editorCarouselStore = new EditorCarouselStore();
+  fileStore = new FileStore();
   uiStore = new UIStore();
-  constructor() {}
+  constructor() {
+    this.setupDependencies();
+  }
+  // Method to configure all dependencies after instantiation
+  setupDependencies() {
+    this.historyStore.initialize(this.editorStore, this.animationStore);
+    this.animationStore.initialize(this.editorStore, this.historyStore);
+    this.timelineStore.initialize(this.animationStore, this.editorStore);
+    this.editorCarouselStore.initialize(this.editorStore, this.timelineStore);
+    this.editorStore.initialize(this.animationStore);
+  }
 }
 const StoreContext = createContext<RootStore | undefined>(undefined);
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

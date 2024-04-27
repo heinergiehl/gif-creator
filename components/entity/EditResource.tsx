@@ -1,69 +1,85 @@
 'use client';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
-
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { fabric } from 'fabric';
 import { DebounceInput } from 'react-debounce-input';
-// allows to edit all fabric objects, including text, images, shapes, etc.
-//  once a fabric object is selected, the user can edit the object's properties
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+
+import debounce from 'lodash.debounce';
+
+const DEBOUNCE_TIME_IN_MS = 500;
 const EditResource = observer(() => {
   const store = useStores().editorStore;
   const fabricElement = store.selectedElement?.fabricObject;
+  console.log(fabricElement);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleChange', e.target.value);
+    switch (e.target.name) {
+      case 'textColor':
+        store.updateTextProperties('fill', e.target.value);
+        break;
+      case 'fontSize':
+        store.updateTextProperties('fontSize', parseInt(e.target.value));
+        break;
+      case 'fontWeight':
+        store.updateTextProperties('fontWeight', parseInt(e.target.value));
+        break;
+    }
+  };
+
   return (
-    <div className="h-[75px] w-full bg-gray-300">
+    <div
+      className="
+    h-[75px] w-full
+    bg-gray-100 bg-inherit text-inherit  dark:bg-slate-900 "
+    >
       {store.selectedElement !== null && store.selectedElement?.fabricObject !== undefined && (
-        <div className="flex h-full flex-row items-center">
+        <div className="flex flex-row items-center h-full">
           {store.selectedElement.type === 'text' && (
-            <label htmlFor="textColor" className="mr-4 text-center text-xs text-gray-500">
+            <Label htmlFor="textColor" className="mr-4 text-xs text-center ">
               Edit Text
-            </label>
+            </Label>
           )}
           <div className="flex flex-row items-center">
-            <label htmlFor="textColor" className="mr-4 text-center text-xs text-gray-500">
+            <Label htmlFor="textColor" className="mr-4 text-xs text-center ">
               Color
-            </label>
-            <DebounceInput
-              className="z-10 flex  h-[32px]  w-[32px]  items-center  justify-center rounded-full font-bold"
+            </Label>
+            <Input
+              className=""
               type="color"
               id="textColor"
               name="textColor"
-              debounceTimeout={500}
-              value={(fabricElement as fabric.Text).fill}
-              onChange={(e) => store.updateTextProperties('fill', e.target.value)}
+              value={'#000000'}
+              onChange={debounce((e) => handleChange(e), DEBOUNCE_TIME_IN_MS)}
             />
           </div>
           {store.selectedElement.type === 'text' && fabricElement !== undefined && (
             <div className="flex space-x-4">
               <div className="flex flex-row items-center">
-                <label htmlFor="fontSize" className="mr-4 text-center text-xs text-gray-500">
+                <Label htmlFor="fontSize" className="mr-4 text-xs text-center ">
                   Font Size
-                </label>
-                <DebounceInput
+                </Label>
+                <Input
                   className=""
                   type="number"
                   id="fontSize"
                   name="fontSize"
-                  debounceTimeout={500}
-                  value={(fabricElement as fabric.Text).fontSize || 16}
-                  onChange={(e) => {
-                    store.updateTextProperties('fontSize', parseFloat(e.target.value));
-                  }}
+                  value={(store.selectedElement?.fabricObject as fabric.Text).fontSize || 16}
+                  onChange={debounce(handleChange, DEBOUNCE_TIME_IN_MS)}
                 />
               </div>
               <div className="flex flex-row items-center">
-                <label htmlFor="fontWeight" className="mr-4 text-xs text-gray-500">
+                <Label htmlFor="fontWeight" className="mr-4 text-xs ">
                   Font Weight
-                </label>
-                <DebounceInput
+                </Label>
+                <Input
                   type="number"
                   id="fontWeight"
                   name="fontWeight"
-                  debounceTimeout={500}
-                  value={(fabricElement as fabric.Text).fontWeight || 400}
-                  onChange={(e) => {
-                    store.updateTextProperties('fontWeight', e.target.value);
-                  }}
+                  value={(store.selectedElement?.fabricObject as fabric.Text).fontWeight || 400}
+                  onChange={debounce(handleChange, DEBOUNCE_TIME_IN_MS)}
                 />
               </div>
             </div>
