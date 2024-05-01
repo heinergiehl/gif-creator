@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './components/ui/DarkToggle';
 import CustomNavigation from './components/ui/CustomNavigation';
+import { usePathname } from 'next/navigation';
 const sections = [
   {
     section: 'Convert',
@@ -61,5 +62,7 @@ const sections = [
   },
 ];
 export default function RootNavigation() {
-  return <CustomNavigation sections={sections} />;
+  return usePathname().includes('/converter-and-editor') ? null : (
+    <CustomNavigation sections={sections} />
+  );
 }

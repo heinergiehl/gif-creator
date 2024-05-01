@@ -5,16 +5,33 @@ import React, { use } from 'react';
 import { observer } from 'mobx-react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { DndContext, DragOverlay, useDraggable } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragEndEvent,
+  DragMoveEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  MouseSensor,
+  PointerSensor,
+  TouchSensor,
+  useDndContext,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { useStores } from '@/store';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
+    data: {
+      image,
+      index,
+    },
   });
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: 999,
+        zIndex: isDragging ? 999 : undefined,
       }
     : undefined;
   return (
@@ -28,7 +45,6 @@ const DraggableImage = observer(({ image, index }: { image: string; index: numbe
         className="max-h-[100px] max-w-[100px]
             cursor-pointer rounded-lg object-cover
           "
-        draggable={true}
       />
     </div>
   );
@@ -45,16 +61,24 @@ const ImageResource = observer(() => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        if (isVideoToGif) {
-          // store.frames.push({ src: reader.result as string, nestedObjects: [] })
+        if (isVideoToGif && !store.isDragging) {
+          store.progress.conversion = 0;
           store.images.push(reader.result as string);
-        } else {
-          store.images.push(reader.result as string);
-          // store.frames.push({ src: reader.result as string, nestedObjects: [] })
+          store.progress.conversion = 100;
         }
       };
     }
   };
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 2,
+      },
+    }),
+  );
   return (
     <>
       <div className="h-screen space-y-2 p-4">
@@ -72,6 +96,25 @@ const ImageResource = observer(() => {
         </div>
       </div>
     </>
+  );
+});
+const DragOverlayComponent = observer(() => {
+  const store = useStores().editorStore;
+  const active = useDndContext().active;
+  if (!active) return null;
+  const translated = active.rect.current.translated;
+  return (
+    <DragOverlay>
+      {active.data.current && (
+        <Image
+          src={active.data.current.image}
+          width={100}
+          height={100}
+          alt="Dragging image"
+          className="max-h-[100px] max-w-[100px] rounded-lg object-cover"
+        />
+      )}
+    </DragOverlay>
   );
 });
 export default ImageResource;

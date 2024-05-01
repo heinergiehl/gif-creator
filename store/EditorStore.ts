@@ -3,6 +3,9 @@ import { EditorElement, Placement, TextEditorElement } from '@/types';
 import { fabric } from 'fabric';
 import { getUid, isHtmlImageElement } from '@/utils';
 import { AnimationStore } from './AnimationStore';
+import { DragStartEvent } from '@dnd-kit/core';
+import { blob } from 'stream/consumers';
+import { error } from 'console';
 export interface Frame {
   id: string;
   src: string;
@@ -30,6 +33,7 @@ export class EditorStore {
   textColor = '#000000';
   imageType: 'Frame' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
+  activeDraggable: DragStartEvent | null = null;
   progress = {
     conversion: 0,
     rendering: 0,
@@ -64,7 +68,7 @@ export class EditorStore {
     this.elements = this.elements.filter((element, i) => i !== oldIndex);
     this.elements.splice(newIndex, 0, editorElementToMove);
   }
-  private updateEditorElementsForFrames() {
+  updateEditorElementsForFrames() {
     const frameDuration = this.maxTime / this.frames.length;
     // Update timeFrames based on the new order of frames
     this.elements = this.elements.map((element, index) => {
@@ -121,71 +125,81 @@ export class EditorStore {
       // this.canvas?.fire('object:modified', { target: fabricElement });
     }
   }
-  addEditorElement(element: EditorElement) {
-    this.elements.push(element);
-    if ((element.type === 'image' || element.type === 'smilies') && element.isFrame) {
-      const fabricImage = this.createFabricImage(
-        document.getElementById(element.id) as HTMLImageElement,
-      );
-      if (!fabricImage) return;
-      element.fabricObject = fabricImage;
-      this.elements[this.elements.length - 1] = element;
-      this.canvas?.add(fabricImage);
+  async addEditorElement(element: EditorElement) {
+    let fabricObject;
+    if (element.type === 'image' && element.isFrame) {
+      fabricObject = await this.createFabricImageFromBlob(element.src);
+      console.log('fabricObject', fabricObject);
+      element.fabricObject = fabricObject;
+      if (element.index) this.elements[element?.index] = element;
+      else this.addElement(element);
     } else if (element.type === 'text') {
-      const textElement = element as TextEditorElement;
-      const text = new fabric.Textbox(textElement.properties.text, {
-        left: textElement.placement.x,
-        top: textElement.placement.y,
-        width: textElement.placement.width,
-        height: textElement.placement.height,
-        fontSize: textElement.properties.fontSize,
-        fontWeight: textElement.properties.fontWeight,
-        fill: textElement.properties.fontColor,
-        fontFamily: textElement.properties.fontFamily,
-        centeredRotation: true,
-        centeredScaling: true,
+      fabricObject = new fabric.Textbox(element.properties.text, {
+        left: element.placement.x,
+        top: element.placement.y,
+        fontSize: element.properties.fontSize,
+        fontWeight: element.properties.fontWeight,
+        fill: element.properties.fontColor,
+        fontFamily: element.properties.fontFamily,
+        width: element.placement.width,
+        height: element.placement.height,
         editable: true,
+        id: element.id,
       });
-      // text.on("modified", this.onObjectModified.bind(this))
-      element.fabricObject = text;
-      this.elements[this.elements.length - 1] = element;
-      this.canvas?.add(element.fabricObject);
     }
   }
-  addImage(index: number, imageId?: string, isFrame = false) {
-    let imageElement: HTMLImageElement | null;
-    if (imageId) imageElement = document.getElementById(imageId) as HTMLImageElement;
-    else imageElement = document.getElementById(`image-${index}`) as HTMLImageElement;
-    if (!isHtmlImageElement(imageElement)) {
-      return;
-    }
-    const id = getUid();
-    // make sure its perfectly centered
-    const placement: Placement = {
-      x: 0,
-      y: 0,
-      width: imageElement.naturalWidth,
-      height: imageElement.naturalHeight,
-      rotation: 0,
-      scaleX: this.canvas ? this.canvas.getWidth() / imageElement.naturalWidth : 1,
-      scaleY: this.canvas ? this.canvas.getHeight() / imageElement.naturalHeight : 1,
-    };
+  createFabricImageFromBlob(src: string): Promise<fabric.Image | undefined> {
+    return new Promise((resolve, reject) => {
+      if (!this.canvas) {
+        reject(() => 'Canvas is not initialized');
+        return;
+      }
+      fabric.Image.fromURL(
+        src,
+        (img) => {
+          img.set({
+            left: 0,
+            top: 0,
+            selectable: true,
+            hoverCursor: 'pointer',
+            transparentCorners: true,
+            originX: 'left',
+            originY: 'top',
+            id: getUid(), // Ensure a unique ID is used for tracking
+          });
+          img.scaleToWidth(this.canvas.getWidth()); // Scale to fit canvas or maintain aspect ratio
+          img.setCoords();
+          resolve(img);
+        },
+        { crossOrigin: 'anonymous' },
+      );
+    });
+  }
+  addImage(index: number, blobUrl: string, isFrame = false) {
+    const id = getUid(); // Use getUid() to ensure each image has a unique identifier
     this.addEditorElement({
-      isFrame,
-      id: imageId?.toString() || 'image-' + index,
-      name: `Media(image) ${index}`,
+      index,
+      id: id,
       type: 'image',
-      placement,
+      isFrame: isFrame,
+      src: blobUrl,
+      placement: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+      },
+      properties: {
+        elementId: id,
+        src: blobUrl,
+        effect: { type: 'none' },
+      },
       timeFrame: {
         start: (index * this.maxTime) / this.frames.length,
         end: this.maxTime / this.frames.length,
-      },
-      properties: {
-        elementId: `image-${id}`,
-        src: imageElement.src,
-        effect: {
-          type: 'none',
-        },
       },
     });
   }
@@ -198,12 +212,13 @@ export class EditorStore {
     fontStyle: string;
     textBackground: string;
     isFrame: boolean;
+    id: string;
   }) {
-    const id = getUid();
+    const id = options.id || getUid();
     const index = this.elements.length;
     const text = {
-      isFrame: options.isFrame,
       id,
+      isFrame: options.isFrame,
       name: `Text ${index + 1}`,
       type: 'text',
       placement: {
@@ -239,19 +254,23 @@ export class EditorStore {
     console.log('startIndex', startIndex, this.frames);
     this.frames.forEach((fr, i) => {
       const id = fr.id;
+      const src = fr.src;
       // check if the image is already added, if so skip
       if (this.elements.find((el) => el.id === id)) return;
-      this.addImage(i + startIndex, id, true);
+      this.addImage(i + startIndex, src, true);
+      console.log('added image', i + startIndex, id);
     });
     if (!this.elements.length) return;
     this.updateMaxTime();
-    this.selectElement(this.elements[0].id);
   }
   private createFabricImage(image: HTMLImageElement | null): fabric.Image | undefined {
     if (this.canvas) {
       const canvasWidth = this.canvas.getWidth();
       const canvasHeight = this.canvas.getHeight();
-      if (!image) return;
+      if (!image) {
+        console.error('Image is not found');
+        return;
+      }
       const orignalHeight = image.naturalHeight;
       const orignalWidth = image.naturalWidth;
       const scaleX = canvasWidth / orignalWidth;

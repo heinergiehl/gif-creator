@@ -103,16 +103,16 @@ const Timeline: React.FC<TimelineProps> = observer(
           dark:bg-slate-800
           "
           style={{
-            maxWidth: `${maxWidth - 150}px`,
+            maxWidth: `${maxWidth}px`,
             height: '80px',
-            minWidth: `${minWidth - 300}px`,
+            minWidth: `${minWidth}px`,
           }}
         >
           <div
             className="flex flex-col p-4 "
             style={{
-              width: `${maxWidth - 150}px`,
-              minWidth: `${minWidth - 300}px`,
+              width: `${maxWidth}px`,
+              minWidth: `${minWidth}px`,
             }}
           >
             {editorStore.elements.map(

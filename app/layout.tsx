@@ -36,6 +36,7 @@ export default function RootLayout({
           attribute="class"
           enableSystem
         >
+          {/* only render navigation when not on pathes that start with  converter-and-editor  */}
           <RootNavigation />
           {children}
         </ThemeProvider>

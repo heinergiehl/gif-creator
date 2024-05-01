@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/cn';
 import { observer } from 'mobx-react-lite';
@@ -29,8 +29,23 @@ import {
   PointerSensor,
   DragMoveEvent,
   DragEndEvent,
+  DragOverlay,
+  useDndMonitor,
+  useDndContext,
+  closestCorners,
+  Active,
+  rectIntersection,
+  DragOverEvent,
+  Over,
 } from '@dnd-kit/core';
-import { SortableContext, arrayMove, useSortable } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+  rectSortingStrategy,
+  rectSwappingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
 import {
   CarouselItem,
   CarouselContent,
@@ -40,22 +55,58 @@ import {
   CarouselApi,
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-gsap.registerPlugin(ScrollToPlugin);
+import { getUid } from '@/utils';
+import { createPortal } from 'react-dom';
+import { set } from 'lodash';
+const Droppable = (
+  props:
+    | {
+        children: React.ReactNode;
+        className?: string;
+        id: string;
+        active: Active | null;
+      }
+    | {
+        children: React.ReactNode;
+        className?: string;
+        id: string;
+        active: Active | null;
+      },
+) => {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: String(props.id),
+    data: {
+      type: 'Frame',
+    },
+  });
+  // make sure to animate the droppable element when the dragged element is over it, so it moves to the left or right
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn([
+        isOver ? ' border-r-8 border-blue-500' : 'border-r-4 border-transparent',
+        'transition-colors duration-200 ease-in-out',
+      ])}
+    >
+      {props.children}
+    </div>
+  );
+};
 interface EditorCarouselProps {
   containerWidth: number;
 }
 export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps) => {
-  const { isOver, setNodeRef } = useDroppable({
-    id: 'carousel',
-  });
   const store = useStores().editorStore;
-  const editorCarouselStore = useStores().editorCarouselStore;
   const animationStore = useStores().animationStore;
-  gsap.registerPlugin(ScrollToPlugin);
   const handleSelectFrame = (index: number) => {
-    if (index === store.currentKeyFrame) return;
-    if (index < 0 || index >= store.frames.length) return;
+    if (index === store.currentKeyFrame) {
+      console.warn('Frame already selected');
+      return;
+    }
+    if (index < 0 || index >= store.frames.length) {
+      console.error('Invalid frame index');
+      return;
+    }
     store.currentKeyFrame = index;
     animationStore.addCurrentGifFrameToCanvas();
   };
@@ -67,17 +118,17 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
     }
   };
   const [api, setApi] = React.useState<CarouselApi>();
-  const handleNextFrame = () => {
+  const handleNextFrame = useCallback(() => {
     if (api) {
       const currentlySelectedFrame = store.currentKeyFrame;
-      if (currentlySelectedFrame < store.frames.length) {
+      if (currentlySelectedFrame < store.frames.length - 1) {
         store.currentKeyFrame = currentlySelectedFrame + 1;
-        animationStore.addCurrentGifFrameToCanvas();
         api.scrollNext();
+        animationStore.addCurrentGifFrameToCanvas();
       }
     }
-  };
-  const handlePrevFrame = () => {
+  }, [api, store.currentKeyFrame, store.frames.length]);
+  const handlePrevFrame = useCallback(() => {
     if (api) {
       const currentlySelectedFrame = store.currentKeyFrame;
       if (currentlySelectedFrame > 0) {
@@ -86,90 +137,23 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
         api.scrollPrev();
       }
     }
-  };
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 2,
-      },
-    }),
-  );
+  }, [api, store.currentKeyFrame, store.frames.length]);
   const frames = store.frames;
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active && over) {
-      const oldIndex = frames.findIndex((frame) => frame.id === active.id);
-      const newIndex = frames.findIndex((frame) => frame.id === over.id);
-      console.log(oldIndex, newIndex);
-      store.currentKeyFrame = oldIndex;
-      store.updateFramesOrder(oldIndex, newIndex);
-      store.currentKeyFrame = newIndex;
-    }
-  };
-  //while dragging an element out of the carousel, the carousel should scroll
-  const handleDragMove = (event: DragMoveEvent) => {
-    if (api) {
-      const { over, active } = event;
-      if (over) {
-        const visibleIndexes = api.slidesInView();
-        const nonVisibleIndexes = api.slidesNotInView();
-        const firstVisibleIndex = visibleIndexes[0];
-        const lastVisibleIndex = visibleIndexes[visibleIndexes.length - 1];
-        const firstNonVisibleIndex = nonVisibleIndexes[0];
-        // calculate the index of the  element where the dragged element is over
-        const newIndex = frames.findIndex((frame) => frame.id === over?.id);
-        // if the dragged element is over the first visible element, scroll to the left
-        if (newIndex === firstVisibleIndex) {
-          api.scrollPrev();
-        }
-        // if the dragged element is over the last visible element, scroll to the right
-        if (newIndex === lastVisibleIndex) {
-          api.scrollNext();
-        }
-        // if the dragged element is over the first non visible element, scroll to the left
-        if (newIndex === firstNonVisibleIndex) {
-          api.scrollPrev();
-        }
-      }
-    }
-  };
-  // whenever the currently selected frame is out of view, scroll to it. use api to scroll to the selected frame
-  useEffect(() => {
-    if (api) {
-      const visibleIndexes = api.slidesInView();
-      const lastVisibleIndex = visibleIndexes[visibleIndexes.length - 1];
-      const currentlySelectedFrame = store.currentKeyFrame;
-      if (currentlySelectedFrame >= lastVisibleIndex) {
-        api.scrollTo(currentlySelectedFrame);
-      }
-      if (currentlySelectedFrame <= lastVisibleIndex) {
-        api.scrollTo(currentlySelectedFrame);
-      }
-    }
-  }, [store.currentKeyFrame, api]);
-  // const [carouselWidth, setCarouselWidth] = useState(0);
   // useEffect(() => {
   //   if (api) {
-  //     editorCarouselStore.cardItemWidth =
-  //       api.containerNode()?.clientWidth / api.slidesInView().length;
-  //     editorCarouselStore.cardItemHeight = api.containerNode()?.clientHeight;
-  //     setCarouselWidth(api.containerNode()?.clientWidth || 0);
+  //     const visibleIndexes = api.slidesInView();
+  //     const lastVisibleIndex = visibleIndexes[visibleIndexes.length - 1];
+  //     const currentlySelectedFrame = store.currentKeyFrame;
+  //     if (currentlySelectedFrame + 1 === lastVisibleIndex) {
+  //       api.scrollNext();
+  //     }
+  //     if (currentlySelectedFrame - 1 === visibleIndexes[0]) {
+  //       api.scrollPrev();
+  //     }
   //   }
-  // }, [store.currentKeyFrame, store.frames.length, api]);
-  // for dve purpose of carousel populate the carousel with placeholder images by populating the frames array with placeholder images
-  // useEffect(() => {
-  //   if (frames.length === 0) {
-  //     store.frames = Array.from({ length: 14 }, (_, i) => ({
-  //       id: i.toString(),
-  //       src: 'https://via.placeholder.com/100',
-  //     }));
-  //   }
-  // }, [store.frames.length, store.frames, store.currentKeyFrame, store.currentKeyFrame]);
+  // }, [store.currentKeyFrame, api, api?.slidesInView()]);
   const getBasisOfCardItem = () => {
-    const carouselWidth = containerWidth - 150;
+    const carouselWidth = containerWidth;
     if (carouselWidth <= 600) {
       // Small carousel
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 1) || 1}]`;
@@ -181,11 +165,157 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
     }
   };
+  const [hoverIndex, setHoverIndex] = useState(-1);
+  const over = useDndContext().over;
+  // useEffect(() => {
+  //   if (api) {
+  //     if (!store.isDragging) return;
+  //     const visibleIndexes = api.slidesInView();
+  //     if (!visibleIndexes.includes(hoverIndex)) {
+  //       // If not visible, scroll to make it visible
+  //       api.scrollTo(visibleIndexes[visibleIndexes.length - 1]);
+  //     }
+  //   }
+  // }, [hoverIndex, api]);
+  // useeffect auto scroll if current slide not in view
+  // useEffect(() => {
+  //   if (api) {
+  //     api.scrollTo(store.currentKeyFrame);
+  //   }
+  // }, [store.currentKeyFrame, api]);
+  // Attach event listeners to the carousel API
+  // useEffect(() => {
+  //   if (api) {
+  //     const handleSlidesInViewChange = () => {
+  //       const visibleIndexes = api.slidesInView();
+  //       // Optionally adjust hoverIndex based on some custom logic
+  //       setHoverIndex((prev) => {
+  //         if (prev === null) return null;
+  //         if (visibleIndexes.includes(prev)) return prev;
+  //         // If the hoverIndex is not visible, set it to the first visible index
+  //         return visibleIndexes[0];
+  //       });
+  //     };
+  //     api.on('slidesInView', handleSlidesInViewChange);
+  //     return () => {
+  //       // Clean up listener when component unmounts or api changes
+  //       api.off('slidesInView', handleSlidesInViewChange);
+  //     };
+  //   }
+  // }, [api, over]);
+  const [shiftDirection, setShiftDirection] = useState<'left' | 'right' | null>(null);
+  // update frames order, after reordering the frames in the carousel
+  // const updateFramesOrder = (active: Active, over: Over | null) => {
+  //   const frames = store.frames;
+  //   if (frames.length === 0) return;
+  //   if (frames.length === 1) return;
+  //   if (frames.length === 0) return;
+  //   if (active && over) {
+  //     let oldIndex = frames.findIndex((frame) => frame.id === active.id);
+  //     let newIndex = frames.findIndex((frame) => frame.id === over.id);
+  //     if (oldIndex === -1 || newIndex === -1) return;
+  //     if (oldIndex === newIndex) return;
+  //     //edge case when a dragged element is added , use the shift direction to determine the new index
+  //     if (shiftDirection === 'left') {
+  //       newIndex = newIndex - 1 === -1 ? 0 : newIndex - 1;
+  //     } else if (shiftDirection === 'right') {
+  //       newIndex = newIndex === frames.length - 1 ? frames.length - 1 : newIndex;
+  //     }
+  //     oldIndex = oldIndex === -1 ? 0 : oldIndex;
+  //     store.updateFramesOrder(oldIndex, newIndex);
+  //     store.currentKeyFrame = newIndex;
+  //   }
+  //   store.updateEditorElementsForFrames();
+  //   animationStore.addCurrentGifFrameToCanvas();
+  // };
+  useDndMonitor({
+    // onDragOver: (event) => {
+    //   updateOnDrag(event.over?.rect, event.over.id);
+    // },
+    onDragOver: (event) => {
+      const newIndex = frames.findIndex((frame) => frame.id === event.over?.id);
+      updateHoverIndex(newIndex);
+    },
+    onDragEnd: (e) => {
+      store.activeDraggable = null;
+      store.isDragging = false;
+      // updateFramesOrder(e.active, e.over);
+      // animationStore.addCurrentGifFrameToCanvas();
+      console.log('drag end', store.currentKeyFrame);
+    },
+    onDragMove: (event) => {
+      const visibleIndexes = api?.slidesInView();
+      const firstVisibleIndex = visibleIndexes ? visibleIndexes[0] : 0;
+      const activeRect = event.active?.rect.current.translated;
+      const firstVisibleRect = api?.slideNodes()[firstVisibleIndex]?.getBoundingClientRect();
+      if (activeRect && firstVisibleRect) {
+        if (activeRect.left < firstVisibleRect.left) {
+          setShiftDirection('left');
+        } else if (activeRect.right > firstVisibleRect.right) {
+          setShiftDirection('right');
+        } else {
+          setShiftDirection(null);
+        }
+      }
+    },
+  });
+  const ctx = useDndContext();
+  const active = ctx.active;
+  // Function to update hover indices
+  const updateHoverIndex = (newIndex: number) => {
+    // setHoverIndex(newIndex);
+  };
+  const calculateTransform = (index: number, hoverIndex: number) => {
+    if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
+    if (shiftDirection === 'right' && index >= hoverIndex) {
+      return 'translateX(100%)';
+    } else if (shiftDirection === 'left' && index <= hoverIndex) {
+      return 'translateX(-100%)';
+    }
+    return 'translateX(0px)';
+  };
+  useEffect(() => {
+    if (store.frames.length > 0 && store.progress.conversion === 100) {
+      // animationStore.addCurrentGifFrameToCanvas();
+      console.log('ADDING IMAGES TO CANVAS');
+      store.progress.conversion = 0;
+    }
+  }, [store.frames, store.progress.conversion]);
+  // for case that being with the dragged element on the edge of the carousel, we need to scroll to the left or right
+  // useEffect(() => {
+  //   if (api) {
+  //     const activeRect = active?.rect.current.translated;
+  //     const carouselRect = document.getElementById('carousel')?.getBoundingClientRect();
+  //     const overIndex = over?.id ? store.frames.findIndex((frame) => frame.id === over.id) : -1;
+  //     const scrollProgress = api.scrollProgress();
+  //     if (activeRect) {
+  //       console.log(activeRect.left < carouselRect.left, activeRect.right, carouselRect.right);
+  //       if (activeRect.left < carouselRect.left) {
+  //         api.scrollTo(api.slidesInView()[0]);
+  //         setHoverIndex(api.slidesInView()[0]);
+  //         store.currentKeyFrame = api.slidesInView()[0];
+  //       } else if (activeRect.right > carouselRect.right) {
+  //         api.scrollTo(api.slidesInView()[api.slidesInView().length - 1]);
+  //         setHoverIndex(api.slidesInView()[api.slidesInView().length - 1]);
+  //         store.currentKeyFrame = api.slidesInView()[api.slidesInView().length - 1];
+  //       }
+  //     }
+  //     console.log('HOVERINDEX', hoverIndex, store.currentKeyFrame, api.slidesInView());
+  //   }
+  // }, [
+  //   active?.rect.current.translated,
+  //   api?.slidesInView(),
+  //   hoverIndex,
+  //   api,
+  //   store.currentKeyFrame,
+  //   store.frames,
+  //   over?.id,
+  // ]);
   return (
-    <div className="flex flex-col items-center justify-center px-16 gap-y-4">
+    <div className="flex flex-col items-center justify-center gap-y-4 px-16">
       <Timeline
-        maxWidth={containerWidth - 150}
-        minWidth={containerWidth - 300}
+        maxWidth={containerWidth}
+        minWidth={containerWidth}
         currentFrame={store.currentKeyFrame}
         onSelectFrame={() => handleSelectFrame(store.currentKeyFrame)}
         totalFrames={store.frames.length}
@@ -193,53 +323,64 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       <div
         className="flex flex-col items-center justify-center "
         style={{
-          maxWidth: containerWidth - 150 + 'px',
-          minWidth: containerWidth - 300 + 'px',
+          maxWidth: containerWidth + 'px',
+          minWidth: containerWidth + 'px',
           minHeight: '120px',
         }}
       >
         <Carousel
           style={{
-            maxWidth: containerWidth - 300 + 'px',
-            minWidth: containerWidth - 300 + 'px',
+            maxWidth: containerWidth + 'px',
+            minWidth: containerWidth + 'px',
             minHeight: '120px',
           }}
-          ref={setNodeRef}
           setApi={setApi}
           opts={{
-            align: 'start',
             dragFree: true,
             watchDrag: false,
             watchSlides: true,
+            watchResize: true,
           }}
-          className="flex items-start justify-start rounded-lg bg-muted"
+          id="carousel"
+          className="flex w-full items-start justify-start overflow-hidden rounded-lg bg-muted"
           orientation="horizontal"
         >
-          <DndContext
-            onDragOver={handleDragMove}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+          {store.frames.length === 0 && <CarouselDroppable />}
+          <CarouselContent
+            style={{
+              overflowX: 'scroll',
+            }}
           >
-            <SortableContext items={store.frames.map((frame) => frame.id)}>
-              <CarouselContent>
-                {store.frames.map((frame, index) => (
-                  <SortableItem
-                    basisOfCardItem={getBasisOfCardItem()}
-                    key={index}
-                    id={frame.id}
-                    src={frame.src}
-                    index={index}
-                    onFrameSelect={handleSelectFrame}
-                    onFrameDelete={handleDeleteFrame}
-                    isSelected={index === store.currentKeyFrame}
-                  />
-                ))}
-              </CarouselContent>
+            <SortableContext
+              items={store.frames.map((frame) => frame.id)}
+              strategy={rectSortingStrategy}
+            >
+              {store.frames.map((frame, index) => (
+                <Droppable id={frame.id} active={active} key={index}>
+                  <div key={index}>
+                    <SortableItem
+                      basisOfCardItem={getBasisOfCardItem()}
+                      id={frame.id}
+                      src={frame.src}
+                      index={index}
+                      onFrameSelect={handleSelectFrame}
+                      onFrameDelete={handleDeleteFrame}
+                      isSelected={index === store.currentKeyFrame}
+                    />
+                  </div>
+                </Droppable>
+              ))}
             </SortableContext>
-          </DndContext>
-          <CarouselPrevious onClick={handlePrevFrame} />
-          <CarouselNext onClick={handleNextFrame} />
+          </CarouselContent>
+          <DragOverlay>
+            <DraggedImagePreview
+              src={store.frames.find((frame) => frame.id === active?.id)?.src || ''}
+            />
+          </DragOverlay>
+          <div>
+            <CarouselPrevious onClick={handlePrevFrame} />
+            <CarouselNext onClick={handleNextFrame} />
+          </div>
         </Carousel>
       </div>
     </div>
@@ -260,6 +401,9 @@ interface SortableItemProps extends Frame {
 const SortableItem: React.FC<SortableItemProps> = observer(
   ({ id, src, index, onFrameSelect, onFrameDelete, isSelected, basisOfCardItem }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    // move sortable item to the left or right when a dragged element is over it
+    const active = useDndContext().active;
+    const over = useDndContext().over;
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
@@ -275,6 +419,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         className={cn([
           'flex h-full  cursor-pointer items-center justify-center p-0 transition-colors duration-200 ease-in-out ',
           basisOfCardItem,
+          active?.id === id ? 'border-4 border-blue-500' : 'border-4 border-transparent',
         ])}
         onMouseDown={(e) => {
           e.stopPropagation();
@@ -282,11 +427,11 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         }}
       >
         <div className="p-1">
-          <Card className="relative flex items-center justify-center h-full">
+          <Card className="relative flex h-full items-center justify-center">
             {isSelected && (
-              <div className="absolute inset-0 transition-all duration-300 rounded-lg opacity-50 bg-slate-600"></div>
+              <div className="absolute inset-0 rounded-lg bg-slate-600 opacity-50 transition-all duration-300"></div>
             )}
-            <CardContent className="flex items-center justify-center h-full p-0">
+            <CardContent className="flex h-full items-center justify-center p-0">
               <Image
                 src={src}
                 alt={`Frame ${index}`}
@@ -304,11 +449,11 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                   e.stopPropagation(); // Prevent triggering onSelect when clicking delete
                   onFrameDelete(index);
                 }}
-                className="absolute z-20 text-white right-2 top-2"
+                className="absolute right-2 top-2 z-20 text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -328,3 +473,40 @@ const SortableItem: React.FC<SortableItemProps> = observer(
     );
   },
 );
+const DraggedImagePreview = ({ src }: { src: string }) => {
+  const active = useDndContext().active;
+  return (
+    <Card className="m-0 p-0">
+      <CardContent className="flex h-full items-center justify-center p-0">
+        <Image
+          src={src}
+          alt="Dragged frame"
+          width={100}
+          height={100}
+          className="min-h-[100px] min-w-[100px] "
+        />
+      </CardContent>
+    </Card>
+  );
+};
+// for the case that there are no frames, we dont have many droppables but only one droppable, which will be
+// the whole carousel
+const CarouselDroppable = () => {
+  const { isOver, setNodeRef, active, over } = useDroppable({
+    id: 'carousel',
+    data: {
+      type: 'Frame',
+    },
+  });
+  console.log('isOver', isOver, active, over);
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn([
+        isOver ? 'absolute inset-0 border-8 border-blue-500' : 'border-4 border-transparent',
+        'transition-colors duration-200 ease-in-out',
+        'h-full w-full rounded-lg bg-gray-100 bg-inherit text-inherit dark:bg-slate-900',
+      ])}
+    />
+  );
+};

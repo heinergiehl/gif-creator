@@ -3,6 +3,7 @@ import React, { use, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { MdAdd } from 'react-icons/md';
 import { useStores } from '@/store';
+import { getUid } from '@/utils';
 type TextResourceProps = {
   fontSize: number;
   fontWeight: number;
@@ -35,6 +36,7 @@ export const TextResource = observer(({ fontSize, fontWeight, sampleText }: Text
             fontStyle: 'normal',
             textBackground: '',
             isFrame: false,
+            id: getUid(),
           });
         }}
       >

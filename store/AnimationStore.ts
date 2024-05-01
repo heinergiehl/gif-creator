@@ -348,8 +348,24 @@ export class AnimationStore {
       return;
     }
     const els: EditorElement[] = elements.filter((element) => element !== undefined);
+    console.log('elements', els, this.editorStore.currentKeyFrame);
     this.editorStore.selectedElement = els[this.editorStore.currentKeyFrame];
+    if (!this.editorStore.selectedElement) {
+      console.warn('No selected element found for current keyframe');
+      return;
+    }
+    if (elements[this.editorStore.currentKeyFrame] == undefined) {
+      console.warn('No element found for current keyframe');
+      return;
+    }
     const fabObject = els[this.editorStore.currentKeyFrame].fabricObject;
+    if (!fabObject) {
+      console.warn(
+        'No fabric object found for current keyframe:',
+        this.editorStore.currentKeyFrame,
+      );
+      return;
+    }
     this.editorStore.canvas?.clear();
     if (fabObject !== undefined) {
       if (this.animations.length > 0) {

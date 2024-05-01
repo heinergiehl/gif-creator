@@ -4,6 +4,7 @@ export type Position = {
   left: number | undefined;
 };
 export type EditorElementBase<T extends string, P> = {
+  readonly index?: number;
   readonly id: string;
   fabricObject?: fabric.Object;
   name: string;
