@@ -184,8 +184,55 @@ declare module 'fabric' {
       id?: string;
       customProperty?: CustomProperty;
     }
+    // make sure typescript knows about RemoeColor filter
+    // Image.filters: fabric.IAllFilters
+    // export namespace Image {
+    //   export namespace customFilters {
+    //     interface IRemoveColor extends IBaseFilter {
+    //       color: string;
+    //       distance: number;
+    //     }
+    //     interface IExtendedAllFilters {
+    //       RemoveColor: IRemoveColor | undefined;
+    //     }
+    //     export class RemoveColor extends fabric.Image.filters.BaseFilter implements IRemoveColor {
+    //       type: 'RemoveColor';
+    //       color: string;
+    //       distance: number;
+    //       constructor(options: { color: string; distance: number });
+    //     }
+    //     export class Image {
+    //       filters: IExtendedAllFilters | undefined;
+    //     }
+    //   }
+    // }
   }
 }
+// declare global {
+//   namespace fabric {
+//     export interface IBaseFilter {
+//       type: string;
+//     }
+//     export namespace Image {
+//       interface IRemoveColor extends IBaseFilter {
+//         color: string;
+//         distance: number;
+//       }
+//       export interface IAllFilters {
+//         RemoveColor: IRemoveColor;
+//       }
+//       export class RemoveColor extends fabric.Image.filters.BaseFilter implements IRemoveColor {
+//         type: 'RemoveColor';
+//         color: string;
+//         distance: number;
+//         constructor(options: { color: string; distance: number });
+//       }
+//       export class Image {
+//         filters: IAllFilters | undefined;
+//       }
+//     }
+//   }
+// }
 fabric.CoverImage = CoverImage;
 fabric.CoverVideo = CoverVideo;
 export class FabricUitls {

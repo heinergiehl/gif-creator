@@ -40,11 +40,18 @@ const Timeline: React.FC<TimelineProps> = observer(
       // update the start and end time of each frame based on store.maxTime and store.frames.length andtimePerFrame
       store.elements.map((element, index) => {
         if (element.isFrame) {
+          store.updateMaxTime();
           animationStore.timePerFrameInMs = store.maxTime / store.frames.length;
           element.timeFrame.start = index * animationStore.timePerFrameInMs;
           element.timeFrame.end = (index + 1) * animationStore.timePerFrameInMs;
         }
       });
+      console.log(
+        'TIMEPERFRAME69!!',
+        animationStore.timePerFrameInMs,
+        store.frames.length,
+        store.maxTime,
+      );
     }, [store.elements, animationStore.fps, store.maxTime]);
     let currentPositionPercent = 0;
     if (editorStore.frames.length > 0) {
@@ -58,7 +65,7 @@ const Timeline: React.FC<TimelineProps> = observer(
         <div
           style={{ maxWidth: `${maxWidth}px`, minWidth: `${minWidth}px` }}
           onMouseMove={handleMouseMove}
-          className="relative flex flex-col items-end m-auto"
+          className="relative m-auto flex flex-col items-end"
           onClick={() => {
             editorStore.currentKeyFrame = frameNumber - 1;
             animationStore.addCurrentGifFrameToCanvas();
@@ -84,11 +91,11 @@ const Timeline: React.FC<TimelineProps> = observer(
           />
           <div
             ref={timelineRef}
-            className="relative z-10 flex items-center justify-center w-full h-4 bg-gray-300 "
+            className="relative z-10 flex h-4 w-full items-center justify-center bg-gray-300 "
             onClick={onSelectFrame}
           >
             <div
-              className="absolute left-0 z-10 h-2 bg-blue-500 rounded-lg"
+              className="absolute left-0 z-10 h-2 rounded-lg bg-blue-500"
               style={{ width: `${currentPositionPercent}%` }}
             ></div>
             <div

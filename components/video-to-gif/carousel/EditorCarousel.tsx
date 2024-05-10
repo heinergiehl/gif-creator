@@ -374,7 +374,10 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
           </CarouselContent>
           <DragOverlay>
             <DraggedImagePreview
-              src={store.frames.find((frame) => frame.id === active?.id)?.src || ''}
+              src={
+                store.frames.find((frame) => frame.id === active?.id)?.src ||
+                'https://via.placeholder.com/100x100.png?text=Dragged+Frame'
+              }
             />
           </DragOverlay>
           <div>
@@ -419,7 +422,6 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         className={cn([
           'flex h-full  cursor-pointer items-center justify-center p-0 transition-colors duration-200 ease-in-out ',
           basisOfCardItem,
-          active?.id === id ? 'border-4 border-blue-500' : 'border-4 border-transparent',
         ])}
         onMouseDown={(e) => {
           e.stopPropagation();

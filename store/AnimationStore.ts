@@ -117,6 +117,7 @@ export class AnimationStore {
       }
       this.addCurrentGifFrameToCanvas();
     }
+    console.log('animations', this.animations);
   }
   private animateFadeIn(animation: FadeInAnimation, { duration = 1000 } = {}) {
     if (!this.editorStore?.canvas) return;
@@ -268,6 +269,7 @@ export class AnimationStore {
     duration: number,
   ): number {
     const index = elementsToAnimate.indexOf(selectedElement);
+    console.log('index', index, 'timePerFrameInMs', timePerFrameInMs, 'duration', duration);
     return ((index + 1) * timePerFrameInMs) / duration;
   }
   private isValidFabricObject(element: EditorElement | null): element is EditorElement {
@@ -278,7 +280,10 @@ export class AnimationStore {
     targetElement: EditorElement,
     durationInMs: number,
   ): EditorElement[] {
-    if (this.editorStore === undefined) return [];
+    if (this.editorStore === undefined) {
+      console.warn('Editor store is undefined');
+      return [];
+    }
     return this.editorStore.elements.filter(
       (ele) =>
         ele.id !== animation.targetId &&
@@ -289,8 +294,10 @@ export class AnimationStore {
   private animateSlideOut(animation: SlideOutAnimation, { duration = 1000 } = {}) {
     if (!this.editorStore?.canvas) return;
     const targetElement = this.getTargetElement(animation);
-    if (!targetElement) return;
-    if (!targetElement || !targetElement.placement) return;
+    if (!targetElement || !targetElement.placement) {
+      console.warn('No target element found for slide out animation');
+      return;
+    }
     const canvasWidth = this.editorStore.canvas.width ?? 0;
     const canvasHeight = this.editorStore.canvas.height ?? 0;
     const direction = animation.properties.direction;
@@ -312,34 +319,39 @@ export class AnimationStore {
             ? canvasHeight
             : targetPosition.top,
     };
-    if (!targetPosition) return;
-    if (!targetElement) return;
-    if (!this.editorStore.canvas.width) return;
-    if (!this.editorStore.canvas.height) return;
+    if (!targetPosition) {
+      console.warn('No target position found for slide out animation');
+      return;
+    }
+    if (!this.editorStore.canvas) {
+    }
     targetElement.fabricObject?.set({
       left: targetPosition.left,
       top: targetPosition.top,
     });
     const elementsToAnimate = this.getElementsToAnimate(animation, targetElement, duration);
-    elementsToAnimate.forEach((element) => {
-      if (
-        this.editorStore === null ||
-        this.editorStore?.selectedElement === undefined ||
-        !this.isValidFabricObject(this.editorStore.selectedElement)
-      )
-        return;
-      if (this.editorStore.selectedElement.id !== element.id) return;
-      const progress = this.calculateAnimationProgress(
-        elementsToAnimate,
-        this.editorStore.selectedElement,
-        this.timePerFrameInMs,
-        duration,
-      );
-      const left = targetPosition.left + (endPosition.left - targetPosition.left) * progress;
-      const top = targetPosition.top + (endPosition.top - targetPosition.top) * progress;
-      if (!this.editorStore.selectedElement.fabricObject) return;
-      this.editorStore.selectedElement.fabricObject.set({ left, top });
-    });
+    if (elementsToAnimate.length === 0) {
+      console.warn('No elements to animate found for slide out animation');
+      return;
+    }
+    if (this.editorStore?.selectedElement === null) {
+      console.warn('No selected element found for slide out animation');
+      return;
+    }
+    const progress = this.calculateAnimationProgress(
+      elementsToAnimate,
+      this.editorStore.selectedElement,
+      this.timePerFrameInMs,
+      duration,
+    );
+    const left = targetPosition.left + (endPosition.left - targetPosition.left) * progress;
+    const top = targetPosition.top + (endPosition.top - targetPosition.top) * progress;
+    if (!this.editorStore.selectedElement.fabricObject) {
+      console.warn('No fabric object found for selected element');
+      return;
+    }
+    console.log('left', left, 'top', top, 'progress', progress);
+    this.editorStore.selectedElement.fabricObject.set({ left, top });
   }
   addCurrentGifFrameToCanvas() {
     const elements = this.editorStore?.elements;
@@ -372,6 +384,7 @@ export class AnimationStore {
         this.animations.forEach((animation) => {
           this.applyAnimation(animation, animation.type);
           this.editorStore?.canvas?.add(fabObject);
+          console.log('ANIMAtions APPLIED');
         });
       } else {
         if (fabObject) {
@@ -385,6 +398,7 @@ export class AnimationStore {
           // });
           // fabObject.setCoords();
           this.editorStore.canvas?.add(fabObject);
+          // apply filters
         }
       }
       // update the frames array. currently it contains the inital images of each frame of a video.

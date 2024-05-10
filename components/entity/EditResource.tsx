@@ -7,8 +7,8 @@ import { DebounceInput } from 'react-debounce-input';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import debounce from 'lodash.debounce';
-import CustomDebounceInput from '@/app/components/ui/CustomDebounceInput';
-const DEBOUNCE_TIME_IN_MS = 500;
+import CustomDebounceInput from '@/app/components/ui/CustomCheckbox';
+import { CustomSelect } from '@/app/components/ui/CustomSelect';
 const EditResource = observer(() => {
   const store = useStores().editorStore;
   const fabricElement = store.selectedElement?.fabricObject;

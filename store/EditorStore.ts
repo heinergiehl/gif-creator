@@ -1,19 +1,80 @@
-import { makeAutoObservable } from 'mobx';
-import { EditorElement, Placement, TextEditorElement } from '@/types';
+import { computed, makeAutoObservable } from 'mobx';
+import { EditorElement, ImageEditorElement, Placement, TextEditorElement } from '@/types';
 import { fabric } from 'fabric';
 import { getUid, isHtmlImageElement } from '@/utils';
 import { AnimationStore } from './AnimationStore';
 import { DragStartEvent } from '@dnd-kit/core';
-import { blob } from 'stream/consumers';
-import { error } from 'console';
+import { IBaseFilter } from '@/components/panels/EffectsPanel';
 export interface Frame {
   id: string;
   src: string;
+}
+// export enum FilterType {
+//   grayscale = 'grayscale',
+//   invert = 'invert',
+//   removeColor = 'removeColor',
+//   sepia = 'sepia',
+//   brightness = 'brightness',
+//   contrast = 'contrast',
+//   pixelate = 'pixelate',
+//   blur = 'blur',
+//   vibrance = 'vibrance',
+//   noise = 'noise',
+//   saturation = 'saturation',
+// }
+// make uppercase
+export enum FilterType {
+  Grayscale = 'Grayscale',
+  Invert = 'Invert',
+  RemoveColor = 'RemoveColor',
+  Sepia = 'Sepia',
+  Brightness = 'Brightness',
+  Contrast = 'Contrast',
+  Pixelate = 'Pixelate',
+  Blur = 'Blur',
+  Vibrance = 'Vibrance',
+  Noise = 'Noise',
+  Saturation = 'Saturation',
+}
+interface GrayscaleFilterOptions {}
+interface InvertFilterOptions {}
+interface RemoveColorFilterOptions {
+  color: string;
+  distance: number;
+}
+interface BrightnessFilterOptions {
+  brightness: number;
+}
+// Extend Fabric.js filters with these options
+class GrayscaleFilter extends fabric.Image.filters.Grayscale implements GrayscaleFilterOptions {}
+class InvertFilter extends fabric.Image.filters.Invert implements InvertFilterOptions {}
+class RemoveColorFilter
+  extends fabric.Image.filters.BaseFilter
+  implements RemoveColorFilterOptions
+{
+  color: string;
+  distance: number;
+  constructor(options: RemoveColorFilterOptions) {
+    super();
+    this.color = options.color;
+    this.distance = options.distance;
+  }
+}
+class BrightnessFilter extends fabric.Image.filters.BaseFilter implements BrightnessFilterOptions {
+  brightness: number;
+  constructor(options: BrightnessFilterOptions) {
+    super();
+    this.brightness = options.brightness;
+  }
+}
+export interface FilterInputOptions {
+  [key: string]: string | number | boolean;
 }
 export class EditorStore {
   private animationStore?: AnimationStore;
   elements: EditorElement[] = [];
   selectedElement: EditorElement | null = null;
+  filtersOfSelectedElement: IBaseFilter[] = [];
   canvas: fabric.Canvas | null = null;
   backgroundColor = '#ffffff';
   fontColor = '#000000';
@@ -38,6 +99,20 @@ export class EditorStore {
     conversion: 0,
     rendering: 0,
   };
+  // use Filters to get all available
+  filtersTypes: FilterType[] = [
+    FilterType.Grayscale,
+    FilterType.Invert,
+    FilterType.RemoveColor,
+    FilterType.Sepia,
+    FilterType.Brightness,
+    FilterType.Contrast,
+    FilterType.Pixelate,
+    FilterType.Blur,
+    FilterType.Vibrance,
+    FilterType.Noise,
+    FilterType.Saturation,
+  ];
   constructor() {
     makeAutoObservable(this);
   }
@@ -146,14 +221,307 @@ export class EditorStore {
         editable: true,
         id: element.id,
       });
+      element.fabricObject = fabricObject;
+      if (element.index) this.elements[element?.index] = element;
+      else this.addElement(element);
     }
+  }
+  removeFilter(filterType: FilterType) {
+    if (this.selectedElement?.type !== 'image') {
+      console.error('Selected element is not an image');
+      return;
+    }
+    const fabricElement = this.selectedElement?.fabricObject as fabric.Image;
+    if (!fabricElement) {
+      console.error('No fabric object found');
+      return;
+    }
+    console.log('Current Filters Before Removal:', fabricElement.filters);
+    fabricElement.filters = fabricElement.filters?.filter((f) => f.type !== filterType);
+    fabricElement.applyFilters();
+    this.canvas?.renderAll();
+    console.log('Current Filters After Removal:', fabricElement.filters);
+  }
+  applyFilter(
+    filterType: FilterType,
+    options?: FilterInputOptions,
+    fromFrame?: number,
+    toFrame?: number,
+    applyToAllFrames: boolean = false,
+  ) {
+    console.log('Applying filter:', filterType, options);
+    if (this.selectedElement?.type !== 'image') {
+      console.error('Selected element is not an image');
+      return;
+    }
+    const fabricElement = this.selectedElement?.fabricObject as fabric.Image;
+    if (!fabricElement) {
+      console.error('No fabric object found');
+      return;
+    }
+    console.log('Current Filters Before Update:', fabricElement.filters);
+    const filter = this.getExistingFilter(fabricElement, filterType);
+    console.log('6969!', options, filter);
+    if (options?.removeFilter !== true) {
+      console.log('Filter with options:', filterType, options);
+      const updatedFabricElement = this.updateOrAddFilter(
+        fabricElement,
+        filterType,
+        filter,
+        options,
+        fromFrame,
+        toFrame,
+        applyToAllFrames,
+      );
+      updatedFabricElement.applyFilters();
+      this.selectedElement.fabricObject = updatedFabricElement;
+    } else {
+      console.log('Removing filter:', filterType);
+      this.removeFilterFromElement(fabricElement, filterType);
+    }
+    this.canvas?.renderAll();
+  }
+  createFilter(filterType: FilterType, options: FilterInputOptions) {
+    switch (filterType) {
+      case 'grayscale':
+        return new fabric.Image.filters.Grayscale(options as any);
+      case 'invert':
+        return new fabric.Image.filters.Invert(options as any);
+      case 'removeColor':
+        //console log with orange text
+        if (options !== undefined) {
+          const color = options['removeColor'] === undefined ? '' : options['removeColor']?.color;
+          const distance = options[filterType] === undefined ? 0 : options[filterType]?.distance;
+          console.log(
+            '%cRemoveColor options:',
+            'color: orange; font-weight: bold',
+            color,
+            distance,
+          );
+        } else {
+          const color = '#ffffff';
+          const distance = 0;
+          console.log(
+            '%cRemoveColor options:',
+            'color: orange; font-weight: bold',
+            color,
+            distance,
+          );
+          const removeColor = new fabric.Image.filters.RemoveColor();
+          removeColor.color = color;
+          removeColor.distance = distance;
+          return removeColor;
+        }
+      case 'sepia':
+        return new fabric.Image.filters.Sepia(options);
+      case 'brightness':
+        return new fabric.Image.filters.Brightness(options);
+      case 'contrast':
+        return new fabric.Image.filters.Contrast(options);
+      case 'pixelate':
+        return new fabric.Image.filters.Pixelate(options);
+      case 'blur':
+        return new fabric.Image.filters.Blur(options);
+      case 'invert':
+        return new fabric.Image.filters.Invert(options);
+      case 'vibrance':
+        return new fabric.Image.filters.Vibrance(options);
+      case 'noise':
+        return new fabric.Image.filters.Noise(options);
+      case 'saturation':
+        return new fabric.Image.filters.Saturation(options);
+      default:
+        console.error('Filter type not supported:', filterType);
+        return null;
+    }
+  }
+  private getExistingFilter(fabricElement: fabric.Image, filterType: FilterType) {
+    {
+      return fabricElement.filters?.find((f) => {
+        console.log(f.type, filterType);
+        return f.type.toLowerCase() === filterType.toLowerCase();
+      });
+    }
+  }
+  // for the case filter was applied to a frame, but from and to frame are being provided as arguments as well, then we need to add the filter to all the frames
+  createFilterForFromToFrames(
+    fabricElement: fabric.Image,
+    filterType: FilterType,
+    options: FilterInputOptions,
+    fromFrame: number,
+    toFrame: number,
+  ) {
+    // console console in orange
+    console.log(
+      '%cFilter applying to multiple frames in createFilterForFromToFrames :',
+      'color: orange; font-weight: bold',
+    );
+    const fabricObjectOfSelectedElement = this.selectedElement?.fabricObject;
+    if (!fabricObjectOfSelectedElement) {
+      // console console in red
+      console.log('%cNo fabric object found:', 'color: red; font-weight: bold');
+      return;
+    }
+    // check if its fabric.image and not just faqbric.object type
+    if (fabricObjectOfSelectedElement.type !== 'image') {
+      // console console in red
+      console.log('%cSelected element is not an image:', 'color: red; font-weight: bold');
+      return;
+    }
+    const filter = this.getExistingFilter(
+      fabricObjectOfSelectedElement as fabric.Image,
+      filterType,
+    );
+    for (let i = fromFrame; i <= toFrame; i++) {
+      const frame = this.elements.find((f, index) => index === i);
+      if (!frame) {
+        // console console in red
+        console.log('%cFrame not found:', 'color: red; font-weight: bold', i);
+        return;
+      }
+      if (frame) {
+        const frameElement = this.elements.find((el) => el.id === frame.id);
+        if (frameElement) {
+          const fabricObject = frameElement.fabricObject as fabric.Image;
+          if (fabricObject) {
+            const doesCurrentElementHaveFilter = fabricObject.filters?.find(
+              (f) => f.type.toLowerCase() === filterType.toLowerCase(),
+            );
+            if (doesCurrentElementHaveFilter && options && filter) {
+              // console console in orange
+              console.log('%cFilter found:', 'color: orange; font-weight: bold', filter);
+              Object.assign(filter, options);
+            } else {
+              const newFilter = this.createFilter(filterType, options);
+              if (newFilter) {
+                // console console in orange
+                console.log('%cNew filter created:', 'color: orange; font-weight: bold', newFilter);
+                fabricObject.filters?.push(newFilter);
+                this.elements[i].fabricObject = fabricObject;
+                this.selectedElement.fabricObject = fabricObject;
+              }
+            }
+            fabricObject.applyFilters();
+            // in green
+            console.log('%cFilter applied to frame:', 'color: green; font-weight: bold', i);
+          }
+        }
+      }
+    }
+  }
+  private updateFilterOnAllFrames(
+    fabricElement: fabric.Image,
+    filterType: FilterType,
+    options: FilterInputOptions,
+    fromFrame: number,
+    toFrame: number,
+  ) {
+    // console log in orange
+    console.log('%cUpdate filter on all frames:', 'color: orange; font-weight: bold');
+    const fabricObjectOfSelectedElement = this.selectedElement?.fabricObject;
+    if (!fabricObjectOfSelectedElement) {
+      // console log in red
+      console.log('%cNo fabric object found:', 'color: red; font-weight: bold');
+      return;
+    }
+    // check if its fabric.image and not just faqbric.object type
+    if (fabricObjectOfSelectedElement.type !== 'image') {
+      // console log in red
+      console.log('%cSelected element is not an image:', 'color: red; font-weight: bold');
+      return;
+    }
+    const filter = this.getExistingFilter(
+      fabricObjectOfSelectedElement as fabric.Image,
+      filterType,
+    );
+    for (let i = fromFrame; i <= toFrame; i++) {
+      const frame = this.elements.find((f, index) => index === i);
+      if (!frame) {
+        // console log in red
+        console.log('%cFrame not found:', 'color: red; font-weight: bold', i);
+        return;
+      }
+      if (frame) {
+        const frameElement = this.elements.find((el) => el.id === frame.id);
+        if (frameElement) {
+          const fabricObject = frameElement.fabricObject as fabric.Image;
+          if (fabricObject) {
+            const doesCurrentElementHaveFilter = fabricObject.filters?.find(
+              (f) => f.type.toLowerCase() === filterType.toLowerCase(),
+            );
+            if (doesCurrentElementHaveFilter && options && filter) {
+              // console log in orange
+              console.log('%cFilter found:', 'color: orange; font-weight: bold', filter);
+              fabricElement.filters?.map((f) => {
+                if (f.type.toLowerCase() === filterType.toLowerCase()) {
+                  return Object.assign(f, options);
+                }
+              });
+              this.elements[i].fabricObject = fabricElement;
+              this.elements[i].fabricObject?.applyFilters();
+            }
+          }
+          // in green
+          console.log('%cFilter applied to frame:', 'color: green; font-weight: bold', i);
+        }
+      }
+    }
+  }
+  private updateOrAddFilter(
+    fabricElement: fabric.Image,
+    filterType: FilterType,
+    filter: IBaseFilter | undefined,
+    options: FilterInputOptions,
+    fromFrame?: number,
+    toFrame?: number,
+    updateAll: boolean = false,
+  ) {
+    // in orange
+    console.log(
+      '%cUpdate or add filter:',
+      'color: orange; font-weight: bold',
+      filterType,
+      options,
+      fromFrame,
+      toFrame,
+      updateAll,
+    );
+    if (updateAll && fromFrame !== undefined && toFrame !== undefined) {
+      // console log in orange
+      console.log('%cUpdate all:', 'color: orange; font-weight: bold');
+      this.updateFilterOnAllFrames(fabricElement, filterType, options, fromFrame, toFrame);
+    }
+    if (filter && fromFrame === undefined && toFrame === undefined) {
+      Object.assign(filter, options);
+      console.log('Filter updated:', filter, options);
+    } else if (
+      fromFrame !== undefined &&
+      toFrame !== undefined &&
+      fromFrame !== toFrame &&
+      filter
+    ) {
+      // console log in orange
+      console.log('%cFilter applying to multiple frames:', 'color: orange; font-weight: bold');
+      this.createFilterForFromToFrames(fabricElement, filterType, options, fromFrame, toFrame);
+    } else {
+      const newFilter = this.createFilter(filterType, options);
+      if (newFilter) {
+        fabricElement.filters?.push(newFilter);
+        this.selectedElement.fabricObject = fabricElement;
+        console.log('selectedElementFilters', this.selectedElement?.fabricObject?.filters);
+      }
+    }
+    return fabricElement;
+  }
+  private removeFilterFromElement(fabricElement: fabric.Image, filterType: FilterType) {
+    fabricElement.filters = fabricElement.filters?.filter(
+      (f) => f.type.toLowerCase() !== filterType.toLowerCase(),
+    );
+    fabricElement.applyFilters();
+    console.log('Filters after removal:', fabricElement.filters);
   }
   createFabricImageFromBlob(src: string): Promise<fabric.Image | undefined> {
     return new Promise((resolve, reject) => {
-      if (!this.canvas) {
-        reject(() => 'Canvas is not initialized');
-        return;
-      }
       fabric.Image.fromURL(
         src,
         (img) => {
@@ -167,7 +535,14 @@ export class EditorStore {
             originY: 'top',
             id: getUid(), // Ensure a unique ID is used for tracking
           });
-          img.scaleToWidth(this.canvas.getWidth()); // Scale to fit canvas or maintain aspect ratio
+          if (!this.canvas) {
+            console.error('Canvas is not found');
+            return;
+          }
+          const scaleX = this.canvas?.getWidth() / img.width!;
+          const scaleY = this.canvas?.getHeight() / img.height!;
+          img.scaleX = scaleX;
+          img.scaleY = scaleY;
           img.setCoords();
           resolve(img);
         },
@@ -186,8 +561,8 @@ export class EditorStore {
       placement: {
         x: 0,
         y: 0,
-        width: 0,
-        height: 0,
+        width: 100,
+        height: 100,
         scaleX: 1,
         scaleY: 1,
         rotation: 0,
@@ -262,6 +637,7 @@ export class EditorStore {
     });
     if (!this.elements.length) return;
     this.updateMaxTime();
+    console.log('maxTime', this.maxTime);
   }
   private createFabricImage(image: HTMLImageElement | null): fabric.Image | undefined {
     if (this.canvas) {

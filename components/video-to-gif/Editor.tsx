@@ -162,7 +162,10 @@ const Editor = observer(() => {
         console.log('IMAGE ADDED', store.elements.length, String(active.id), store.elements);
       } else if (resourceType.startsWith('textResource')) {
         const textElement = document.getElementById(String(active.id));
-        if (!textElement) return;
+        if (!textElement) {
+          console.warn('No HTML text element found');
+          return;
+        }
         store.addText({
           id: String(active.id),
           text: textElement.innerHTML,
@@ -351,6 +354,11 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
     containerWidth,
   ]); // Depend on the canvas to ensure it exists
   const animationStore = rootStore.animationStore;
+  const updateThumbnail = (url: string) => {
+    if (store.frames.length > 0) {
+      store.frames[store.currentKeyFrame].src = url;
+    }
+  };
   useEffect(() => {
     if (store.canvas === null) {
       const c = new fabric.Canvas('canvas', {
@@ -371,6 +379,9 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerColor = 'blue';
     fabric.Object.prototype.cornerStyle = 'circle';
+    fabric.filterBackend = new fabric.WebglFilterBackend();
+    //@ts-ignore
+    fabric.isWebglSupported(fabric.textureSize);
     const c = store.canvas;
     fabric.util.requestAnimFrame(function render() {
       c.requestRenderAll();
@@ -399,7 +410,6 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
       store.selectedElement = null;
     });
   }, []);
-  const uiStore = rootStore.uiStore;
   useEffect(() => {
     if (
       store.currentKeyFrame !== 0 &&
@@ -409,7 +419,13 @@ const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
     ) {
       animationStore.addCurrentGifFrameToCanvas();
     }
-  }, [store.currentKeyFrame, store.frames.length, store.elements.length, store.selectedElement]);
+  }, [
+    store.currentKeyFrame,
+    store.frames.length,
+    store.elements.length,
+    store.selectedElement,
+    store.selectedElement?.fabricObject,
+  ]);
   return (
     <div id="grid-canvas-container" ref={setNodeRef} className="p-4">
       <canvas id="canvas" className="justify-center border-2 drop-shadow-lg" />

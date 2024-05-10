@@ -9,6 +9,7 @@ import { UIStore } from './UIStore';
 import { EditorCarouselStore } from './EditorCarouselStore';
 import { FileStore } from './FileStore';
 import { HistoryStore } from './HistoryStore';
+import { FilterStore } from './FilterStore';
 configure({
   enforceActions: 'never',
 });
@@ -21,6 +22,7 @@ class RootStore {
   editorCarouselStore = new EditorCarouselStore();
   fileStore = new FileStore();
   uiStore = new UIStore();
+  filterStore = new FilterStore(this.editorStore);
   constructor() {
     this.setupDependencies();
   }
@@ -31,6 +33,7 @@ class RootStore {
     this.timelineStore.initialize(this.animationStore, this.editorStore);
     this.editorCarouselStore.initialize(this.editorStore, this.timelineStore);
     this.editorStore.initialize(this.animationStore);
+    // this.filterStore.initialize(this.editorStore);
   }
 }
 const StoreContext = createContext<RootStore | undefined>(undefined);

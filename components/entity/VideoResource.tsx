@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import { useStores } from '@/store';
 import { Frame } from '@/store/EditorStore';
 import { getUid } from '@/utils';
-import { InputFile } from '@/app/components/ui/FileInput';
+import { CustomInputFile } from '@/app/components/ui/CustomFileInput';
 import { Label } from '../ui/label';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -51,6 +51,7 @@ export const VideoResource = observer(() => {
     load();
   }, []);
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleFileChange', event.target.files?.[0]);
     if (!ffmpegRef.current.loaded) return;
     const file = event.target.files?.[0];
     if (!file) return;
@@ -102,18 +103,11 @@ export const VideoResource = observer(() => {
       setInputKey(Date.now());
     }
   };
-  useEffect(() => {
-    store.elements = [];
-    store.frames = [];
-    store.selectedElement = null;
-    store.currentKeyFrame = 0;
-    store.canvas?.clear();
-  }, []);
   return (
-    <div className="relative z-[100] p-8">
+    <div className="relative z-[100] h-full bg-secondary p-8">
       <>
         <h2 className="mb-8 font-semibold ">Upload a video to extract frames</h2>
-        <div className="flex w-full flex-col items-center justify-center gap-y-4 text-xs ">
+        <div className="flex w-full flex-col items-start justify-center gap-y-4 text-xs ">
           <Label className="flex w-full max-w-xs flex-col gap-y-4">
             <span className="">Frame extraction rate (frames per second):</span>
             <span className="text-xs font-semibold">{frameRate} fps</span>
@@ -143,7 +137,7 @@ export const VideoResource = observer(() => {
             />
           </Label>
           {store.frames.length === 0 && store.elements.length === 0 && (
-            <InputFile type="video" onChange={handleFileChange} key={inputKey} />
+            <CustomInputFile key={inputKey} onChange={handleFileChange} type="video" />
           )}
           {/* if store._editorelements, make sure to provide option for deleting all  frames and resetting the editor */}
           {store.frames.length > 0 && store.elements.length > 0 && (

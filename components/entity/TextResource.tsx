@@ -12,7 +12,7 @@ type TextResourceProps = {
 export const TextResource = observer(({ fontSize, fontWeight, sampleText }: TextResourceProps) => {
   const store = useStores().editorStore;
   return (
-    <div className="m-[15px] flex h-full flex-row items-center ">
+    <div className="m-[15px] flex h-full flex-row items-center bg-secondary">
       <div
         className="flex-1 px-2 py-1 "
         style={{

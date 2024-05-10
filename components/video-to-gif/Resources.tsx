@@ -9,6 +9,7 @@ import SmiliesResource from '../entity/SmiliesResource';
 import GifResource from '../entity/GifResource';
 import ExportPanel from '../panels/ExportPanel';
 import { AnimationsPanel } from '../panels/AnimationsPanel';
+import EffectsPanel from '../panels/EffectsPanel';
 export type AnimationResourceProps = {
   animation: Animation;
 };
@@ -18,7 +19,7 @@ export const Resources = observer(() => {
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   return (
     <aside
-      className="relative h-full w-full text-foreground opacity-100 transition-all duration-300 ease-in-out dark:bg-slate-900 "
+      className="relative  h-full w-full   text-foreground opacity-100 transition-all duration-300 ease-in-out dark:bg-slate-900 "
       ref={sidebarRef}
     >
       <div className="relative h-full w-full ">
@@ -31,6 +32,7 @@ export const Resources = observer(() => {
           {selectedMenuOption === 'Smilies' ? <SmiliesResource /> : null}
           {selectedMenuOption === 'Gif' ? <GifResource /> : null}
           {selectedMenuOption === 'Animation' ? <AnimationsPanel /> : null}
+          {selectedMenuOption === 'Effect' ? <EffectsPanel /> : null}
         </div>
       </div>
     </aside>

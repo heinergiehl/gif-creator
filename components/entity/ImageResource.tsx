@@ -5,22 +5,9 @@ import React, { use } from 'react';
 import { observer } from 'mobx-react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import {
-  DndContext,
-  DragEndEvent,
-  DragMoveEvent,
-  DragOverlay,
-  DragStartEvent,
-  KeyboardSensor,
-  MouseSensor,
-  PointerSensor,
-  TouchSensor,
-  useDndContext,
-  useDraggable,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
 import { useStores } from '@/store';
+import { CustomInputFile } from '@/app/components/ui/CustomFileInput';
+import { useDraggable } from '@dnd-kit/core';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
@@ -69,26 +56,10 @@ const ImageResource = observer(() => {
       };
     }
   };
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 2,
-      },
-    }),
-  );
   return (
     <>
       <div className="h-screen space-y-2 p-4">
-        <span className="text-xs font-semibold text-gray-700">Add Image(s)</span>
-        <input
-          type="file"
-          multiple // Allow multiple files
-          className="mb-4 w-full max-w-xs"
-          onChange={handleImageChange}
-        />
+        <CustomInputFile onChange={handleImageChange} type="image" />
         <div className="mb-4 flex w-full flex-col items-center justify-center space-y-4">
           {store.images.map((image, index) => (
             <DraggableImage key={index} image={image} index={index} />
@@ -96,25 +67,6 @@ const ImageResource = observer(() => {
         </div>
       </div>
     </>
-  );
-});
-const DragOverlayComponent = observer(() => {
-  const store = useStores().editorStore;
-  const active = useDndContext().active;
-  if (!active) return null;
-  const translated = active.rect.current.translated;
-  return (
-    <DragOverlay>
-      {active.data.current && (
-        <Image
-          src={active.data.current.image}
-          width={100}
-          height={100}
-          alt="Dragging image"
-          className="max-h-[100px] max-w-[100px] rounded-lg object-cover"
-        />
-      )}
-    </DragOverlay>
   );
 });
 export default ImageResource;
