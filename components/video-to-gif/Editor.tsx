@@ -32,11 +32,6 @@ import { getUid } from '@/utils';
 import { usePathname } from 'next/navigation';
 import { Resources } from './Resources';
 import { ClipboardProvider, useClipboard } from '@/app/hooks/useClipboard';
-import { useInitializeCanvas } from '@/app/components/canvas/useInitializeCanvas';
-import { useManageFabricObjects } from '@/app/components/canvas/useManageFabricObjects';
-import { useUpdateFabricObjects } from '@/app/components/canvas/useUpdateFabricObjects';
-import { useUpdateSelectedObject } from '@/app/components/canvas/useUpdateSelectedObject';
-import { useSyncCanvasWithStore } from '@/app/components/canvas/useSyncCanvasWithStore';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {

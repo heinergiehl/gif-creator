@@ -3,7 +3,6 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { MdImage, MdTextFields } from 'react-icons/md';
 import { useStores } from '@/store';
-import { CustomAnimatedList } from '../ui/CustomAnimatedList';
 import { MagicCard, MagicContainer } from '../magicui/magic-card';
 import { Button } from '../ui/button';
 import { DeleteIcon, RemoveFormattingIcon, XIcon } from 'lucide-react';
