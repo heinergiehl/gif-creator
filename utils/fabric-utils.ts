@@ -1,5 +1,9 @@
-import { EditorElement, EffecType } from '@/types';
+import { EditorElement, EffecType, ImageEditorElement, TextEditorElement } from '@/types';
 import { fabric } from 'fabric';
+import { getUid } from './index';
+import { isString } from 'lodash';
+import { FaB } from 'react-icons/fa6';
+import { FilterInputOptions, FilterType } from '@/store/EditorStore';
 // https://jsfiddle.net/i_prikot/pw7yhaLf/
 export const CoverImage = fabric.util.createClass(fabric.Image, {
   type: 'coverImage',
@@ -182,6 +186,12 @@ declare module 'fabric' {
     }
     interface Object {
       id?: string;
+      zIndex: number;
+      customProperty?: CustomProperty;
+    }
+    interface Textbox {
+      id?: string;
+      zIndex: number;
       customProperty?: CustomProperty;
     }
     // make sure typescript knows about RemoeColor filter
@@ -255,3 +265,431 @@ export class FabricUitls {
     return clipRectangle;
   }
 }
+export class FabricObjectFactory {
+  static canvas: fabric.Canvas | null = null;
+  static setCanvas(canvas: fabric.Canvas) {
+    FabricObjectFactory.canvas = canvas;
+  }
+  static createFabricImageFromBlob(ele: ImageEditorElement): Promise<fabric.Image | undefined> {
+    return new Promise((resolve, reject) => {
+      const id = ele.properties.elementId;
+      const src = ele.properties.src;
+      const placement = ele.placement;
+      const existingObject = FabricObjectFactory.canvas?.getObjects().find((obj) => obj.id === id);
+      if (existingObject && FabricObjectFactory.isFabricImage(existingObject)) {
+        const updatedImage = FabricObjectFactory.updateFabricImage(ele, existingObject);
+        return resolve(updatedImage);
+      } else {
+        fabric.Image.fromURL(
+          src,
+          (img) => {
+            if (!FabricObjectFactory.canvas) return reject('No Canvas');
+            const { x, y, width, height, scaleX, scaleY, rotation, zIndex } = placement;
+            const shadowOptions = ele.shadow as fabric.IShadowOptions;
+            const filters = ele.filters?.map((filter) => {
+              return createFilter(filter.type || filter.filterType, filter);
+            });
+            if (FabricObjectFactory.canvas)
+              img.set({
+                filters: [...(filters || [])],
+                id,
+                left: x,
+                top: y,
+                width: width || img.width,
+                height: height || img.height,
+                scaleX: scaleX
+                  ? scaleX
+                  : (FabricObjectFactory.canvas?.width ?? 1) / (img.width ?? 1),
+                scaleY: scaleY
+                  ? scaleY
+                  : (FabricObjectFactory.canvas?.height ?? 1) / (img.height ?? 1),
+                angle: rotation || 0,
+                opacity: ele.opacity || 1,
+                zIndex: zIndex || 0,
+                originX: 'left',
+                originY: 'top',
+                selectable: true,
+                hoverCursor: 'pointer',
+                borderColor: 'none',
+                crossOrigin: 'anonymous',
+                shadow: new fabric.Shadow(shadowOptions),
+                stateProperties: fabric.Image.prototype.stateProperties?.concat(['id', 'zIndex']),
+                statefullCache: true,
+              });
+            img.setCoords();
+            img.applyFilters();
+            FabricObjectFactory.canvas?.requestRenderAll();
+            resolve(img);
+          },
+          { crossOrigin: 'anonymous' },
+        );
+      }
+    });
+  }
+  static updateFabricImage(options: Partial<ImageEditorElement>, image: fabric.Image) {
+    if (!image) return;
+    const { x, y, width, height, scaleX, scaleY, rotation, zIndex } = options.placement || {};
+    // check if element has shadow property with type of fabric.IShadowOptions
+    let shadow: fabric.IShadowOptions | undefined;
+    if (
+      options.shadow &&
+      typeof options.shadow === 'object' &&
+      Object.keys(options.shadow).length > 0
+    ) {
+      shadow = options.shadow;
+    }
+    image.set({
+      id: image.id,
+      crossOrigin: 'anonymous',
+      opacity: options.opacity,
+      zIndex,
+      left: x,
+      top: y,
+      width,
+      height,
+      scaleX,
+      scaleY,
+      originX: 'left',
+      originY: 'top',
+      angle: rotation,
+      shadow: new fabric.Shadow({
+        ...(image.shadow as fabric.IShadowOptions),
+        ...shadow,
+      }),
+    });
+    image.setCoords();
+    image.applyFilters();
+    FabricObjectFactory.canvas?.requestRenderAll();
+    return image;
+  }
+  static createFabricText(editorElement: TextEditorElement): Promise<fabric.Text> {
+    return new Promise((resolve, reject) => {
+      const { placement, properties, id, shadow, dataUrl, opacity } = editorElement;
+      const { x, y, width, height, scaleX, scaleY, rotation, zIndex } = placement;
+      const {
+        fontSize,
+        fontFamily,
+        fill,
+        textAlign,
+        fontWeight,
+        fontStyle,
+        text,
+        underline,
+        overline,
+        linethrough,
+      } = properties;
+      const existingFabricText = FabricObjectFactory.canvas
+        ?.getObjects()
+        .find((obj) => obj.id === id);
+      if (existingFabricText && FabricObjectFactory.isFabricText(existingFabricText)) {
+        const updatedText = FabricObjectFactory.updateFabricText(editorElement, existingFabricText);
+        if (updatedText === undefined) {
+          return reject(new Error('Failed to update text'));
+        }
+        resolve(updatedText);
+      } else {
+        const textObject = new fabric.Textbox(text, {
+          zIndex: zIndex || 0,
+          opacity: opacity || 1,
+          id,
+          left: x || 0,
+          top: y || 0,
+          width: width || 200,
+          height: height || 200,
+          scaleX: scaleX || 1,
+          scaleY: scaleY || 1,
+          angle: rotation || 0,
+          fontSize,
+          fontFamily,
+          fill: FabricObjectFactory.parseFill(fill),
+          textAlign,
+          fontWeight,
+          fontStyle,
+          selectable: true,
+          underline,
+          overline,
+          linethrough,
+          hoverCursor: 'pointer',
+          editable: true,
+          shadow: new fabric.Shadow({
+            ...(shadow as fabric.IShadowOptions),
+          }),
+        });
+        textObject.setCoords();
+        // this.canvas?.add(textObject);
+        resolve(textObject);
+      }
+    });
+  }
+  static parseFill = (
+    fill: string | fabric.Pattern | fabric.IGradientOptions | undefined,
+  ): string | fabric.Gradient | fabric.Pattern => {
+    switch (true) {
+      case fill === undefined:
+        return 'black';
+      case isString(fill):
+        if (!fill.includes('gradient') && !fill.includes('pattern')) {
+          return fill;
+        }
+        if (fill.includes('gradient')) {
+          const gradient = parseGradient(fill);
+          return new fabric.Gradient({
+            ...gradient,
+          });
+        }
+        return fill;
+      case isFabricGradientOptions(fill):
+        return new fabric.Gradient({
+          ...fill,
+        });
+      case isFabricPatternOptions(fill):
+        return new fabric.Pattern({
+          source: fill.source,
+          repeat: fill.repeat,
+        });
+      default:
+        return fill;
+    }
+  };
+  static updateFabricText(options: Partial<TextEditorElement>, text: fabric.Text) {
+    if (!text) return;
+    const { x, y, width, height, scaleX, scaleY, rotation } = options.placement || {};
+    let shadow: fabric.IShadowOptions | undefined;
+    if (
+      options.shadow &&
+      typeof options.shadow === 'object' &&
+      Object.keys(options.shadow).length > 0
+    ) {
+      shadow = options.shadow;
+    }
+    const {
+      text: textContent,
+      fontSize,
+      fontFamily,
+      fill,
+      textAlign,
+      fontWeight,
+      fontStyle,
+      underline,
+      overline,
+      linethrough,
+    } = options.properties || {};
+    text.set({
+      zIndex: options.placement?.zIndex,
+      id: text.id,
+      left: x,
+      top: y,
+      width,
+      height,
+      scaleX,
+      scaleY,
+      angle: rotation,
+      text: textContent,
+      fontSize,
+      fontFamily,
+      fill: this.parseFill(fill),
+      textAlign,
+      fontWeight,
+      fontStyle,
+      underline,
+      overline,
+      linethrough,
+      shadow: new fabric.Shadow({
+        ...(text.shadow as fabric.IShadowOptions),
+        ...shadow,
+      }),
+    });
+    text.setCoords();
+    return text;
+  }
+  static manageFabricObject(editorElement: EditorElement): Promise<fabric.Object | undefined> {
+    if (FabricObjectFactory.isImageEditorElement(editorElement)) {
+      return FabricObjectFactory.createFabricImageFromBlob(editorElement);
+    } else if (FabricObjectFactory.isTextEditorElement(editorElement)) {
+      return FabricObjectFactory.createFabricText(editorElement);
+    }
+    return Promise.resolve(undefined);
+  }
+  static isFabricGradientOptions(
+    obj: fabric.IGradientOptions | fabric.IPatternOptions,
+  ): obj is fabric.IGradientOptions {
+    return 'colorStops' in obj;
+  }
+  isFabricPatternOptions = (value: any): value is fabric.Pattern => {
+    // Add appropriate checks for Pattern properties
+    return value && typeof value === 'object' && 'source' in value;
+  };
+  static isImageEditorElement(editorElement: EditorElement): editorElement is ImageEditorElement {
+    return editorElement.type === 'image';
+  }
+  static isTextEditorElement(editorElement: EditorElement): editorElement is TextEditorElement {
+    return editorElement.type === 'text';
+  }
+  static isFabricImage(obj: fabric.Object): obj is fabric.Image {
+    return obj instanceof fabric.Image;
+  }
+  static isFabricText(obj: fabric.Object): obj is fabric.Text {
+    return obj instanceof fabric.Text;
+  }
+}
+export function parseGradient(gradient: string): {
+  type: 'linear' | 'radial';
+  coords: { x1: number; y1: number; x2: number; y2: number };
+  colorStops: fabric.Gradient['colorStops'];
+} {
+  const typeMatch = gradient.match(/(linear-gradient|radial-gradient)/);
+  const type = typeMatch && typeMatch[0] === 'radial-gradient' ? 'radial' : 'linear';
+  const directionMatch = gradient.match(/to [\w\s]+,/);
+  const direction = directionMatch ? directionMatch[0].replace(',', '').trim() : 'to bottom';
+  const colorStopRegex = /rgba?\([^)]+\)|#[0-9a-f]{3,6}|[a-z]+/gi;
+  const colorsPart = gradient.replace(/(linear-gradient|radial-gradient|to [\w\s]+,)/gi, '').trim();
+  const colors = colorsPart.match(colorStopRegex) || [];
+  const colorStops = colors.map((color, index) => ({
+    offset: index / (colors.length - 1),
+    color,
+  }));
+  const coords = { x1: 0, y1: 0, x2: 0, y2: 0 };
+  // Convert direction to coordinates
+  switch (direction) {
+    case 'to top':
+      coords.x1 = 0;
+      coords.y1 = 1;
+      coords.x2 = 0;
+      coords.y2 = 0;
+      break;
+    case 'to bottom':
+      coords.x1 = 0;
+      coords.y1 = 0;
+      coords.x2 = 0;
+      coords.y2 = 1;
+      break;
+    case 'to left':
+      coords.x1 = 1;
+      coords.y1 = 0;
+      coords.x2 = 0;
+      coords.y2 = 0;
+      break;
+    case 'to right':
+      coords.x1 = 0;
+      coords.y1 = 0;
+      coords.x2 = 1;
+      coords.y2 = 0;
+      break;
+    case 'to top left':
+      coords.x1 = 1;
+      coords.y1 = 1;
+      coords.x2 = 0;
+      coords.y2 = 0;
+      break;
+    case 'to top right':
+      coords.x1 = 0;
+      coords.y1 = 1;
+      coords.x2 = 1;
+      coords.y2 = 0;
+      break;
+    case 'to bottom left':
+      coords.x1 = 1;
+      coords.y1 = 0;
+      coords.x2 = 0;
+      coords.y2 = 1;
+      break;
+    case 'to bottom right':
+      coords.x1 = 0;
+      coords.y1 = 0;
+      coords.x2 = 1;
+      coords.y2 = 1;
+      break;
+    default:
+      coords.x1 = 0;
+      coords.y1 = 0;
+      coords.x2 = 0;
+      coords.y2 = 1;
+      break;
+  }
+  return { type, coords, colorStops };
+}
+const isFabricGradientOptions = (value: any): value is fabric.IGradientOptions => {
+  return value && typeof value === 'object' && 'colorStops' in value;
+};
+const isFabricPatternOptions = (value: any): value is fabric.Pattern => {
+  return value && typeof value === 'object' && 'source' in value;
+};
+export function gradientObjectToString(gradient: fabric.IGradientOptions): string {
+  const directionMap: { [key: string]: string } = {
+    '0,0,0,1': 'to bottom',
+    '0,1,0,0': 'to top',
+    '1,0,0,0': 'to left',
+    '0,0,1,0': 'to right',
+    '1,1,0,0': 'to top left',
+    '0,1,1,0': 'to top right',
+    '1,0,0,1': 'to bottom left',
+    '0,0,1,1': 'to bottom right',
+  };
+  if (!gradient?.coords || !gradient.colorStops || !gradient.type) {
+    console.log('Invalid gradient object in gradientObjectToString:', gradient);
+    return '';
+  }
+  const coordsKey = `${gradient.coords.x1},${gradient.coords.y1},${gradient.coords.x2},${gradient.coords.y2}`;
+  const direction = directionMap[coordsKey] || 'to bottom';
+  const colorStops = gradient.colorStops.map((stop) => stop.color).join(', ');
+  return `${gradient.type}-gradient(${direction}, ${colorStops})`;
+}
+export function shadowOptionsToString(shadow: fabric.IShadowOptions): string {
+  const { color, blur, offsetX, offsetY } = shadow;
+  return `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+}
+export function stringToShadowOptions(shadow: string): fabric.IShadowOptions {
+  const [offsetX, offsetY, blur, color] = shadow.split(' ');
+  return {
+    offsetX: parseInt(offsetX),
+    offsetY: parseInt(offsetY),
+    blur: parseInt(blur),
+    color,
+  };
+}
+export function isImageEditorElement(
+  editorElement: EditorElement,
+): editorElement is ImageEditorElement {
+  return editorElement.type === 'image';
+}
+export function isTextEditorElement(
+  editorElement: EditorElement,
+): editorElement is TextEditorElement {
+  return editorElement.type === 'text';
+}
+export function isFabricImage(obj: fabric.Object): obj is fabric.Image {
+  return obj instanceof fabric.Image;
+}
+export function isFabricText(obj: fabric.Object): obj is fabric.Text {
+  return obj instanceof fabric.Text;
+}
+export const createFilter = (filterType: FilterType, options: FilterInputOptions) => {
+  switch (filterType) {
+    case FilterType.Grayscale:
+      return new fabric.Image.filters.Grayscale(options as any);
+    case FilterType.Invert:
+      return new fabric.Image.filters.Invert(options as any);
+    case FilterType.RemoveColor:
+      return new fabric.Image.filters.RemoveColor(options as any);
+    case FilterType.Sepia:
+      return new fabric.Image.filters.Sepia(options as any);
+    case FilterType.Brightness:
+      console.log('Creating Brightness filter with options:', options);
+      return new fabric.Image.filters.Brightness(options as any);
+    case FilterType.Contrast:
+      return new fabric.Image.filters.Contrast(options as any);
+    case FilterType.Pixelate:
+      return new fabric.Image.filters.Pixelate(options as any);
+    case FilterType.Blur:
+      return new fabric.Image.filters.Blur(options as any);
+    case FilterType.Vibrance:
+      return new fabric.Image.filters.Vibrance(options as any);
+    case FilterType.Noise:
+      return new fabric.Image.filters.Noise(options as any);
+    case FilterType.Saturation:
+      return new fabric.Image.filters.Saturation(options as any);
+    default:
+      console.error('Filter type not supported:', filterType);
+      return null;
+  }
+};

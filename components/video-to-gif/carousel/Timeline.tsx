@@ -1,3 +1,4 @@
+import { CustomTooltip } from '@/app/components/ui/CustomTooltip';
 import { TimeFrameView } from '@/components/timeline/TimeFrameView';
 import { ScrollBar, ScrollArea } from '@/components/ui/scroll-area';
 import { useStores } from '@/store';
@@ -13,6 +14,7 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = observer(
   ({ currentFrame, onSelectFrame, totalFrames, minWidth = 300, maxWidth = 800 }) => {
     const editorStore = useStores().editorStore;
+    const timelineStore = useStores().timelineStore;
     const animationStore = useStores().animationStore;
     const editorCarouselStore = useStores().editorCarouselStore;
     const markerWidthPercent = 100 / totalFrames;
@@ -31,8 +33,10 @@ const Timeline: React.FC<TimelineProps> = observer(
         });
         const mouseXRelativeToTimeline = event.clientX - left; // Mouse X position relative to the timeline start
         const frameNumber = Math.ceil((mouseXRelativeToTimeline / width) * totalFrames);
-        setTooltipContent(`Frame: ${frameNumber}`);
-        setFrameNumber(frameNumber);
+        if (frameNumber) {
+          setTooltipContent(`Frame: ${frameNumber}`);
+          setFrameNumber(frameNumber);
+        }
       }
     };
     const store = useStores().editorStore;
@@ -46,13 +50,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           element.timeFrame.end = (index + 1) * animationStore.timePerFrameInMs;
         }
       });
-      console.log(
-        'TIMEPERFRAME69!!',
-        animationStore.timePerFrameInMs,
-        store.frames.length,
-        store.maxTime,
-      );
-    }, [store.elements, animationStore.fps, store.maxTime]);
+    }, [store.elements, animationStore.fps, store.maxTime, store.frames]);
     let currentPositionPercent = 0;
     if (editorStore.frames.length > 0) {
       currentPositionPercent = markerWidthPercent * currentFrame;
@@ -60,22 +58,21 @@ const Timeline: React.FC<TimelineProps> = observer(
       currentPositionPercent = 0;
     }
     const tooltip = useRef<HTMLDivElement>(null);
+    const width = `${maxWidth - 100}px`;
     return (
       <>
         <div
-          style={{ maxWidth: `${maxWidth}px`, minWidth: `${minWidth}px` }}
+          style={{ width }}
           onMouseMove={handleMouseMove}
           className="relative m-auto flex flex-col items-end"
           onClick={() => {
             editorStore.currentKeyFrame = frameNumber - 1;
-            animationStore.addCurrentGifFrameToCanvas();
           }}
         >
           {/* display current time */}
           <div className="flex space-x-4">
             <div className="text-sm font-semibold text-gray-500">
-              {editorCarouselStore?.timelineStore &&
-                editorCarouselStore?.timelineStore?.formatCurrentTime()}
+              {timelineStore && timelineStore?.formatCurrentTime()}
             </div>
             {/* display of current frame / total frames */}
             <div className="text-sm font-semibold text-gray-500">
@@ -106,24 +103,27 @@ const Timeline: React.FC<TimelineProps> = observer(
         </div>
         <ScrollArea
           type="always"
-          className=" flex h-[80px] items-center justify-center rounded-md border bg-slate-100
+          className="flex h-[80px] items-center justify-center overflow-visible rounded-md border bg-slate-100
           dark:bg-slate-800
           "
           style={{
-            maxWidth: `${maxWidth}px`,
+            width,
             height: '80px',
-            minWidth: `${minWidth}px`,
           }}
         >
           <div
-            className="flex flex-col p-4 "
+            className="flex flex-col overflow-visible p-4 "
             style={{
-              width: `${maxWidth}px`,
-              minWidth: `${minWidth}px`,
+              width,
             }}
           >
             {editorStore.elements.map(
-              (obj, index) => !obj.isFrame && <TimeFrameView key={index} element={obj} />,
+              (obj, index) =>
+                !obj.isFrame && (
+                  <CustomTooltip content={obj.name} key={index}>
+                    <TimeFrameView element={obj} />
+                  </CustomTooltip>
+                ),
             )}
           </div>
         </ScrollArea>

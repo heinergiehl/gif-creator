@@ -1,51 +1,21 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/cn';
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import React from 'react';
 import { useStores } from '@/store';
-import Timeline from './Timeline';
-import {
-  useCarouselState,
-  useCarouselEffects,
-  useFrameSelection,
-} from '@/components/video-to-gif/carousel-hooks/hooks';
-import CarouselSkeleton from './CarouselSkeleton';
-import CarouselButton from './CarouselButton';
-import { CSS } from '@dnd-kit/utilities';
 import {
   DndContext,
   useDroppable,
-  MouseSensor,
-  TouchSensor,
-  KeyboardSensor,
-  closestCenter,
   useSensor,
   useSensors,
   PointerSensor,
-  DragMoveEvent,
-  DragEndEvent,
-  DragOverlay,
   useDndMonitor,
   useDndContext,
-  closestCorners,
-  Active,
-  rectIntersection,
-  DragOverEvent,
-  Over,
+  DragOverlay,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  arrayMove,
-  horizontalListSortingStrategy,
-  rectSortingStrategy,
-  rectSwappingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
+import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import {
   CarouselItem,
   CarouselContent,
@@ -56,75 +26,139 @@ import {
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { getUid } from '@/utils';
-import { createPortal } from 'react-dom';
-import { set } from 'lodash';
-const Droppable = (
-  props:
-    | {
-        children: React.ReactNode;
-        className?: string;
-        id: string;
-        active: Active | null;
-      }
-    | {
-        children: React.ReactNode;
-        className?: string;
-        id: string;
-        active: Active | null;
-      },
-) => {
-  const { isOver, setNodeRef, active } = useDroppable({
-    id: String(props.id),
+import { Button } from '@/components/ui/button';
+import { XIcon } from 'lucide-react';
+import { useClipboard } from '@/app/hooks/useClipboard';
+import { useHotkeys } from 'react-hotkeys-hook';
+import Timeline from './Timeline';
+import { CSS } from '@dnd-kit/utilities';
+import { EditorElement } from '@/types';
+import SelectionArea from '@viselect/vanilla';
+import e from 'express';
+import { useToast } from '@/components/ui/use-toast';
+const Droppable = ({
+  children,
+  id,
+  className,
+}: {
+  children: React.ReactNode;
+  id: string;
+  className: string;
+}) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: String(id),
     data: {
       type: 'Frame',
     },
   });
-  // make sure to animate the droppable element when the dragged element is over it, so it moves to the left or right
   return (
     <div
+      data-id={id}
       ref={setNodeRef}
       className={cn([
         isOver ? ' border-r-8 border-blue-500' : 'border-r-4 border-transparent',
         'transition-colors duration-200 ease-in-out',
+        className,
       ])}
     >
-      {props.children}
+      {children}
     </div>
   );
 };
 interface EditorCarouselProps {
   containerWidth: number;
 }
-export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps) => {
+export const EditorCarousel = observer(function EditorCarousel({
+  containerWidth,
+}: EditorCarouselProps) {
   const store = useStores().editorStore;
-  const animationStore = useStores().animationStore;
-  const handleSelectFrame = (index: number) => {
-    if (index === store.currentKeyFrame) {
-      console.warn('Frame already selected');
-      return;
+  const [api, setApi] = useState<CarouselApi>();
+  const { clipboard, setClipboard } = useClipboard();
+  const [selectionStart, setSelectionStart] = useState<number | null>(null);
+  const [pasteIndicatorPosition, setPasteIndicatorPosition] = useState<number | null>(null);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const ctx = useDndContext();
+  const active = ctx.active;
+  const handleSelectFrame = (id: string, multiSelect = false) => {
+    const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
+    if (multiSelect) {
+      const currentSelection = store.selectedElements.map((el) => el.id);
+      if (currentSelection.includes(id)) {
+        store.setSelectedElements(currentSelection.filter((selectedId) => selectedId !== id));
+      } else {
+        store.setSelectedElements([...currentSelection, id]);
+      }
+    } else {
+      store.setSelectedElements([id]);
     }
-    if (index < 0 || index >= store.frames.length) {
-      console.error('Invalid frame index');
-      return;
-    }
-    store.currentKeyFrame = index;
-    animationStore.addCurrentGifFrameToCanvas();
+    store.currentKeyFrame = selectedFrameIdx;
   };
+  const selectionRef = useRef<SelectionArea>();
+  useEffect(() => {
+    if (active?.id) {
+      selectionRef.current?.cancel();
+      return;
+    }
+    if (selectionRef.current === undefined && store.elements.length > 0) {
+      selectionRef.current = new SelectionArea({
+        selectables: ['.selectable'],
+        boundaries: ['#carousel-container'],
+      })
+        .on('beforedrag', (e) => {
+          selectionRef.current?.clearSelection();
+        })
+        .on('start', ({ event }) => {
+          selectionRef.current?.clearSelection();
+          // remove all selected elements, meaning  selectedElements = [] and classList.remove('selected')
+          if (!event?.ctrlKey && !event?.metaKey) {
+          }
+        })
+        .on(
+          'move',
+          ({
+            store: {
+              changed: { added, removed },
+              stored,
+            },
+          }) => {
+            const changed = { added, removed };
+            changed.added.forEach((el) => {
+              el.classList.add('selected');
+            });
+            changed.removed.forEach((el) => {
+              el.classList.remove('selected');
+            });
+          },
+        )
+        .on('stop', (ev) => {
+          const selected = ev.selection.getSelection();
+          const selectedIds = selected
+            .map((el) => el.getAttribute('data-id'))
+            .filter((e) => e !== null) as string[];
+          // remove  selected class
+          selected.forEach((el) => {
+            el.classList.remove('selected');
+          });
+          store.setSelectedElements([...selectedIds]);
+        });
+      return () => {
+        selectionRef.current?.clearSelection();
+      };
+    }
+  }, [store.selectedElements, selectionRef.current]);
   const handleDeleteFrame = (index: number): void => {
-    store.deleteFrame(index); // Assuming this method exists on the store
+    store.deleteFrame(index);
     if (index === store.currentKeyFrame || index === store.frames.length - 1) {
       const newSelectedIndex = (index === 0 ? 0 : index - 1) % store.frames.length;
       store.currentKeyFrame = newSelectedIndex;
     }
   };
-  const [api, setApi] = React.useState<CarouselApi>();
   const handleNextFrame = useCallback(() => {
     if (api) {
       const currentlySelectedFrame = store.currentKeyFrame;
       if (currentlySelectedFrame < store.frames.length - 1) {
         store.currentKeyFrame = currentlySelectedFrame + 1;
         api.scrollNext();
-        animationStore.addCurrentGifFrameToCanvas();
       }
     }
   }, [api, store.currentKeyFrame, store.frames.length]);
@@ -133,115 +167,29 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       const currentlySelectedFrame = store.currentKeyFrame;
       if (currentlySelectedFrame > 0) {
         store.currentKeyFrame = currentlySelectedFrame - 1;
-        animationStore.addCurrentGifFrameToCanvas();
         api.scrollPrev();
       }
     }
   }, [api, store.currentKeyFrame, store.frames.length]);
-  const frames = store.frames;
-  // useEffect(() => {
-  //   if (api) {
-  //     const visibleIndexes = api.slidesInView();
-  //     const lastVisibleIndex = visibleIndexes[visibleIndexes.length - 1];
-  //     const currentlySelectedFrame = store.currentKeyFrame;
-  //     if (currentlySelectedFrame + 1 === lastVisibleIndex) {
-  //       api.scrollNext();
-  //     }
-  //     if (currentlySelectedFrame - 1 === visibleIndexes[0]) {
-  //       api.scrollPrev();
-  //     }
-  //   }
-  // }, [store.currentKeyFrame, api, api?.slidesInView()]);
   const getBasisOfCardItem = () => {
     const carouselWidth = containerWidth;
     if (carouselWidth <= 600) {
-      // Small carousel
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 1) || 1}]`;
     } else if (carouselWidth <= 900) {
-      // Medium carousel
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 2) || 1}]`;
     } else {
-      // Large carousel
       return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
     }
   };
-  const [hoverIndex, setHoverIndex] = useState(-1);
-  const over = useDndContext().over;
-  // useEffect(() => {
-  //   if (api) {
-  //     if (!store.isDragging) return;
-  //     const visibleIndexes = api.slidesInView();
-  //     if (!visibleIndexes.includes(hoverIndex)) {
-  //       // If not visible, scroll to make it visible
-  //       api.scrollTo(visibleIndexes[visibleIndexes.length - 1]);
-  //     }
-  //   }
-  // }, [hoverIndex, api]);
-  // useeffect auto scroll if current slide not in view
-  // useEffect(() => {
-  //   if (api) {
-  //     api.scrollTo(store.currentKeyFrame);
-  //   }
-  // }, [store.currentKeyFrame, api]);
-  // Attach event listeners to the carousel API
-  // useEffect(() => {
-  //   if (api) {
-  //     const handleSlidesInViewChange = () => {
-  //       const visibleIndexes = api.slidesInView();
-  //       // Optionally adjust hoverIndex based on some custom logic
-  //       setHoverIndex((prev) => {
-  //         if (prev === null) return null;
-  //         if (visibleIndexes.includes(prev)) return prev;
-  //         // If the hoverIndex is not visible, set it to the first visible index
-  //         return visibleIndexes[0];
-  //       });
-  //     };
-  //     api.on('slidesInView', handleSlidesInViewChange);
-  //     return () => {
-  //       // Clean up listener when component unmounts or api changes
-  //       api.off('slidesInView', handleSlidesInViewChange);
-  //     };
-  //   }
-  // }, [api, over]);
   const [shiftDirection, setShiftDirection] = useState<'left' | 'right' | null>(null);
-  // update frames order, after reordering the frames in the carousel
-  // const updateFramesOrder = (active: Active, over: Over | null) => {
-  //   const frames = store.frames;
-  //   if (frames.length === 0) return;
-  //   if (frames.length === 1) return;
-  //   if (frames.length === 0) return;
-  //   if (active && over) {
-  //     let oldIndex = frames.findIndex((frame) => frame.id === active.id);
-  //     let newIndex = frames.findIndex((frame) => frame.id === over.id);
-  //     if (oldIndex === -1 || newIndex === -1) return;
-  //     if (oldIndex === newIndex) return;
-  //     //edge case when a dragged element is added , use the shift direction to determine the new index
-  //     if (shiftDirection === 'left') {
-  //       newIndex = newIndex - 1 === -1 ? 0 : newIndex - 1;
-  //     } else if (shiftDirection === 'right') {
-  //       newIndex = newIndex === frames.length - 1 ? frames.length - 1 : newIndex;
-  //     }
-  //     oldIndex = oldIndex === -1 ? 0 : oldIndex;
-  //     store.updateFramesOrder(oldIndex, newIndex);
-  //     store.currentKeyFrame = newIndex;
-  //   }
-  //   store.updateEditorElementsForFrames();
-  //   animationStore.addCurrentGifFrameToCanvas();
-  // };
   useDndMonitor({
-    // onDragOver: (event) => {
-    //   updateOnDrag(event.over?.rect, event.over.id);
-    // },
     onDragOver: (event) => {
-      const newIndex = frames.findIndex((frame) => frame.id === event.over?.id);
+      const newIndex = store.frames.findIndex((frame) => frame.id === event.over?.id);
       updateHoverIndex(newIndex);
     },
-    onDragEnd: (e) => {
+    onDragEnd: () => {
       store.activeDraggable = null;
       store.isDragging = false;
-      // updateFramesOrder(e.active, e.over);
-      // animationStore.addCurrentGifFrameToCanvas();
-      console.log('drag end', store.currentKeyFrame);
     },
     onDragMove: (event) => {
       const visibleIndexes = api?.slidesInView();
@@ -259,9 +207,6 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
       }
     },
   });
-  const ctx = useDndContext();
-  const active = ctx.active;
-  // Function to update hover indices
   const updateHoverIndex = (newIndex: number) => {
     // setHoverIndex(newIndex);
   };
@@ -276,62 +221,213 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
   };
   useEffect(() => {
     if (store.frames.length > 0 && store.progress.conversion === 100) {
-      // animationStore.addCurrentGifFrameToCanvas();
-      console.log('ADDING IMAGES TO CANVAS');
       store.progress.conversion = 0;
     }
   }, [store.frames, store.progress.conversion]);
-  // for case that being with the dragged element on the edge of the carousel, we need to scroll to the left or right
-  // useEffect(() => {
-  //   if (api) {
-  //     const activeRect = active?.rect.current.translated;
-  //     const carouselRect = document.getElementById('carousel')?.getBoundingClientRect();
-  //     const overIndex = over?.id ? store.frames.findIndex((frame) => frame.id === over.id) : -1;
-  //     const scrollProgress = api.scrollProgress();
-  //     if (activeRect) {
-  //       console.log(activeRect.left < carouselRect.left, activeRect.right, carouselRect.right);
-  //       if (activeRect.left < carouselRect.left) {
-  //         api.scrollTo(api.slidesInView()[0]);
-  //         setHoverIndex(api.slidesInView()[0]);
-  //         store.currentKeyFrame = api.slidesInView()[0];
-  //       } else if (activeRect.right > carouselRect.right) {
-  //         api.scrollTo(api.slidesInView()[api.slidesInView().length - 1]);
-  //         setHoverIndex(api.slidesInView()[api.slidesInView().length - 1]);
-  //         store.currentKeyFrame = api.slidesInView()[api.slidesInView().length - 1];
-  //       }
-  //     }
-  //     console.log('HOVERINDEX', hoverIndex, store.currentKeyFrame, api.slidesInView());
-  //   }
-  // }, [
-  //   active?.rect.current.translated,
-  //   api?.slidesInView(),
-  //   hoverIndex,
-  //   api,
-  //   store.currentKeyFrame,
-  //   store.frames,
-  //   over?.id,
-  // ]);
+  const handleCut = useCallback(() => {
+    if (store.selectedElements.length > 0) {
+      selectionRef.current?.clearSelection();
+      const selectedFrames = store.frames.filter((frame) =>
+        store.selectedElements.map((el) => el.id).includes(frame.id),
+      );
+      // Identify elements corresponding to the selected frames
+      const elementsToCut = store.elements.filter((element) =>
+        selectedFrames.map((frame) => frame.id).includes(element.id),
+      );
+      // Set clipboard with elements and action
+      setClipboard({
+        elements: [...elementsToCut],
+        frames: [...selectedFrames],
+        action: 'cut',
+      });
+      // Delete frames and corresponding elements
+      // selectedFrames.forEach((frame) => {
+      //   store.deleteFrame(store.frames.indexOf(frame));
+      // });
+      elementsToCut.forEach((element) => {
+        store.removeElement(element.id);
+        store.removeFrame(element.id);
+      });
+      // Clear selected elements
+      store.setSelectedElements([]);
+      // Update currentKeyFrame
+      const selectedFramesStartIndex = store.selectedElements.findIndex(
+        (frame) => frame.id === store.selectedElements[0]?.id,
+      );
+      store.currentKeyFrame = selectedFramesStartIndex !== -1 ? selectedFramesStartIndex : 0;
+      toast({
+        title: 'Cut',
+        description: 'Elements cut to clipboard',
+        variant: 'default',
+        duration: 3000,
+      });
+      console.log(
+        'Cut to clipboard',
+        clipboard,
+        store.elements.map((e) => e.id),
+        store.frames.map((f) => f.id),
+      );
+    }
+  }, [store.selectedElements, setClipboard, store.frames, store.elements]);
+  const { toast } = useToast();
+  const handleCopy = useCallback(() => {
+    if (store.selectedElements.length > 0) {
+      setClipboard({
+        elements: store.selectedElements,
+        frames: store.frames.filter((frame) =>
+          store.selectedElements.map((el) => el.id).includes(frame.id),
+        ),
+        action: 'copy',
+      });
+      console.log('Copied to clipboard', clipboard);
+      toast({
+        title: 'Copied',
+        description: 'Elements copied to clipboard',
+        variant: 'default',
+        duration: 3000,
+      });
+    }
+  }, [store.selectedElements, setClipboard, store.frames]);
+  const handlePaste = useCallback(
+    (index: number, pasteBefore: boolean) => {
+      if (clipboard && clipboard.elements) {
+        const pastedElements: EditorElement[] = [];
+        const pastedFrames: Frame[] = [];
+        const framesCopy = [...store.frames];
+        clipboard.frames.forEach((frame, idx) => {
+          const id = clipboard.action === 'cut' ? frame.id : getUid();
+          const newFrame = { ...frame, id };
+          framesCopy.splice(pasteBefore ? index + idx : index + idx + 1, 0, newFrame);
+          pastedFrames.push(newFrame);
+        });
+        clipboard.elements.forEach((element) => {
+          const id = clipboard.action === 'cut' ? element.id : getUid();
+          const newElement = {
+            ...element,
+            id,
+            properties: { ...element.properties, elementId: id },
+          };
+          pastedElements.push(newElement);
+        });
+        if (clipboard.action === 'cut') {
+          // clipboard.elements.forEach((element) => store.removeElement(element.id));
+        }
+        store.frames = framesCopy;
+        store.elements = store.elements.concat(pastedElements);
+        setClipboard(null);
+        store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === pastedFrames[0].id);
+        store.setSelectedElements([...pastedElements.map((el) => el.id)]);
+        console.log(
+          'Pasted elements',
+          store.elements.map((el) => el.id),
+          store.frames.map((el) => el.id),
+        );
+      }
+    },
+    [clipboard, store, setClipboard],
+  );
+  const editorStore = useStores().editorStore;
+  const handlePasteHotkey = useCallback(
+    (event: KeyboardEvent) => {
+      const selectedElementIndex = store.frames.findIndex(
+        (el) =>
+          el.id ===
+          (editorStore.selectedElements.length > 0
+            ? editorStore.selectedElements[editorStore.selectedElements.length - 1].id
+            : ''),
+      );
+      const elementId = store.frames[selectedElementIndex]?.id;
+      const element = document.getElementById(elementId);
+      const { left, width } = element?.getBoundingClientRect() ?? { left: 0, width: 0 };
+      const pasteBefore = mousePosition!.x < left + width / 2;
+      handlePaste(selectedElementIndex + (pasteBefore ? 0 : 1), pasteBefore);
+    },
+    [clipboard, editorStore.selectedElements, handlePaste, store.frames, mousePosition],
+  );
+  useHotkeys('ctrl+c', handleCopy);
+  useHotkeys('ctrl+x', handleCut);
+  useHotkeys('ctrl+v', handlePasteHotkey);
+  const [selectionBox, setSelectionBox] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const handleMouseDrag = (event: React.MouseEvent) => {
+    if (selectionBox) {
+      const width = event.clientX - selectionBox.x;
+      const height = event.clientY - selectionBox.y;
+      setSelectionBox({ ...selectionBox, width, height });
+      console.log(
+        'Selection box',
+        selectionBox,
+        store.frames.map((frame) => frame.id),
+        store.selectedElements.map((el) => el.id),
+      );
+    }
+  };
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
+    // if (selectionBox) {
+    //   const width = event.clientX - selectionBox.x;
+    //   const height = event.clientY - selectionBox.y;
+    //   setSelectionBox({ ...selectionBox, width, height });
+    // }
+  };
+  const handleMouseEnter = (index: number) => {
+    setPasteIndicatorPosition(index);
+  };
+  const handleMouseLeave = () => {
+    setPasteIndicatorPosition(null);
+  };
+  const handleMouseDragEnd = (event: React.MouseEvent) => {
+    if (selectionBox) {
+      const selectionEnd = { x: event.clientX, y: event.clientY };
+      const selectedFrames = store.frames
+        .filter((frame) => {
+          const frameElement = document.getElementById(frame.id);
+          if (!frameElement) return false;
+          const { left, top, right, bottom } = frameElement.getBoundingClientRect();
+          return (
+            left >= selectionBox.x &&
+            right <= selectionEnd.x &&
+            top >= selectionBox.y &&
+            bottom <= selectionEnd.y
+          );
+        })
+        .map((frame) => frame.id);
+      console.log('Selected frames', selectedFrames);
+      store.setSelectedElements(selectedFrames);
+      store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === selectedFrames[0]);
+      setSelectionBox(null);
+      setSelectionStart(null);
+    }
+  };
+  const width = `${containerWidth - 100}px`;
   return (
-    <div className="flex flex-col items-center justify-center gap-y-4 px-16">
+    <div
+      className="flex select-none flex-col items-center justify-center gap-y-4 px-16"
+      draggable="false"
+      id="carousel-container"
+      onMouseMove={handleMouseMove}
+    >
       <Timeline
         maxWidth={containerWidth}
         minWidth={containerWidth}
         currentFrame={store.currentKeyFrame}
-        onSelectFrame={() => handleSelectFrame(store.currentKeyFrame)}
+        onSelectFrame={() => handleSelectFrame(store.frames[store.currentKeyFrame].id)}
         totalFrames={store.frames.length}
       />
       <div
         className="flex flex-col items-center justify-center "
         style={{
-          maxWidth: containerWidth + 'px',
-          minWidth: containerWidth + 'px',
+          width,
           minHeight: '120px',
         }}
       >
         <Carousel
           style={{
-            maxWidth: containerWidth + 'px',
-            minWidth: containerWidth + 'px',
+            width,
             minHeight: '120px',
           }}
           setApi={setApi}
@@ -348,16 +444,40 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
           {store.frames.length === 0 && <CarouselDroppable />}
           <CarouselContent
             style={{
-              overflowX: 'scroll',
+              overflowX: api?.slidesNotInView()?.length > 0 ? 'scroll' : 'hidden',
+              position: 'relative',
             }}
           >
+            {/* {selectionBox && !active?.id && (
+              <div
+                className="absolute border border-blue-500 bg-blue-500 bg-opacity-20"
+                style={{
+                  left: `${selectionBox.x}px`,
+                  top: `${selectionBox.y}px`,
+                  width: `${selectionBox.width}px`,
+                  height: `${selectionBox.height}px`,
+                }}
+              />
+            )} */}
             <SortableContext
               items={store.frames.map((frame) => frame.id)}
               strategy={rectSortingStrategy}
             >
               {store.frames.map((frame, index) => (
-                <Droppable id={frame.id} active={active} key={index}>
-                  <div key={index}>
+                <Droppable
+                  id={frame.id}
+                  active={active}
+                  key={index}
+                  className=" selectable relative mx-4 rounded-md border-2"
+                  data-id={frame.id}
+                >
+                  <div>
+                    {pasteIndicatorPosition === index && (
+                      <div
+                        className="absolute inset-y-0 left-0 w-1 bg-blue-500"
+                        style={{ height: '100%', zIndex: 10 }}
+                      />
+                    )}
                     <SortableItem
                       basisOfCardItem={getBasisOfCardItem()}
                       id={frame.id}
@@ -365,7 +485,9 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
                       index={index}
                       onFrameSelect={handleSelectFrame}
                       onFrameDelete={handleDeleteFrame}
-                      isSelected={index === store.currentKeyFrame}
+                      isSelected={store.selectedElements.map((el) => el.id).includes(frame.id)}
+                      onMouseEnter={() => handleMouseEnter(index)}
+                      onMouseLeave={handleMouseLeave}
                     />
                   </div>
                 </Droppable>
@@ -373,12 +495,7 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
             </SortableContext>
           </CarouselContent>
           <DragOverlay>
-            <DraggedImagePreview
-              src={
-                store.frames.find((frame) => frame.id === active?.id)?.src ||
-                'https://via.placeholder.com/100x100.png?text=Dragged+Frame'
-              }
-            />
+            <DraggedImagePreview src={active?.data.current?.image} />
           </DragOverlay>
           <div>
             <CarouselPrevious onClick={handlePrevFrame} />
@@ -392,26 +509,38 @@ export const EditorCarousel = observer(({ containerWidth }: EditorCarouselProps)
 interface Frame {
   id: string;
   src: string;
-  index: number; // Add index if necessary for handling specific interactions
+  index: number;
 }
 interface SortableItemProps extends Frame {
-  onFrameSelect: (index: number) => void;
+  onFrameSelect: (id: string, multiSelect?: boolean) => void;
   onFrameDelete: (index: number) => void;
+  onMouseDown: (id: string, e: React.MouseEvent) => void;
   basisOfCardItem: string;
   index: number;
   isSelected: boolean;
+  onMouseEnter: (index: number) => void;
+  onMouseLeave: () => void;
 }
 const SortableItem: React.FC<SortableItemProps> = observer(
-  ({ id, src, index, onFrameSelect, onFrameDelete, isSelected, basisOfCardItem }) => {
+  ({
+    id,
+    src,
+    index,
+    onFrameSelect,
+    onFrameDelete,
+    isSelected,
+    basisOfCardItem,
+    onMouseEnter,
+    onMouseLeave,
+  }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-    // move sortable item to the left or right when a dragged element is over it
-    const active = useDndContext().active;
-    const over = useDndContext().over;
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
     };
     const store = useStores().editorCarouselStore;
+    const editorStore = useStores().editorStore;
+    const [showHoverCard, setShowHoverCard] = useState(false);
     return (
       <CarouselItem
         key={index}
@@ -420,23 +549,36 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         {...attributes}
         {...listeners}
         className={cn([
-          'flex h-full  cursor-pointer items-center justify-center p-0 transition-colors duration-200 ease-in-out ',
+          'flex h-full cursor-pointer select-none items-center justify-center p-0 transition-colors duration-200 ease-in-out',
           basisOfCardItem,
         ])}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          onFrameSelect(index);
-        }}
+        onClick={() => onFrameSelect(id)}
+        onMouseEnter={() => onMouseEnter(index)}
+        onMouseLeave={onMouseLeave}
       >
         <div className="p-1">
-          <Card className="relative flex h-full items-center justify-center">
-            {isSelected && (
-              <div className="absolute inset-0 rounded-lg bg-slate-600 opacity-50 transition-all duration-300"></div>
-            )}
+          <Card
+            className="relative"
+            onMouseEnter={() => setShowHoverCard(true)}
+            onMouseLeave={() => setShowHoverCard(false)}
+          >
+            <div
+              className={cn([
+                ' absolute inset-0 rounded-lg opacity-50 transition-all duration-300 dark:hover:bg-slate-700',
+                isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-800',
+              ])}
+            >
+              <span
+                className={cn([
+                  'absolute text-xs transition-opacity duration-500',
+                  showHoverCard ? 'opacity-100' : 'opacity-0',
+                ])}
+              >{`Frame ${index + 1}/${editorStore.frames.length}`}</span>
+            </div>
             <CardContent className="flex h-full items-center justify-center p-0">
               <Image
                 src={src}
-                alt={`Frame ${index}`}
+                alt={`Frame ${index + 1}`}
                 onLoad={(image) => {
                   store.cardItemHeight = image.currentTarget.naturalHeight;
                   store.cardItemWidth = image.currentTarget.naturalWidth;
@@ -444,30 +586,21 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                 id={id}
                 width={100}
                 height={100}
-                className="min-h-[100px] min-w-[100px] rounded-lg "
+                className="min-h-[100px] min-w-[100px] rounded-lg"
               />
-              <button
+              <Button
+                variant={'outline'}
                 onMouseDown={(e) => {
-                  e.stopPropagation(); // Prevent triggering onSelect when clicking delete
+                  e.stopPropagation();
                   onFrameDelete(index);
                 }}
-                className="absolute right-2 top-2 z-20 text-white"
+                className={cn([
+                  'absolute right-2 top-2 z-20 m-0 h-5 w-5 rounded-full p-0 transition duration-500',
+                  showHoverCard ? 'opacity-100' : 'opacity-0',
+                ])}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                <XIcon />
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -485,22 +618,19 @@ const DraggedImagePreview = ({ src }: { src: string }) => {
           alt="Dragged frame"
           width={100}
           height={100}
-          className="min-h-[100px] min-w-[100px] "
+          className="min-h-[100px] min-w-[100px]"
         />
       </CardContent>
     </Card>
   );
 };
-// for the case that there are no frames, we dont have many droppables but only one droppable, which will be
-// the whole carousel
 const CarouselDroppable = () => {
-  const { isOver, setNodeRef, active, over } = useDroppable({
+  const { isOver, setNodeRef } = useDroppable({
     id: 'carousel',
     data: {
       type: 'Frame',
     },
   });
-  console.log('isOver', isOver, active, over);
   return (
     <div
       ref={setNodeRef}

@@ -1,16 +1,18 @@
-import { makeAutoObservable } from 'mobx';
+import { computed, makeAutoObservable } from 'mobx';
 import { AnimationStore } from './AnimationStore';
 import { EditorElement, TimeFrame } from '@/types';
-import { EditorStore } from './EditorStore';
+import { RootStore } from '.';
 export class TimelineStore {
-  private animationStore?: AnimationStore;
-  private editorStore?: EditorStore;
-  constructor() {
+  private rootStore?: RootStore;
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
     makeAutoObservable(this);
   }
-  initialize(animationStore: AnimationStore, editorStore: EditorStore) {
-    this.animationStore = animationStore;
-    this.editorStore = editorStore;
+  get editorStore() {
+    return this.rootStore?.editorStore;
+  }
+  get animationStore() {
+    return this.rootStore?.animationStore;
   }
   updateEditorElementTimeFrame(editorElement: EditorElement, timeFrame: Partial<TimeFrame>) {
     const maxTime = this.editorStore?.maxTime || Infinity;
@@ -24,9 +26,15 @@ export class TimelineStore {
       ...editorElement,
       timeFrame: { ...editorElement.timeFrame, ...timeFrame },
     };
+    console.log(
+      'updateEditorElementTimeFrame:',
+      'from',
+      editorElement.timeFrame,
+      'to',
+      updatedElement.timeFrame,
+    );
     this.editorStore?.updateElement(updatedElement.id, updatedElement);
-    this.animationStore?.addCurrentGifFrameToCanvas();
-    this.animationStore?.refreshAnimations();
+    // this.animationStore?.refreshAnimations();
   }
   formatCurrentTime(): string {
     if (!this.editorStore || !this.animationStore) return this.formatTime(0);
@@ -55,7 +63,7 @@ export class TimelineStore {
       return;
     }
     this.editorStore!.currentKeyFrame = frame;
-    this.animationStore!.addCurrentGifFrameToCanvas();
+    // this.animationStore!.addCurrentGifFrameToCanvas();
   }
   private startPlayback() {
     this.editorStore!.isPlaying = true;

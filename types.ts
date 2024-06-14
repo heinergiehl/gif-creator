@@ -1,4 +1,7 @@
-import { fabric } from 'fabric';
+export type Frame = {
+  id: string;
+  src: string;
+};
 export type Position = {
   top: number | undefined;
   left: number | undefined;
@@ -6,43 +9,24 @@ export type Position = {
 export type EditorElementBase<T extends string, P> = {
   readonly index?: number;
   readonly id: string;
-  fabricObject?: fabric.Object;
   name: string;
   readonly type: T;
   isFrame?: boolean;
   placement: Placement;
   timeFrame: TimeFrame;
+  shadow?: fabric.IShadowOptions;
   properties: P;
+  order: number;
+  copied?: boolean;
+  dataUrl?: string;
+  opacity?: number;
+  visible?: boolean;
 };
-export type VideoEditorElement = EditorElementBase<
-  'video',
-  { src: string; elementId: string; imageObject?: fabric.Image; effect: Effect }
->;
 export type ImageEditorElement = EditorElementBase<
   'image',
   {
     src: string;
     elementId: string;
-    imageObject?: fabric.Object;
-    effect: Effect;
-  }
->;
-export type SmiliesEditorElement = EditorElementBase<
-  'smilies',
-  {
-    src: string;
-    elementId: string;
-    imageObject?: fabric.Object;
-    effect: Effect;
-  }
->;
-export type GifEditorElement = EditorElementBase<
-  'gif',
-  {
-    src: string;
-    elementId: string;
-    imageObject?: fabric.Object;
-    effect: Effect;
   }
 >;
 export type AudioEditorElement = EditorElementBase<'audio', { src: string; elementId: string }>;
@@ -51,29 +35,28 @@ export type TextEditorElement = EditorElementBase<
   {
     text: string;
     fontSize: number;
-    fontWeight: number;
+    fontWeight: fabric.TextOptions['fontWeight'];
     fontFamily: string;
     fontColor: string;
     textBackground: string;
-    fontStyle: string;
-    splittedTexts: fabric.Text[];
+    fontStyle: fabric.TextOptions['fontStyle'];
+    textAlign: fabric.TextOptions['textAlign'];
+    fill: string;
+    underline: boolean;
+    linethrough: boolean;
+    overline: boolean;
   }
 >;
-export type EditorElement =
-  | VideoEditorElement
-  | ImageEditorElement
-  | AudioEditorElement
-  | TextEditorElement
-  | SmiliesEditorElement
-  | GifEditorElement;
+export type EditorElement = ImageEditorElement | AudioEditorElement | TextEditorElement;
 export type Placement = {
   x: number;
   y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  scaleX: number;
-  scaleY: number;
+  width?: number;
+  height?: number;
+  rotation?: number;
+  scaleX?: number;
+  scaleY?: number;
+  zIndex?: number;
 };
 export type TimeFrame = {
   start: number;
@@ -107,7 +90,7 @@ export type SlideInAnimation = AnimationBase<
   {
     direction: SlideDirection;
     useClipPath: boolean;
-    textType: 'none' | 'character';
+    textType: SlideTextType;
   }
 >;
 export type SlideOutAnimation = AnimationBase<
@@ -125,6 +108,7 @@ export type Animation =
   | SlideOutAnimation
   | BreatheAnimation;
 export type MenuOption =
+  | ''
   | 'Video'
   | 'Audio'
   | 'Text'

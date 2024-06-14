@@ -1,17 +1,13 @@
 import { makeAutoObservable } from 'mobx';
 import { TimelineStore } from './TimelineStore';
-import { EditorStore } from './EditorStore';
+import { RootStore } from '.';
 export class EditorCarouselStore {
-  timelineStore?: TimelineStore;
-  editorStore?: EditorStore;
+  rootStore?: RootStore;
   cardItemWidth: number = 0;
   cardItemHeight: number = 0;
   isCreatingGifs: boolean = false;
-  constructor() {
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
     makeAutoObservable(this);
-  }
-  initialize(editorStore: EditorStore, timelineStore: TimelineStore) {
-    this.editorStore = editorStore;
-    this.timelineStore = timelineStore;
   }
 }

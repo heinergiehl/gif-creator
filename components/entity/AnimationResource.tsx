@@ -12,6 +12,7 @@ import {
   SlideTextType,
 } from '@/types';
 import { useStores } from '@/store';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
 const ANIMATION_TYPE_TO_LABEL: Record<string, string> = {
   fadeIn: 'Fade In',
   fadeOut: 'Fade Out',
@@ -24,6 +25,9 @@ export type AnimationResourceProps = {
 };
 export const AnimationResource = observer((props: AnimationResourceProps) => {
   const store = useStores().animationStore;
+  const removeAnimation = () => {
+    store.removeAnimation(props.animation.id);
+  };
   return (
     <div className="relative m-[15px] flex min-h-[100px] flex-col items-center overflow-hidden rounded-lg bg-slate-800 p-2">
       <div className="flex w-full flex-row justify-between">
@@ -32,7 +36,7 @@ export const AnimationResource = observer((props: AnimationResourceProps) => {
         </div>
         <button
           className="z-10 rounded bg-[rgba(0,0,0,.25)] py-1 text-lg font-bold text-white hover:bg-[#00a0f5]"
-          onClick={() => store.removeAnimation(props.animation.id)}
+          onClick={removeAnimation}
         >
           <MdDelete size="25" />
         </button>
@@ -49,6 +53,7 @@ export const AnimationResource = observer((props: AnimationResourceProps) => {
 export const FadeAnimation = observer(
   (props: { animation: FadeInAnimation | FadeOutAnimation }) => {
     const store = useStores().animationStore;
+    const { canvasRef } = useCanvas();
     return (
       <div className="flex w-full flex-col items-start">
         {/* duration */}
@@ -69,6 +74,8 @@ export const FadeAnimation = observer(
                 ...props.animation,
                 duration: newDuration,
               });
+              const canvas = canvasRef.current;
+              store.refreshAnimations(canvas);
             }}
           />
         </div>
@@ -81,6 +88,7 @@ export const FadeAnimation = observer(
 export const SlideAnimation = observer(
   (props: { animation: SlideInAnimation | SlideOutAnimation }) => {
     const store = useStores().animationStore;
+    const { canvasRef } = useCanvas();
     return (
       <div className="flex w-full flex-col items-start">
         {/* duration */}
@@ -101,6 +109,8 @@ export const SlideAnimation = observer(
                 ...props.animation,
                 duration: newDuration,
               });
+              const canvas = canvasRef.current;
+              store.refreshAnimations(canvas);
             }}
           />
         </div>
@@ -117,6 +127,8 @@ export const SlideAnimation = observer(
                   direction: e.target.value as SlideDirection,
                 },
               });
+              const canvas = canvasRef.current;
+              store.refreshAnimations(canvas);
             }}
           >
             <option value="left">Left</option>
@@ -139,6 +151,8 @@ export const SlideAnimation = observer(
                   useClipPath: e.target.checked,
                 },
               });
+              const canvas = canvasRef.current;
+              store.refreshAnimations(canvas);
             }}
           />
         </div>
@@ -155,6 +169,8 @@ export const SlideAnimation = observer(
                   textType: e.target.value as SlideTextType,
                 },
               });
+              const canvas = canvasRef.current;
+              store.refreshAnimations(canvas);
             }}
           >
             <option value="none">None</option>

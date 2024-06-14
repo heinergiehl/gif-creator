@@ -23,7 +23,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 }) => {
   return (
     <Select onValueChange={(e) => onChange(e)} value={value || ''}>
-      <SelectTrigger className={'max-w-[70%]'}>{trigger}</SelectTrigger>
+      <SelectTrigger className={'max-w-[70%]'}>{value !== '' ? value : trigger}</SelectTrigger>
       <SelectContent>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>

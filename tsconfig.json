@@ -22,14 +22,15 @@
       "@/*": ["./*"]
     }
   },
-  "darkMode": "class",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     "public/videoWorker.js",
-    "public(/.*)?.(js|ts|tsx)",
+    "public/**/*.js",
+    "public/**/*.ts",
+    "public/**/*.tsx",
     "tailwind.config.js"
   ],
   "exclude": ["node_modules"]

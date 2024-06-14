@@ -8,7 +8,6 @@ import { set } from 'animejs';
 import { Label } from '../ui/label';
 import { CustomSelect } from '@/app/components/ui/CustomSelect';
 import { Input } from '../ui/input';
-
 const TEXT_RESOURCES = [
   {
     name: 'Title',
@@ -110,11 +109,11 @@ export const TextResourcesPanel = observer(() => {
     store.fontSize = fontSize;
   }, [fontColor, fontSize]);
   return (
-    <div className="flex flex-col w-full h-full p-8 space-y-8 bg-slate-100 text-foreground dark:bg-slate-900 ">
-      <div className="flex flex-col items-start justify-between w-full space-y-8">
+    <div className="flex h-full w-full flex-col space-y-8 bg-slate-100 p-8 text-foreground dark:bg-slate-900 ">
+      <div className="flex w-full flex-col items-start justify-between space-y-8">
         <FontPicker />
         {/* Additional controls like color picker and font size range */}
-        <Label htmlFor="textColor" className="flex flex-col mb-2">
+        <Label htmlFor="textColor" className="mb-2 flex flex-col">
           <span className="pb-4">Text Color</span>
           <Input
             type="color"
@@ -131,7 +130,7 @@ export const TextResourcesPanel = observer(() => {
           value={fontSize}
           onChange={(e) => setFontSize(parseFloat(e.target.value))}
         /> */}
-        <Label htmlFor="fontSize" className="flex flex-col mb-2">
+        <Label htmlFor="fontSize" className="mb-2 flex flex-col">
           <span className="pb-4">Font Size</span>
           <Input
             type="range"

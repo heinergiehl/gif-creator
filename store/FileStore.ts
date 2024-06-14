@@ -1,17 +1,93 @@
-import { makeAutoObservable } from 'mobx';
-import { EditorStore } from './EditorStore';
+import { computed, makeAutoObservable } from 'mobx';
+import { fabric } from 'fabric';
 import GIF from '@/dist/gif.js';
-import { AnimationStore } from './AnimationStore';
+import { RootStore } from '.';
+import { EditorElement } from '@/types';
 export class FileStore {
-  private editorStore?: EditorStore;
-  private animationStore?: AnimationStore;
+  rootStore: RootStore;
   gifQuality = 10;
-  constructor() {
-    makeAutoObservable(this);
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
+    makeAutoObservable(this, {
+      canvas: computed,
+      animationStore: computed,
+      editorStore: computed,
+      fabricObjects: computed,
+    });
   }
-  initialize(editorStore: EditorStore, animationStore: AnimationStore) {
-    this.editorStore = editorStore;
-    this.animationStore = animationStore;
+  get editorStore() {
+    return this.rootStore.editorStore;
+  }
+  get canvas() {
+    return this.rootStore?.canvasRef?.current;
+  }
+  get fabricObjects() {
+    return this.canvas?.getObjects();
+  }
+  get animationStore() {
+    return this.rootStore.animationStore;
+  }
+  async loadFabricObject(element: EditorElement) {
+    const { type, properties, placement } = element;
+    switch (type) {
+      case 'image':
+      case 'smilies':
+      case 'gif':
+        return new Promise<fabric.Image>((resolve, reject) => {
+          fabric.Image.fromURL(
+            properties.src,
+            (img) => {
+              img.set({
+                scaleX: placement?.scaleX || 1,
+                scaleY: placement.scaleY || 1,
+                left: placement.x || 0,
+                top: placement.y || 0,
+                angle: placement.rotation,
+                originX: 'left',
+                originY: 'top',
+                selectable: false,
+              });
+              resolve(img);
+            },
+            { crossOrigin: 'anonymous' },
+          );
+        });
+      case 'text':
+        return new Promise<fabric.Text>((resolve) => {
+          const {
+            text,
+            fontSize,
+            fontWeight,
+            fontFamily,
+            fontColor,
+            fontStyle,
+            textAlign,
+            underline,
+            linethrough,
+          } = properties;
+          const fabricText = new fabric.Text(text, {
+            left: placement.x,
+            top: placement.y,
+            scaleX: placement.scaleX || 1,
+            scaleY: placement.scaleY || 1,
+            fontSize,
+            fontWeight,
+            fontFamily,
+            fill: fontColor,
+            fontStyle,
+            textAlign,
+            underline,
+            linethrough,
+            angle: placement.rotation,
+            originX: 'left',
+            originY: 'top',
+            selectable: false,
+          });
+          resolve(fabricText);
+        });
+      default:
+        return Promise.reject(`Unsupported element type: ${type}`);
+    }
   }
   async createGifFromEditorElements(): Promise<string> {
     const gif = new GIF({
@@ -20,71 +96,64 @@ export class FileStore {
       workerScript: '/gif.worker.js',
     });
     const frames = this.editorStore?.elements.filter((el) => el.isFrame === true);
-    const ObjectsInFrame = this.editorStore?.elements.filter((el) => el.isFrame === false);
-    // only draw the objects in the frame that are in the timeframe of the frame
-    if (!frames || !ObjectsInFrame) return '';
+    const objectsInFrame = this.editorStore?.elements.filter((el) => el.isFrame === false);
+    if (!frames || !objectsInFrame) {
+      console.error('%cFrames or ObjectsInFrame not found', 'color: red');
+      return '';
+    }
     for (let i = 0; i < frames.length; i++) {
       const currentFrame = frames[i];
-      // get all object within the timeframe of the frame
-      const objectsInFrame = ObjectsInFrame.filter(
+      const objectsInCurrentFrame = objectsInFrame.filter(
         (obj) =>
           obj.timeFrame.start <= currentFrame.timeFrame.start &&
           obj.timeFrame.end >= currentFrame.timeFrame.end,
       );
+      const canvas = this.canvas;
+      if (!canvas) return Promise.reject('Canvas not found');
       const tempCanvas = document.createElement('canvas');
-      const canvas = this.editorStore?.canvas;
-      tempCanvas.width = canvas?.getWidth() || 800;
-      tempCanvas.height = canvas?.getHeight() || 500;
+      tempCanvas.width = canvas.getWidth() || 800;
+      tempCanvas.height = canvas.getHeight() || 500;
       const tempCanvasContext = tempCanvas.getContext('2d');
       if (tempCanvasContext) {
-        // Clear the canvas
         tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-        // Draw the background color
-        if (this.editorStore?.backgroundColor)
+        if (this.editorStore?.backgroundColor) {
           tempCanvasContext.fillStyle = this.editorStore?.backgroundColor;
-        tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        // Draw the image, meaning draw the frame and the objects in the frame
-        if (currentFrame.fabricObject) {
-          currentFrame.fabricObject.setCoords();
-          currentFrame.fabricObject.render(tempCanvasContext);
+          tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
         }
-        // Draw the objects in the frame
-        objectsInFrame.forEach((obj) => {
-          if (obj.fabricObject) {
-            obj.fabricObject.setCoords();
-            obj.fabricObject.render(tempCanvasContext);
+        try {
+          const fabricFrameObject = await this.loadFabricObject(currentFrame);
+          if (fabricFrameObject) {
+            fabricFrameObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
+              return this;
+            };
+            fabricFrameObject.scaleToWidth(tempCanvas.width);
+            fabricFrameObject.scaleToHeight(tempCanvas.height);
+            fabricFrameObject.setCoords();
+            fabricFrameObject.render(tempCanvasContext);
           }
-        });
-        // Add the canvas frame to the GIF
-        if (this.animationStore?.fps)
-          gif.addFrame(tempCanvas, { delay: 1000 / this.animationStore?.fps });
+          for (let j = 0; j < objectsInCurrentFrame.length; j++) {
+            const editorElement = objectsInCurrentFrame[j];
+            const fabricObject = await this.loadFabricObject(editorElement);
+            if (fabricObject) {
+              fabricObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
+                return this;
+              };
+              fabricObject.setCoords();
+              fabricObject.render(tempCanvasContext);
+            }
+          }
+          gif.addFrame(tempCanvas, {
+            delay: 1000 / (this.animationStore?.fps || 10),
+          });
+        } catch (error) {
+          console.error('Error rendering frame:', error);
+        }
       }
     }
-    // for (let i = 0; i < this.editorStore.elements.length; i++) {
-    //   const editorElement = this.editorStore.elements[i];
-    //   const currentVideoFrame = this.editorStore.frames[i];
-    //   const tempCanvas = document.createElement('canvas');
-    //   const canvas = this.editorStore.canvas;
-    //   tempCanvas.width = canvas?.getWidth() || 800;
-    //   tempCanvas.height = canvas?.getHeight() || 500;
-    //   console.log('CANVAS', tempCanvas.width, tempCanvas.height);
-    //   const tempCanvasContext = tempCanvas.getContext('2d');
-    //   if (tempCanvasContext) {
-    //     // Clear the canvas
-    //     tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-    //     // Draw the background color
-    //     tempCanvasContext.fillStyle = this.editorStore.backgroundColor;
-    //     tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    //     // Draw the image
-    //     if (editorElement.fabricObject) {
-    //       editorElement.fabricObject.setCoords();
-    //       editorElement.fabricObject.render(tempCanvasContext);
-    //     }
-    //     // Add the canvas frame to the GIF
-    //     gif.addFrame(tempCanvas, { delay: 1000 / this.animationStore.fps });
-    //   }
-    // }
     return new Promise((resolve, reject) => {
+      gif.on('progress', (progress: number) => {
+        console.log('GIF progress', progress);
+      });
       gif.on('finished', (blob: Blob) => {
         resolve(URL.createObjectURL(blob));
       });
@@ -97,7 +166,7 @@ export class FileStore {
   handleSaveAsGif = async (): Promise<string> => {
     try {
       const gifUrl = await this.createGifFromEditorElements();
-      // Do something with the gifUrl, such as downloading it or displaying it
+      console.log('GIF URL', gifUrl);
       return gifUrl;
     } catch (error) {
       console.error('Error creating GIF', error);

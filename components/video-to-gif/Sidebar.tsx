@@ -50,7 +50,7 @@ export const Sidebar = observer(() => {
   //   }
   // }, [pathName])
   return (
-    <ul className="flex w-[90px] border-slate-900  bg-white pt-[80px] shadow-lg shadow-secondary dark:bg-gray-800 sm:flex-col lg:h-screen lg:flex-col">
+    <ul className="flex h-full w-[90px]   gap-y-4  border-4 pt-[80px] shadow-lg  shadow-secondary  dark:bg-gray-800 sm:flex-col lg:h-screen lg:flex-col">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name;
         return (
@@ -117,20 +117,6 @@ const MENU_OPTIONS = [
     icon: MdTitle,
     action: (store: UIStore) => {
       store.setSelectedMenuOption('Text');
-    },
-  },
-  {
-    name: 'Animation',
-    icon: MdAnimation,
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Animation');
-    },
-  },
-  {
-    name: 'Effect',
-    icon: MdMovieFilter,
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Effect');
     },
   },
   {

@@ -1,76 +1,67 @@
 import { makeAutoObservable } from 'mobx';
-import { Animation, EditorElement } from '@/types';
-import { EditorStore } from './EditorStore';
-import { fabric } from 'fabric';
-import { AnimationStore } from './AnimationStore';
+import { EditorElement, Animation } from '@/types';
+import { RootStore } from '.';
 interface HistoryState {
+  elements: EditorElement[];
   animations: Animation[];
-  affectedElements: EditorElement[];
 }
 export class HistoryStore {
-  private editorStore?: EditorStore;
-  private animationStore?: AnimationStore;
-  private history: HistoryState[] = [];
-  private redoStack: HistoryState[] = [];
-  constructor() {
+  rootStore: RootStore;
+  history: HistoryState[] = [];
+  currentIndex = -1;
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
     makeAutoObservable(this);
   }
-  initialize(editorStore: EditorStore, animationStore: AnimationStore) {
-    this.editorStore = editorStore;
-    this.animationStore = animationStore;
-  }
-  addState(affectedElements: EditorElement[], animations: Animation[]) {
-    // Clone affected elements with their current state
-    const clonedElements = affectedElements.map((element) => ({
-      ...element,
-      fabricObject: element.fabricObject
-        ? fabric.util.object.clone(element.fabricObject)
-        : undefined,
-    }));
+  addState(elements: EditorElement[], animations: Animation[]) {
+    // Remove future states if we are not at the end of the history
+    // set inital state if currentIndex is -1
+    if (this.currentIndex < this.history.length - 1) {
+      this.history = this.history.slice(0, this.currentIndex + 1);
+    }
+    // Add new state
     this.history.push({
+      elements: JSON.parse(JSON.stringify(elements)), // Deep copy to avoid reference issues
       animations: JSON.parse(JSON.stringify(animations)),
-      affectedElements: clonedElements,
     });
-    this.redoStack = []; // Clear the redo stack whenever a new state is added
+    this.currentIndex++;
   }
   undo() {
-    if (this.history.length < 2) return;
-    const currentState = this.history.pop(); // Remove the latest state
-    // when undoing an animation, we dont want to put on the redo stack
-    if (currentState?.animations.length) {
-      this.redoStack = [];
-    } else {
-      this.redoStack.push(currentState!);
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      this.restoreState();
     }
-    this.restoreState(this.history[this.history.length - 1]); // Restore the previous state
   }
   redo() {
-    const stateToRestore = this.redoStack.pop();
-    if (!stateToRestore) return;
-    this.history.push(stateToRestore);
-    this.restoreState(stateToRestore);
-  }
-  private restoreState(state: HistoryState) {
-    // Restore the editor elements to their previous state
-    if (this.editorStore) {
-      this.editorStore.elements = this.editorStore.elements.map((editorElement) => {
-        const savedElement = state.affectedElements.find((e) => e.id === editorElement.id);
-        return savedElement || editorElement;
-      });
-      // Update the canvas with restored elements
-      if (this.editorStore.canvas) {
-        this.editorStore.canvas.clear();
-        this.editorStore.elements.forEach((element) => {
-          if (element.fabricObject) {
-            this.editorStore?.canvas!.add(element.fabricObject);
-          }
-        });
-        this.editorStore.canvas.requestRenderAll();
-      }
+    if (this.currentIndex < this.history.length - 1) {
+      this.currentIndex++;
+      this.restoreState();
     }
-    // Restore animations
-    if (this.animationStore) {
-      this.animationStore.animations = state.animations;
+  }
+  deleteAndGetStateBeforeAnimation(animationId: string) {
+    const newHistory = this.history
+      .map((state, i) => {
+        if (i === 0) return state;
+        if (state.animations.length > 1)
+          return {
+            elements: state.elements,
+            animations: state.animations.filter((animation) => animation.id !== animationId),
+          };
+        else if (state.animations.map((an) => an.id).includes(animationId)) return undefined;
+      })
+      .filter((state) => state !== undefined) as HistoryState[];
+    console.log('newHistory:', [...newHistory]);
+    if (newHistory.length > 0) {
+      this.history = newHistory;
+      this.currentIndex = this.history.length - 1;
+      return this.history[this.currentIndex];
+    }
+  }
+  private restoreState() {
+    const state = this.history[this.currentIndex];
+    if (state) {
+      this.rootStore.editorStore.elements = JSON.parse(JSON.stringify(state.elements));
+      this.rootStore.animationStore.animations = JSON.parse(JSON.stringify(state.animations));
     }
   }
 }

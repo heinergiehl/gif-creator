@@ -93,6 +93,7 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
           : isValidType?.toString() === 'false'
             ? 'border-red-500'
             : 'border-foreground',
+        'hover:border-dashed hover:border-green-500 hover:border-opacity-50',
       ])}
     >
       <Label
@@ -111,9 +112,11 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
         {LabelContent(type, isValidType)}
       </Label>
       <Input
+        multiple
         id="file-upload-droppable"
         type="file"
         onChange={onChange}
+        name="file-upload-droppable"
         className="absolute hidden h-full w-full "
         accept={acceptableTypes[type]}
       />
@@ -145,7 +148,6 @@ const LabelContent = (fileType: string, isValidFile: boolean | null) => {
         return null;
     }
   };
-  console.log('HMM69:', isValidFile);
   return (
     <div
       className={cn([

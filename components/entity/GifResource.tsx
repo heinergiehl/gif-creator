@@ -6,35 +6,47 @@ import { SuperGif } from '@wizpanda/super-gif';
 import { useStores } from '@/store';
 import { Frame } from '@/store/EditorStore';
 import { getUid } from '@/utils';
+import { CustomInputFile } from '@/app/components/ui/CustomFileInput';
+import { CustomDialog } from '@/app/components/ui/CustomDialog';
+import { Label } from '@radix-ui/react-label';
+import { Input } from '../ui/input';
+import { CustomProgress } from '../ui/CustomProgress';
+import { Button } from '../ui/button';
+import { MdDelete } from 'react-icons/md';
+import { FaRemoveFormat } from 'react-icons/fa';
 const GifResource = observer(() => {
-  const store = useStores().editorStore;
+  const rootStore = useStores();
+  const store = rootStore.editorStore;
   const editorCarouselStore = useStores().editorCarouselStore;
-  const editorStore = useStores().editorStore;
+  const [frameRate, setFrameRate] = useState<number>(1);
+  const [quality, setQuality] = useState<number>(1);
+  const [inputKey, setInputKey] = useState<number>(Date.now());
   const [loading, setLoading] = useState<boolean>(false);
-  // Function to extract frames from the GIF stored in  html image element
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const editorStore = useStores().editorStore;
   const extractFrames = async (file: File) => {
+    setLoading(true);
     editorCarouselStore.isCreatingGifs = true;
     const image = new Image();
     image.src = URL.createObjectURL(file);
-    const superGif = new SuperGif(image, { auto_play: false });
-    superGif.load(() => {
+    const superGif = new SuperGif(image, {});
+    superGif.load(async () => {
       const frames: Frame[] = [];
-      for (let i = 0; i < superGif.getLength(); i++) {
+      const length = superGif.getLength();
+      const interval = Math.max(1, Math.floor(1000 / frameRate)); // Calculate interval based on FPS
+      for (let i = 0; i < length; i += interval) {
         superGif.moveTo(i);
         const canvas = superGif.getCanvas();
-        const src = canvas.toDataURL('image/png');
-        // Add your logic to extract nested objects
+        const src = canvas.toDataURL('image/png', quality);
         const id = getUid();
-        frames.push({
-          id,
-          src,
-        });
+        frames.push({ id, src });
       }
       editorStore.frames = frames;
+      editorStore.addImages();
       editorCarouselStore.isCreatingGifs = false;
+      setLoading(false);
     });
   };
-  // Function to handle file change
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -42,15 +54,104 @@ const GifResource = observer(() => {
     }
   };
   return (
-    <div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <input type="file" accept="image/gif" onChange={handleFileChange} />
-          {/* Display extracted frames or any other UI elements here */}
-        </>
-      )}
+    <div className="relative z-[100] h-full p-8">
+      <CustomDialog
+        header="Add more frames from another GIF"
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+      >
+        <Label className="flex w-full max-w-xs flex-col gap-y-4">
+          <span className="">Frame extraction rate (frames per second):</span>
+          <span className="text-xs font-semibold">{frameRate} fps</span>
+          <Input
+            type="range"
+            step="1"
+            min="1"
+            max="24"
+            value={frameRate}
+            onChange={(e) => setFrameRate(parseFloat(e.target.value))}
+            className=""
+          />
+        </Label>
+        <Label className="w-full max-w-xs space-y-4">
+          <div className="label flex flex-col items-start space-y-4">
+            <span className=""> Resolution scale (1 for full, 0.5 for half, etc.):</span>
+            <span className="font-semibold ">{quality}</span>
+          </div>
+          <Input
+            type="range"
+            step="0.1"
+            max={1}
+            min={0.1}
+            value={quality}
+            onChange={(e) => setQuality(parseFloat(e.target.value))}
+            className=""
+          />
+        </Label>
+        <CustomInputFile key={inputKey} onChange={handleFileChange} type="gif" />
+        <CustomProgress />
+      </CustomDialog>
+      <>
+        <h2 className="mb-8 font-semibold">Upload a GIF to extract frames</h2>
+        <div className="flex w-full flex-col items-start justify-center gap-y-4 text-xs">
+          {store.frames.length === 0 && store.elements.length === 0 && (
+            <>
+              <Label className="flex w-full max-w-xs flex-col gap-y-4">
+                <span className="">Frame extraction rate (frames per second):</span>
+                <span className="text-xs font-semibold">{frameRate} fps</span>
+                <Input
+                  type="range"
+                  step="1"
+                  min="1"
+                  max="24"
+                  value={frameRate}
+                  onChange={(e) => setFrameRate(parseFloat(e.target.value))}
+                  className=""
+                />
+              </Label>
+              <Label className="w-full max-w-xs space-y-4">
+                <div className="label flex flex-col items-start space-y-4">
+                  <span className=""> Resolution scale (1 for full, 0.5 for half, etc.):</span>
+                  <span className="font-semibold ">{quality}</span>
+                </div>
+                <Input
+                  type="range"
+                  step="0.1"
+                  max={1}
+                  min={0.1}
+                  value={quality}
+                  onChange={(e) => setQuality(parseFloat(e.target.value))}
+                  className=""
+                />
+              </Label>
+              <CustomInputFile key={inputKey} onChange={handleFileChange} type="gif" />
+            </>
+          )}
+          {store.frames.length > 0 && store.elements.length > 0 && (
+            <div className="mb-4 flex w-full flex-col gap-y-4">
+              <Button
+                onClick={() => {
+                  store.frames = [];
+                  store.elements = [];
+                  store.currentKeyFrame = 0;
+                }}
+                variant={'destructive'}
+              >
+                <MdDelete className="mr-2" /> Delete Frames
+              </Button>
+              <Button
+                onClick={() => {
+                  setOpenModal(true);
+                }}
+                variant={'outline'}
+              >
+                <FaRemoveFormat className="mr-2" /> Add more frames
+              </Button>
+            </div>
+          )}
+          <CustomProgress />
+        </div>
+      </>
     </div>
   );
 });

@@ -43,7 +43,7 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
         isScrolled ? ' shadow-lg dark:border-gray-700  dark:shadow-xl' : '',
       ])}
     >
-      <NavigationMenu className="">
+      <NavigationMenu className="sticky">
         <NavigationMenuList className="">
           {sections.map((section) => (
             <NavigationMenuItem key={section.section} className="">
@@ -86,11 +86,11 @@ const ListItem = React.forwardRef<
       >
         <span
           ref={ref}
-          className="transition-colors duration-200 ease-in-out rounded-md cursor-pointer "
+          className="cursor-pointer rounded-md transition-colors duration-200 ease-in-out "
           {...props}
         >
           <div className="font-medium leading-none ">{title}</div>
-          <p className="text-sm leading-snug line-clamp-2 text-muted-foreground">{children}</p>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
         </span>
       </NavigationMenuLink>
     </Link>

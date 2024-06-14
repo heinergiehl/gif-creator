@@ -24,22 +24,7 @@ export const TextResource = observer(({ fontSize, fontWeight, sampleText }: Text
       >
         {sampleText}
       </div>
-      <button
-        className="] z-10 flex h-[32px] w-[32px] items-center justify-center rounded py-1 font-bold "
-        onClick={() => {
-          store.addText({
-            text: sampleText,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            fontColor: store.textColor,
-            fontFamily: store.fontFamily,
-            fontStyle: 'normal',
-            textBackground: '',
-            isFrame: false,
-            id: getUid(),
-          });
-        }}
-      >
+      <button className=" z-10 flex h-[32px] w-[32px] items-center justify-center rounded py-1 font-bold ">
         <MdAdd size="25" />
       </button>
     </div>

@@ -1,40 +1,63 @@
 'use client';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { TextResourcesPanel } from '@/components/panels/TextResourcesPanel';
 import VideoResource from '../entity/VideoResource';
-import ImageResource from '../entity/ImageResource';
+import ImageResource from '../entity/imageResource/ImageResource';
 import SmiliesResource from '../entity/SmiliesResource';
 import GifResource from '../entity/GifResource';
 import ExportPanel from '../panels/ExportPanel';
 import { AnimationsPanel } from '../panels/AnimationsPanel';
-import EffectsPanel from '../panels/EffectsPanel';
+import { EditOptionsPanel } from '../panels/EditOptionsPanel';
+import { MenuOption } from '@/types';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
+import ShadowOptionsPanel from '../panels/ShadowOptionsPanel';
+import TextStyleOptions from '../panels/TextStyleOptions';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 export type AnimationResourceProps = {
   animation: Animation;
 };
 export const Resources = observer(() => {
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const store = useStores().uiStore;
+  const editorStore = useStores().editorStore;
+  const selectedMenuOption = store.selectedMenuOption;
+  useEffect(() => {
+    editorStore.setAllOptionsToFalse();
+  }, [selectedMenuOption, editorStore.toggleOptions]);
+  return <RenderResource />;
+});
+const RenderResource = observer(({}: {}) => {
   const store = useStores().uiStore;
   const selectedMenuOption = store.selectedMenuOption;
+  const editorStore = useStores().editorStore;
   const sidebarRef = React.useRef<HTMLDivElement>(null);
-  return (
-    <aside
-      className="relative  h-full w-full   text-foreground opacity-100 transition-all duration-300 ease-in-out dark:bg-slate-900 "
-      ref={sidebarRef}
-    >
-      <div className="relative h-full w-full ">
-        <div className="absolute -inset-0.5 h-full rounded-md bg-pink-600 bg-gradient-to-r from-pink-500 to-purple-600 opacity-60 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-500"></div>
-        <div className="relative h-full w-full  dark:bg-slate-900">
-          {selectedMenuOption === 'Text' ? <TextResourcesPanel /> : null}
-          {selectedMenuOption === 'Video' ? <VideoResource /> : null}
-          {selectedMenuOption === 'Image' ? <ImageResource /> : null}
-          {selectedMenuOption === 'Export' ? <ExportPanel /> : null}
-          {selectedMenuOption === 'Smilies' ? <SmiliesResource /> : null}
-          {selectedMenuOption === 'Gif' ? <GifResource /> : null}
-          {selectedMenuOption === 'Animation' ? <AnimationsPanel /> : null}
-          {selectedMenuOption === 'Effect' ? <EffectsPanel /> : null}
-        </div>
-      </div>
-    </aside>
-  );
+  if (editorStore.toggleOptions.get('shadowOptions')) {
+    return <ShadowOptionsPanel />;
+  }
+  if (editorStore.toggleOptions.get('editOptions')) {
+    return <EditOptionsPanel />;
+  }
+  if (editorStore.toggleOptions.get('textStyleOptions')) {
+    return <TextStyleOptions />;
+  }
+  switch (selectedMenuOption) {
+    case 'Text':
+      return <TextResourcesPanel />;
+    case 'Video':
+      return <VideoResource />;
+    case 'Image':
+      return <ImageResource />;
+    case 'Export':
+      return <ExportPanel />;
+    case 'Smilies':
+      return <SmiliesResource />;
+    case 'Gif':
+      return <GifResource />;
+    case 'Animation':
+      return <AnimationsPanel />;
+    default:
+      return null;
+  }
 });
