@@ -21,6 +21,24 @@ const RecordComponent = observer(() => {
   const [stoppedRecording, setStoppedRecording] = useState(false);
   const [startedRecording, setStartedRecording] = useState(false);
   useEffect(() => {
+    if (!previewStream) return;
+    if (!previewVideoRef.current) return;
+    previewVideoRef.current.style.display = 'block';
+    previewVideoRef.current.srcObject = previewStream;
+    previewVideoRef.current.width = 1280;
+    previewVideoRef.current.height = 720;
+    if (screenToVideoStore.currentStep === 3) return;
+    screenToVideoStore.currentStep = 2;
+  }, [previewStream]);
+  useEffect(() => {
+    if (startedRecording) {
+      if (previewVideoRef.current) {
+        setNewWidth(previewVideoRef.current.videoWidth);
+        setNewHeight(previewVideoRef.current.videoHeight);
+      }
+    }
+  }, [startedRecording]);
+  useEffect(() => {
     if (canvasRef.current && !fabricCanvasRef.current) {
       fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
         height: 1280,
@@ -145,16 +163,6 @@ const RecordComponent = observer(() => {
     canvas.setActiveObject(cropRectRef.current);
   };
   const previewVideoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    if (!previewStream) return;
-    if (!previewVideoRef.current) return;
-    previewVideoRef.current.style.display = 'block';
-    previewVideoRef.current.srcObject = previewStream;
-    previewVideoRef.current.width = 1280;
-    previewVideoRef.current.height = 720;
-    if (screenToVideoStore.currentStep === 3) return;
-    screenToVideoStore.currentStep = 2;
-  }, [previewStream]);
   // create function to create a video from the canvas stream, which will be the final edited video
   const createFinalVideo = () => {
     if (!canvasRef.current) return;
@@ -218,14 +226,6 @@ const RecordComponent = observer(() => {
     screenToVideoStore.currentStep = 3;
   };
   // when stopped recording, adjust canvas size to fit the video
-  useEffect(() => {
-    if (startedRecording) {
-      if (previewVideoRef.current) {
-        setNewWidth(previewVideoRef.current.videoWidth);
-        setNewHeight(previewVideoRef.current.videoHeight);
-      }
-    }
-  }, [startedRecording]);
   return (
     <div className=" container my-[80px]  flex  h-full  ">
       <div className="mx-4 flex flex-col">
