@@ -75,6 +75,7 @@ export const FadeAnimation = observer(
                 duration: newDuration,
               });
               const canvas = canvasRef.current;
+              if (!canvas) return;
               store.refreshAnimations(canvas);
             }}
           />
@@ -110,6 +111,7 @@ export const SlideAnimation = observer(
                 duration: newDuration,
               });
               const canvas = canvasRef.current;
+              if (!canvas) return;
               store.refreshAnimations(canvas);
             }}
           />
@@ -128,6 +130,7 @@ export const SlideAnimation = observer(
                 },
               });
               const canvas = canvasRef.current;
+              if (!canvas) return;
               store.refreshAnimations(canvas);
             }}
           >
@@ -152,6 +155,7 @@ export const SlideAnimation = observer(
                 },
               });
               const canvas = canvasRef.current;
+              if (!canvas) return;
               store.refreshAnimations(canvas);
             }}
           />
@@ -170,6 +174,7 @@ export const SlideAnimation = observer(
                 },
               });
               const canvas = canvasRef.current;
+              if (!canvas) return;
               store.refreshAnimations(canvas);
             }}
           >

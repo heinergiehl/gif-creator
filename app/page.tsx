@@ -1,4 +1,13 @@
-import { Bell, CalendarIcon, EditIcon, FileText, Globe, ShareIcon, VideoIcon } from 'lucide-react';
+import {
+  Bell,
+  CalendarIcon,
+  EditIcon,
+  FileText,
+  Globe,
+  LucideIcon,
+  ShareIcon,
+  VideoIcon,
+} from 'lucide-react';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { Footer } from './components/ui/Footer';
 import { CustomAccordion } from './components/ui/CustomAccordion';
@@ -17,12 +26,13 @@ import Marquee from '@/components/magicui/marquee';
 import { FileTextIcon } from '@radix-ui/react-icons';
 import { Share2Icon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { AnimatedBeamDemo } from '@/components/pages/animated-beam-multiple-outputs';
+import AnimatedBeamDemo from '@/components/pages/animated-beam-multiple-outputs';
 import { BorderBeam } from '@/components/magicui/border-beam';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { BentoGrid } from '@/components/magicui/bento-grid';
-import { ReactNode } from 'react';
+import { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
+import { IconProps } from '@radix-ui/react-icons/dist/types';
 const FadeInUpWrapper = dynamic(
   () => import('@/components/ui/FadeInWrapper').then((mod) => mod.FadeInUpWrapper),
   { ssr: false },
@@ -88,13 +98,13 @@ let notifications = [
 ];
 notifications = Array.from({ length: 10 }, () => notifications).flat();
 export type FeautureType = {
-  Icon: ReactNode;
+  Icon: any;
   name: string;
   description: string;
   href: string;
   cta: string;
   className: string;
-  background: ReactNode;
+  background: any;
 };
 const Notification = ({ name, description, icon, color, time }: Item) => {
   return (
@@ -298,7 +308,7 @@ export default function Home() {
               <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
               <div className="join join-vertical space-y-2">
                 {faqData.map((faq, index) => (
-                  <CustomAccordion trigger={faq.question} content={faq.answer} />
+                  <CustomAccordion trigger={faq.question} content={faq.answer} key={index} />
                 ))}
               </div>
             </div>

@@ -41,7 +41,11 @@ const EditResource = observer(() => {
                 <CustomTextInput
                   className="w-full"
                   inputTooltip="Text"
-                  value={selectedElements[0].properties.text}
+                  value={
+                    'text' in selectedElements[0].properties
+                      ? selectedElements[0].properties.text
+                      : ''
+                  }
                   name="text"
                   onChange={(value) => handleChange('text', value)}
                 />
@@ -51,7 +55,11 @@ const EditResource = observer(() => {
                   <CustomColorPicker
                     label="Text Color"
                     name="fill"
-                    value={selectedElements[0].properties?.fill ?? ''}
+                    value={
+                      'fill' in selectedElements[0].properties
+                        ? selectedElements[0].properties.fill
+                        : '#000000'
+                    }
                     onChange={(color) => handleChange('fill', color)}
                   />
                 </div>
@@ -60,7 +68,11 @@ const EditResource = observer(() => {
                     inputTooltip="Font Size"
                     increaseButtonTooltip="Increase Font Size"
                     decreaseButtonTooltip="Decrease Font Size"
-                    value={selectedElements[0].properties.fontSize}
+                    value={
+                      'fontSize' in selectedElements[0].properties
+                        ? Number(selectedElements[0].properties.fontSize)
+                        : 14
+                    }
                     name="fontSize"
                     onChange={(value) => handleChange('fontSize', value)}
                   />
@@ -71,8 +83,8 @@ const EditResource = observer(() => {
                     increaseButtonTooltip="Increase Font Weight"
                     decreaseButtonTooltip="Decrease Font Weight"
                     value={
-                      selectedElements[0].properties?.fontWeight
-                        ? Number(selectedElements[0].properties?.fontWeight)
+                      'fontWeight' in selectedElements[0].properties
+                        ? Number(selectedElements[0].properties.fontWeight)
                         : 400
                     }
                     name="fontWeight"
