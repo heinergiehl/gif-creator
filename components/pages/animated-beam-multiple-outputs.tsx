@@ -18,6 +18,7 @@ const Circle = forwardRef<HTMLDivElement, { className?: string; children?: React
     );
   },
 );
+Circle.displayName = 'Circle';
 export default function AnimatedBeamDemo({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const div1Ref = useRef<HTMLDivElement>(null);
