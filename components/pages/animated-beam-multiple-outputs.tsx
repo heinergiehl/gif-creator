@@ -474,3 +474,4 @@ const Icons = {
     </svg>
   ),
 };
+AnimatedBeamDemo.displayName = 'AnimatedBeamDemo';
