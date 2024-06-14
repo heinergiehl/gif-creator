@@ -26,7 +26,7 @@ import Marquee from '@/components/magicui/marquee';
 import { FileTextIcon } from '@radix-ui/react-icons';
 import { Share2Icon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { AnimatedBeamDemo } from '@/components/pages/animated-beam-multiple-outputs';
+import AnimatedBeamDemo from '@/components/pages/animated-beam-multiple-outputs';
 import { BorderBeam } from '@/components/magicui/border-beam';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
