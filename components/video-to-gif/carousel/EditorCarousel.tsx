@@ -34,7 +34,6 @@ import Timeline from './Timeline';
 import { CSS } from '@dnd-kit/utilities';
 import { EditorElement } from '@/types';
 import SelectionArea from '@viselect/vanilla';
-import e from 'express';
 import { useToast } from '@/components/ui/use-toast';
 const Droppable = ({
   children,
@@ -509,7 +508,7 @@ export const EditorCarousel = observer(function EditorCarousel({
 interface Frame {
   id: string;
   src: string;
-  index: number;
+  index?: number;
 }
 interface SortableItemProps extends Frame {
   onFrameSelect: (id: string, multiSelect?: boolean) => void;
