@@ -5,7 +5,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FilterType } from '@/store/EditorStore';
 interface CustomSelectProps {
   options: {
     value: string;
@@ -13,7 +12,7 @@ interface CustomSelectProps {
   }[];
   trigger: string;
   value: string | null;
-  onChange: (filterType: FilterType) => void;
+  onChange: (filterType: string) => void;
 }
 export const CustomSelect: React.FC<CustomSelectProps> = ({
   options,
