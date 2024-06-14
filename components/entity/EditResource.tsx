@@ -1,91 +1,107 @@
 'use client';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { fabric } from 'fabric';
-import { DebounceInput } from 'react-debounce-input';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-
 import debounce from 'lodash.debounce';
-
-const DEBOUNCE_TIME_IN_MS = 500;
+import CustomTextInput from '@/app/components/ui/CustomTextInput';
+import CustomColorPicker from '@/app/components/ui/CustomColorPicker';
+import CustomNumberInput from '@/app/components/ui/CustomNumberInput';
+import { Button } from '../ui/button';
+import { FabricObjectFactory } from '@/utils/fabric-utils';
 const EditResource = observer(() => {
   const store = useStores().editorStore;
-  const fabricElement = store.selectedElement?.fabricObject;
-  console.log(fabricElement);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleChange', e.target.value);
-    switch (e.target.name) {
-      case 'textColor':
-        store.updateTextProperties('fill', e.target.value);
-        break;
-      case 'fontSize':
-        store.updateTextProperties('fontSize', parseInt(e.target.value));
-        break;
-      case 'fontWeight':
-        store.updateTextProperties('fontWeight', parseInt(e.target.value));
-        break;
-    }
+  const handleChange = (property: keyof fabric.ITextOptions, value: string | number | boolean) => {
+    console.log('handleChange', property, value);
+    store.updateTextProperties(property, value);
   };
-
+  const selectedElements = store.selectedElements;
+  const toggleEditOptionsPanel = () => {
+    store.toggleOption('editOptions');
+  };
+  const toggleShadowOptionsPanel = () => {
+    store.toggleOption('shadowOptions');
+  };
+  const toggleTextStyleOptionsPanel = () => {
+    store.toggleOption('textStyleOptions');
+  };
+  const uiStore = useStores().uiStore;
+  useEffect(() => {
+    store.setAllOptionsToFalse();
+  }, [uiStore.selectedMenuOption]);
   return (
-    <div
-      className="
-    h-[75px] w-full
-    bg-gray-100 bg-inherit text-inherit  dark:bg-slate-900 "
-    >
-      {store.selectedElement !== null && store.selectedElement?.fabricObject !== undefined && (
-        <div className="flex flex-row items-center h-full">
-          {store.selectedElement.type === 'text' && (
-            <Label htmlFor="textColor" className="mr-4 text-xs text-center ">
-              Edit Text
-            </Label>
+    <div className="flex  w-full flex-row items-center justify-start bg-gray-100 bg-inherit text-inherit dark:bg-slate-900">
+      <div className="flex h-full w-full flex-row items-center justify-center">
+        {selectedElements.length > 0 &&
+          selectedElements?.every((element, index, array) =>
+            FabricObjectFactory.isTextEditorElement(element),
+          ) && (
+            <>
+              <div className="ml-8 flex basis-1/3 flex-row items-center">
+                <CustomTextInput
+                  className="w-full"
+                  inputTooltip="Text"
+                  value={selectedElements[0].properties.text}
+                  name="text"
+                  onChange={(value) => handleChange('text', value)}
+                />
+              </div>
+              <div className="flex w-full flex-row items-center">
+                <div className="flex h-full w-[240px] basis-1/4 flex-row items-center justify-evenly">
+                  <CustomColorPicker
+                    label="Text Color"
+                    name="fill"
+                    value={selectedElements[0].properties?.fill ?? ''}
+                    onChange={(color) => handleChange('fill', color)}
+                  />
+                </div>
+                <div className="flex basis-1/4 flex-row items-center">
+                  <CustomNumberInput
+                    inputTooltip="Font Size"
+                    increaseButtonTooltip="Increase Font Size"
+                    decreaseButtonTooltip="Decrease Font Size"
+                    value={selectedElements[0].properties.fontSize}
+                    name="fontSize"
+                    onChange={(value) => handleChange('fontSize', value)}
+                  />
+                </div>
+                <div className="flex basis-1/4 flex-row items-center">
+                  <CustomNumberInput
+                    inputTooltip="Font Weight"
+                    increaseButtonTooltip="Increase Font Weight"
+                    decreaseButtonTooltip="Decrease Font Weight"
+                    value={
+                      selectedElements[0].properties?.fontWeight
+                        ? Number(selectedElements[0].properties?.fontWeight)
+                        : 400
+                    }
+                    name="fontWeight"
+                    onChange={(value) => handleChange('fontWeight', value)}
+                  />
+                </div>
+                <div className="flex basis-1/4 flex-row items-center justify-evenly">
+                  <Button onClick={toggleTextStyleOptionsPanel} variant="outline">
+                    Style
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
-          <div className="flex flex-row items-center">
-            <Label htmlFor="textColor" className="mr-4 text-xs text-center ">
-              Color
-            </Label>
-            <Input
-              className=""
-              type="color"
-              id="textColor"
-              name="textColor"
-              value={'#000000'}
-              onChange={debounce((e) => handleChange(e), DEBOUNCE_TIME_IN_MS)}
-            />
-          </div>
-          {store.selectedElement.type === 'text' && fabricElement !== undefined && (
-            <div className="flex space-x-4">
-              <div className="flex flex-row items-center">
-                <Label htmlFor="fontSize" className="mr-4 text-xs text-center ">
-                  Font Size
-                </Label>
-                <Input
-                  className=""
-                  type="number"
-                  id="fontSize"
-                  name="fontSize"
-                  value={(store.selectedElement?.fabricObject as fabric.Text).fontSize || 16}
-                  onChange={debounce(handleChange, DEBOUNCE_TIME_IN_MS)}
-                />
-              </div>
-              <div className="flex flex-row items-center">
-                <Label htmlFor="fontWeight" className="mr-4 text-xs ">
-                  Font Weight
-                </Label>
-                <Input
-                  type="number"
-                  id="fontWeight"
-                  name="fontWeight"
-                  value={(store.selectedElement?.fabricObject as fabric.Text).fontWeight || 400}
-                  onChange={debounce(handleChange, DEBOUNCE_TIME_IN_MS)}
-                />
-              </div>
+        {selectedElements.length > 0 && (
+          <>
+            <div className="flex basis-1/4 flex-row items-center justify-evenly">
+              <Button onClick={toggleEditOptionsPanel} variant="outline">
+                Position
+              </Button>
             </div>
-          )}
-        </div>
-      )}
+            <div className="flex basis-1/4 flex-row items-center justify-evenly">
+              <Button onClick={toggleShadowOptionsPanel} variant="outline">
+                Shadow
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 });

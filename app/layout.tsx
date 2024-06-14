@@ -8,8 +8,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import dynamic from 'next/dynamic';
 import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
-import { ModeToggle } from './components/ui/DarkToggle';
-import Script from 'next/script';
+import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 const CookieBanner = dynamic(() => import('@/app/components/consent/CookieBanner'), {
   ssr: false,
@@ -28,6 +27,7 @@ export default function RootLayout({
         className={cn([
           inter.className,
           ' font-sans text-black antialiased  transition-colors duration-500 ease-in-out  dark:text-white',
+          'h-full select-none',
         ])}
       >
         <ThemeProvider
@@ -36,7 +36,9 @@ export default function RootLayout({
           attribute="class"
           enableSystem
         >
+          {/* only render navigation when not on pathes that start with  converter-and-editor  */}
           <RootNavigation />
+          <Toaster />
           {children}
         </ThemeProvider>
         <Analytics />

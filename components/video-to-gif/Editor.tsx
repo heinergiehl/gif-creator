@@ -1,25 +1,42 @@
 'use client';
-import { fabric } from 'fabric';
-import React, { use, useEffect, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import React, { Suspense, use, useCallback, useEffect, useState } from 'react';
 import { StoreProvider, useStores } from '@/store';
 import { observer } from 'mobx-react';
-import { Resources } from './Resources';
 import { Sidebar } from './Sidebar';
 import ElementsHistoryPanel from '../panels/ElementsHistoryPanel';
 import { FaPlayCircle, FaStopCircle } from 'react-icons/fa';
-import { usePathname } from 'next/navigation';
-import RootNavigation from '@/app/RootNavigation';
-import { DndContext, DragEndEvent, DragOverEvent, useDroppable } from '@dnd-kit/core';
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  DragEndEvent,
+  DragStartEvent,
+  DragMoveEvent,
+  DragOverEvent,
+} from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { CanvasProvider, useCanvas } from '@/app/components/canvas/canvasContext';
+import { CustomAlertDialog } from '@/app/components/ui/CustomAlertDialog';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import CanvasComponent from '@/app/components/canvas/Canvas';
 import EditResource from '../entity/EditResource';
-import { getUid } from '@/utils';
+import { throttle } from 'lodash';
 import { EditorCarousel } from './carousel/EditorCarousel';
-const EditorWithStore = () => {
-  return (
-    <StoreProvider>
-      <Editor></Editor>
-    </StoreProvider>
-  );
-};
+import { getUid } from '@/utils';
+import { usePathname } from 'next/navigation';
+import { Resources } from './Resources';
+import { ClipboardProvider, useClipboard } from '@/app/hooks/useClipboard';
+import { useInitializeCanvas } from '@/app/components/canvas/useInitializeCanvas';
+import { useManageFabricObjects } from '@/app/components/canvas/useManageFabricObjects';
+import { useUpdateFabricObjects } from '@/app/components/canvas/useUpdateFabricObjects';
+import { useUpdateSelectedObject } from '@/app/components/canvas/useUpdateSelectedObject';
+import { useSyncCanvasWithStore } from '@/app/components/canvas/useSyncCanvasWithStore';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {
@@ -29,88 +46,107 @@ declare module 'fabric' {
     id: string;
   }
 }
+const EditorWithStore = () => {
+  return (
+    <ClipboardProvider>
+      <CanvasProvider>
+        <StoreProvider>
+          <Editor />
+        </StoreProvider>
+      </CanvasProvider>
+    </ClipboardProvider>
+  );
+};
 export default EditorWithStore;
-const Editor = observer(() => {
-  const rootStore = useStores();
-  const store = rootStore.editorStore;
-  const editorStore = rootStore.editorStore;
-  const editorCarouselStore = rootStore.editorCarouselStore;
-  const animationStore = rootStore.animationStore;
-  const pathName = usePathname();
-  // useEffect(() => {
-  //   // for testing, create a text object when the component mounts
-  //   store.addText({
-  //     text: "Hello World",
-  //     fontSize: 20,
-  //     fontWeight: 400,
-  //     isFrame: false,
-  //   })
-  // }, [])
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    store.isDragging = false;
-    //extract index from the id
-    console.log(active.id, over?.id);
-    const index = parseInt(String(active.id).split('-')[1]);
-    const resourceType = String(active.id).split('-')[0];
-    if (store.imageType === 'Frame' && String(over?.id).includes('carousel')) {
-      if (resourceType.startsWith('imageResource')) {
-        const src = document.getElementById(String(active.id))?.getAttribute('src');
-        console.log(src, 'src', index, 'index', active.id);
-        if (!src) return;
-        const id = getUid();
-        store.frames.push({
-          id: id,
-          src: src,
-        });
-        store.selectedElement = null;
-        store.addImage(store.frames.length, String(active.id), true);
-        console.log('ADDING IMAGE TO FRAME');
-        store.currentKeyFrame = store.frames.length - 1;
-        animationStore.addCurrentGifFrameToCanvas();
-      } else if (resourceType.startsWith('textResource')) {
-        const textElement = document.getElementById(String(active.id));
-        if (!textElement) return;
-        // make sure to add the text as a frame to frames, but also make sure that it appears in the carousel, meaning we must render it on canvas then take snapshot and put the dataurl in frames
-        store.addText({
-          text: textElement.innerHTML,
-          fontColor: store.fontColor,
-          fontSize: store.fontSize,
-          fontWeight: store.fontWeight,
-          textBackground: store.textBackground,
-          fontFamily: store.fontFamily,
-          fontStyle: store.fontStyle,
-          isFrame: true,
-        });
-        store.currentKeyFrame = store.frames.length;
-        store.selectedElement = null;
-        animationStore.addCurrentGifFrameToCanvas();
-        const dataUrl = store.canvas?.toDataURL();
-        if (dataUrl) {
-          const id = getUid();
-          store.frames.push({
-            id: id,
-            src: dataUrl,
+const Editor = React.memo(
+  observer(function Editor() {
+    const rootStore = useStores();
+    const store = rootStore.editorStore;
+    const editorCarouselStore = rootStore.editorCarouselStore;
+    const animationStore = rootStore.animationStore;
+    const timelineStore = rootStore.timelineStore;
+    const sensors = useSensors(
+      useSensor(MouseSensor),
+      useSensor(TouchSensor),
+      useSensor(KeyboardSensor),
+      useSensor(PointerSensor, {
+        activationConstraint: { distance: 10 },
+      }),
+    );
+    const handleDragEnd = (event: DragEndEvent) => {
+      const { active, over } = event;
+      store.isDragging = false;
+      const overId = over?.id;
+      const activeIndex = store.frames.findIndex((element) => element.id === active.id);
+      const overIndex = store.frames.findIndex((frame) => frame.id === overId);
+      if (activeIndex !== -1) {
+        store.frames = arrayMove(store.frames, activeIndex, overIndex);
+        store.elements = arrayMove(store.elements, activeIndex, overIndex);
+        return;
+      }
+      const resourceType = String(active.id).split('-')[0];
+      const isCarousel = over?.data?.current?.type === 'Frame';
+      const isCanvas = over?.data?.current?.type === 'ObjectInFrame';
+      store.updateMaxTime();
+      store.updateEditorElementsForFrames();
+      if (isCarousel) {
+        if (resourceType.startsWith('imageResource')) {
+          const frameId = getUid();
+          const newFrame = { id: frameId, src: active?.data?.current?.image };
+          if (store.frames.length < 2) {
+            store.frames.push(newFrame);
+            store.addImage(0, active?.data?.current?.image, true, frameId);
+            return;
+          }
+          store.frames.splice(overIndex, 0, newFrame);
+          store.addImage(overIndex, active?.data?.current?.image, true, frameId);
+        } else if (resourceType.startsWith('textResource')) {
+          const textElement = document.getElementById(String(active.id));
+          if (!textElement) {
+            console.warn('No HTML text element found');
+            return;
+          }
+          const newFrame = { id: getUid(), src: 'https://via.placeholder.com/150' };
+          store.frames.splice(overIndex, 0, newFrame);
+          store.addText({
+            id: String(newFrame.id),
+            text: textElement.innerHTML,
+            fontColor: store.fontColor,
+            fontSize: store.fontSize,
+            fontWeight: store.fontWeight,
+            textBackground: store.textBackground,
+            fontFamily: store.fontFamily,
+            fontStyle: store.fontStyle,
+            isFrame: true,
+            index: overIndex,
+            fill: store.textColor,
           });
         }
-      } else {
-        if (resourceType.startsWith('imageResource')) {
-          store.addImage(index, String(active.id), false);
+      } else if (isCanvas) {
+        if (store.frames.length === 0) {
+          store.setInfo(
+            'You have not provided any frames!',
+            'Please add frames to create a GIF, then you can add objects to the frames.',
+          );
+          store.toggleAlertDialog();
+          return;
         }
-      }
-    } else if (
-      store.imageType === 'ObjectInFrame' &&
-      String(over?.id).includes('grid-canvas-container')
-    ) {
-      if (resourceType.startsWith('imageResource')) {
-        const src = document.getElementById(String(active.id))?.getAttribute('src');
-        if (!src) return;
-        store.addImage(index, String(active.id), false);
-      } else if (resourceType.startsWith('textResource')) {
-        const textElement = document.getElementById(String(active.id));
-        if (!textElement) return;
-        if (store.frames.length > 0)
+        if (resourceType.startsWith('imageResource')) {
+          store.addImage(
+            store.elements.length,
+            active.data.current?.image,
+            false,
+            String(getUid()),
+          );
+        } else if (resourceType.startsWith('textResource')) {
+          const textElement = document.getElementById(String(active.id));
+          if (!textElement) {
+            console.warn('No HTML text element found');
+            return;
+          }
           store.addText({
+            fill: store.textColor,
+            id: String(getUid()),
             text: textElement.innerHTML,
             fontColor: store.fontColor,
             fontSize: store.fontSize,
@@ -119,231 +155,150 @@ const Editor = observer(() => {
             fontFamily: store.fontFamily,
             fontStyle: store.fontStyle,
             isFrame: false,
+            index: store.elements.length,
           });
+        }
       }
-    }
-  };
-  const handleDragStart = () => {
-    store.isDragging = true;
-  };
-  const handleDragOver = (event: DragOverEvent) => {
-    //check if over id is canvas-grid-container, if so set store.imageType to ObjectInFrame
-    if (event.over?.id === 'grid-canvas-container') {
-      store.imageType = 'ObjectInFrame';
-    } else {
-      store.imageType = 'Frame';
-    }
-  };
-  const [containerWidth, setContainerWidth] = useState(0);
-  const resizeEditor = () => {
-    const editorContainer = document.getElementById('editor-container');
-    if (!editorContainer) return;
-    const containerWidth = editorContainer.clientWidth;
-    setContainerWidth(containerWidth);
-  };
-  useEffect(() => {
-    resizeEditor();
-    window.addEventListener('resize', resizeEditor);
-    return () => {
-      window.removeEventListener('resize', resizeEditor);
     };
-  }, [
-    store.frames.length,
-    editorCarouselStore.cardItemWidth,
-    editorCarouselStore.cardItemHeight,
-    containerWidth,
-  ]);
-  return (
-    <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} onDragOver={handleDragOver}>
-      <main
-        className="relative
-        grid  grid-cols-[90px_200px_auto_150px]
-        overflow-hidden   md:grid-cols-[90px_300px_200px_1fr_150px] 
-      "
+    const handleDragStart = (e: DragStartEvent) => {
+      store.isDragging = true;
+      store.activeDraggable = e;
+    };
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [percentageWidthOfEditorContainer, setPercentageWidthOfEditorContainer] = useState(0);
+    const resizeEditor = () => {
+      const editorContainer = document.getElementById('editor-container');
+      if (!editorContainer) return;
+      const containerWidth = editorContainer.clientWidth;
+      setContainerWidth(containerWidth);
+    };
+    useEffect(() => {
+      resizeEditor();
+      window.addEventListener('resize', resizeEditor);
+      return () => {
+        window.removeEventListener('resize', resizeEditor);
+      };
+    }, [
+      store.frames.length,
+      editorCarouselStore.cardItemWidth,
+      editorCarouselStore.cardItemHeight,
+      containerWidth,
+      percentageWidthOfEditorContainer,
+    ]);
+    const handleDragOver = throttle((event: DragOverEvent) => {
+      if (event.over?.id === 'canvas') {
+        store.imageType = 'ObjectInFrame';
+      } else {
+        store.imageType = 'Frame';
+      }
+    }, 100);
+    const handleDragMove = throttle((event: DragMoveEvent) => {
+      const { active } = event;
+      if (active) {
+        store.isDragging = true;
+      }
+    }, 200);
+    const canvasRef = useCanvas().canvasRef;
+    // useInitializeCanvas(canvasRef, store);
+    // useManageFabricObjects(canvasRef, store); // Updated usage
+    // useUpdateFabricObjects(canvasRef, store);
+    // useUpdateSelectedObject(canvasRef, store);
+    // useSyncCanvasWithStore(canvasRef, store);
+    return (
+      <DndContext
+        autoScroll={{ layoutShiftCompensation: { x: true, y: false } }}
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
+        onDragOver={handleDragOver}
+        collisionDetection={closestCenter}
       >
-        <div className="flex flex-col row-start-1 sm:col-span-1">
-          <Sidebar />
-        </div>
-        <div className="row-span-4 sm:col-span-1">
-          <Resources />
-        </div>
-        <div
-          className="grid col-span-3 col-start-3 grid-cols-subgrid dark:bg-slate-900 "
-          id="editor-container"
-        >
-          <div className="col-span-4 col-start-1 pt-[70px]">
-            <EditResource />
-          </div>
-          <div className="items-center justify-center col-span-2 col-start-1 row-span-1 row-start-3 pt-16 lg:col-span-1 lg:row-start-2 ">
-            <div className="flex flex-col items-center justify-center h-full">
-              <label htmlFor="speed" className="flex flex-col font-semibold ">
-                <span className="text-sm text-gray-600">FPS of your GIF</span>
-                <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
-                <input
-                  id="speed"
-                  onChange={(e) => {
-                    animationStore.fps = parseFloat(e.target.value);
-                    if (editorCarouselStore?.timelineStore)
-                      editorCarouselStore?.timelineStore.formatCurrentTime();
-                  }}
-                  type="range"
-                  min="1"
-                  max="30"
-                />
-              </label>
-              <button
-                onClick={() => {
-                  if (store.isPlaying) store.isPaused = !store.isPaused;
-                  if (editorCarouselStore.timelineStore)
-                    editorCarouselStore.timelineStore.playSequence();
-                }}
-                className="mt-8 play-button"
-              >
-                {store.isPlaying ? (
-                  <FaStopCircle size={54} className="" />
-                ) : (
-                  <FaPlayCircle size={54} />
-                )}
-              </button>{' '}
-            </div>
-          </div>
-          <div className="content-center justify-center h-full col-span-2 row-start-2 md:col-span-1 xl:col-span-2 xl:items-center xl:justify-center">
-            <Canvas containerWidth={containerWidth} />
-          </div>
-          <div className="content-center justify-center col-span-2 row-start-4 lg:row-start-3">
-            <EditorCarousel containerWidth={containerWidth} />
-          </div>
-          <div className="flex-col h-full col-span-1 col-start-5 row-span-5 row-start-1">
-            <ElementsHistoryPanel />
-          </div>
-        </div>
-      </main>
-    </DndContext>
-  );
-});
-const Canvas = observer(({ containerWidth }: { containerWidth: number }) => {
-  const { setNodeRef } = useDroppable({
-    id: 'grid-canvas-container',
-  });
-  const rootStore = useStores();
-  const store = rootStore.editorStore;
-  const editorCarouselStore = rootStore.editorCarouselStore;
-  const canvas = store.canvas;
-  const resizeCanvas = () => {
-    const canvasContainer = document.getElementById('grid-canvas-container');
-    if (!canvasContainer || !canvas) return;
-    const ratio = canvas.getWidth() / canvas.getHeight();
-    const containerWidth = window.innerWidth / 3.2;
-    const containerHeight = containerWidth / ratio;
-    const scale = containerWidth / canvas.getWidth();
-    canvas.setWidth(containerWidth);
-    canvas.setHeight(containerHeight);
-    // make sure to keep the position of the objects when resizing
-    const objects = canvas.getObjects();
-    objects.forEach((object) => {
-      if (object.scaleX) {
-        object.scaleX *= scale;
-      }
-      if (object.scaleY) {
-        object.scaleY *= scale;
-      }
-      if (object.left) {
-        object.left *= scale;
-      }
-      if (object.top) {
-        object.top *= scale;
-      }
-      object.setCoords();
-    });
-    console.log('RESIZING!!!');
-  };
-  useEffect(() => {
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Call it to ensure it sizes correctly initially
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, [
-    store.canvas,
-    store.frames.length,
-    editorCarouselStore.cardItemWidth,
-    editorCarouselStore.cardItemHeight,
-    containerWidth,
-  ]); // Depend on the canvas to ensure it exists
-  const animationStore = rootStore.animationStore;
-  useEffect(() => {
-    if (store.canvas === null) {
-      const c = new fabric.Canvas('canvas', {
-        backgroundColor: 'grey',
-        hoverCursor: 'pointer',
-        allowTouchScrolling: true,
-        selection: true,
-        selectionBorderColor: 'blue',
-        width: 500,
-        height: 350,
-        preserveObjectStacking: true,
-        enableRetinaScaling: true,
-        imageSmoothingEnabled: true,
-        stateful: true,
-      });
-      store.canvas = c;
-    }
-    fabric.Object.prototype.transparentCorners = false;
-    fabric.Object.prototype.cornerColor = 'blue';
-    fabric.Object.prototype.cornerStyle = 'circle';
-    const c = store.canvas;
-    fabric.util.requestAnimFrame(function render() {
-      c.requestRenderAll();
-      fabric.util.requestAnimFrame(render);
-    });
-    c.on('object:modified', (e) => {
-      console.log('object:modified', e.target, 'object:modified');
-      store.onObjectModified(e);
-      //
-    });
-    c.on('selection:created', (e) => {
-      const selectedObject = e.target;
-      if (!selectedObject) return;
-      if (!store?.selectElement) return;
-      store.selectedElement =
-        store.elements.find((element) => element.id === selectedObject.id) || null;
-      console.log(e, store.selectedElement);
-    });
-    c.on('selection:updated', (e) => {
-      const selectedObject = e.target;
-      if (!selectedObject) return;
-      store.selectedElement =
-        store.elements.find((element) => element.id === selectedObject.id) || null;
-    });
-    c.on('selection:cleared', (e) => {
-      store.selectedElement = null;
-    });
-  }, []);
-  const uiStore = rootStore.uiStore;
-  useEffect(() => {
-    if (
-      store.frames.length > 0 &&
-      !editorCarouselStore.isCreatingGifs &&
-      !store.isDragging &&
-      editorCarouselStore.cardItemHeight > 0 &&
-      editorCarouselStore.cardItemWidth > 0 &&
-      uiStore.selectedMenuOption === 'Video'
-    ) {
-      store.addImages();
-      console.log('ADD IMAGES');
-      animationStore.addCurrentGifFrameToCanvas();
-    }
-  }, [
-    store.frames.length,
-    editorCarouselStore.cardItemWidth,
-    editorCarouselStore.cardItemHeight,
-    uiStore.selectedMenuOption,
-    editorCarouselStore.isCreatingGifs,
-    store.isDragging,
-  ]);
-  return (
-    <div id="grid-canvas-container" ref={setNodeRef} className="p-4">
-      <canvas id="canvas" className="justify-center border-2 drop-shadow-lg" />
-    </div>
-  );
-});
+        <ResizablePanelGroup direction="horizontal">
+          <>
+            <ResizablePanel defaultSize={5} id="sidebar" order={1}>
+              <Sidebar />
+            </ResizablePanel>
+          </>
+          <ResizablePanel defaultSize={95} order={2}>
+            <ResizablePanelGroup
+              direction="horizontal"
+              onLayout={(e) => {
+                setPercentageWidthOfEditorContainer(e[1]);
+              }}
+            >
+              <>
+                <ResizablePanel defaultSize={12} id="resources" order={3}>
+                  <Resources />
+                </ResizablePanel>
+                <ResizableHandle withHandle={true} />
+              </>
+              <>
+                <ResizablePanel defaultSize={78} id="editor" order={4}>
+                  <ResizablePanelGroup direction="vertical">
+                    <ResizablePanel defaultSize={6} order={5}>
+                      <EditResource />
+                    </ResizablePanel>
+                    <ResizablePanel defaultSize={94} id="editor-container" order={6}>
+                      <div
+                        className="m-auto flex h-full w-[90%] flex-col items-center justify-center"
+                        id="editor-container"
+                      >
+                        <CustomAlertDialog />
+                        <div className="flex h-full w-full justify-center">
+                          <div className="col-span-1 col-start-1 row-span-1 row-start-3 items-center justify-center pt-16 lg:col-span-1 lg:row-start-2 ">
+                            <div className="flex h-full flex-col items-center justify-center">
+                              <label htmlFor="speed" className="flex flex-col font-semibold ">
+                                <span className="text-sm text-gray-600">FPS of your GIF</span>
+                                <span className="text-xs text-gray-700">
+                                  {animationStore.fps}fps
+                                </span>
+                                <input
+                                  id="speed"
+                                  onChange={(e) => {
+                                    animationStore.fps = parseFloat(e.target.value);
+                                    if (timelineStore) timelineStore.formatCurrentTime();
+                                  }}
+                                  type="range"
+                                  min="1"
+                                  max="30"
+                                />
+                              </label>
+                              <button
+                                onClick={() => {
+                                  if (store.isPlaying) store.isPaused = !store.isPaused;
+                                  if (timelineStore) timelineStore.playSequence();
+                                }}
+                                className="play-button mt-8"
+                              >
+                                {store.isPlaying ? (
+                                  <FaStopCircle size={54} className="" />
+                                ) : (
+                                  <FaPlayCircle size={54} />
+                                )}
+                              </button>{' '}
+                            </div>
+                          </div>
+                          <CanvasComponent containerWidth={containerWidth} />
+                        </div>
+                        <div className="flex h-full w-full items-center justify-center">
+                          <EditorCarousel containerWidth={containerWidth} />
+                        </div>
+                      </div>
+                    </ResizablePanel>
+                  </ResizablePanelGroup>
+                </ResizablePanel>
+                <ResizableHandle withHandle={true} />
+                <>
+                  <ResizablePanel defaultSize={10} order={7}>
+                    <ElementsHistoryPanel />
+                  </ResizablePanel>
+                </>
+              </>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </DndContext>
+    );
+  }),
+);

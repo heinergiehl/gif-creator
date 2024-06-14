@@ -1,6 +1,7 @@
 import { useStores } from '@/store';
 import React, { MouseEventHandler, useEffect, useRef } from 'react';
-function DragableView(props: {
+import { observer } from 'mobx-react';
+const DragableView = observer(function DragableView(props: {
   children?: React.ReactNode;
   disabled?: boolean;
   className?: string;
@@ -13,45 +14,49 @@ function DragableView(props: {
     div: HTMLDivElement | null;
     isDragging: boolean;
     initialMouseX: number;
+    initialLeft: number;
   }>({
     div: null,
     isDragging: false,
     initialMouseX: 0,
+    initialLeft: 0,
   });
   const { current: data } = ref;
   function calculateNewValue(mouseX: number): number {
-    if (!data.div) return 0;
+    if (!data.div || !data.div.parentElement) return 0;
     const deltaX = mouseX - data.initialMouseX;
-    const deltaValue = (deltaX / data.div.parentElement!.clientWidth) * props.total;
-    return props.value + deltaValue;
+    const parentWidth = data.div.parentElement.clientWidth;
+    const newLeft = data.initialLeft + deltaX;
+    const maxLeft = parentWidth - data.div.clientWidth;
+    const boundedLeft = Math.max(0, Math.min(maxLeft, newLeft));
+    return (boundedLeft / parentWidth) * props.total;
   }
   const handleMouseDown: MouseEventHandler<HTMLDivElement> = (event) => {
-    if (!data.div) return;
-    if (props.disabled) return;
+    if (!data.div || props.disabled) return;
     data.isDragging = true;
     data.initialMouseX = event.clientX;
+    data.initialLeft = data.div.offsetLeft;
+    document.body.style.userSelect = 'none';
   };
-  const handleMouseMove: MouseEventHandler<HTMLDivElement> = (event) => {
-    if (!data.div) return;
-    if (!data.isDragging) return;
-    data.div.style.left = `${(calculateNewValue(event.clientX) / props.total) * 100}%`;
-    event.stopPropagation();
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!data.div || !data.isDragging) return;
+    const newValue = calculateNewValue(event.clientX);
+    data.div.style.left = `${(newValue / props.total) * 100}%`;
     event.preventDefault();
   };
-  const handleMouseUp: MouseEventHandler<HTMLDivElement> = (event) => {
-    if (!data.div) return;
-    if (!data.isDragging) return;
+  const handleMouseUp = (event: MouseEvent) => {
+    if (!data.div || !data.isDragging) return;
     data.isDragging = false;
     props.onChange(calculateNewValue(event.clientX));
-    event.stopPropagation();
+    document.body.style.userSelect = 'auto';
     event.preventDefault();
   };
   useEffect(() => {
-    window.addEventListener('mouseup', handleMouseUp as any);
-    window.addEventListener('mousemove', handleMouseMove as any);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
     return () => {
-      window.removeEventListener('mouseup', handleMouseUp as any);
-      window.removeEventListener('mousemove', handleMouseMove as any);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [handleMouseUp, handleMouseMove]);
   return (
@@ -60,7 +65,6 @@ function DragableView(props: {
         data.div = r;
       }}
       className={`h-100 absolute ${props.className}`}
-      // make sure  that the value is within the bounds
       style={{
         left: (Math.max(0, Math.min(props.total, props.value)) / props.total) * 100 + '%',
         top: 0,
@@ -72,5 +76,5 @@ function DragableView(props: {
       {props.children}
     </div>
   );
-}
+});
 export default DragableView;

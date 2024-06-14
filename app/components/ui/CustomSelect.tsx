@@ -5,14 +5,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FilterType } from '@/store/EditorStore';
 interface CustomSelectProps {
   options: {
     value: string;
     label: string;
   }[];
   trigger: string;
-  value: string;
-  onChange: (event: string) => void;
+  value: string | null;
+  onChange: (filterType: FilterType) => void;
 }
 export const CustomSelect: React.FC<CustomSelectProps> = ({
   options,
@@ -21,10 +22,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   value,
 }) => {
   return (
-    <Select onValueChange={(e) => onChange(e)} value={value}>
-      <SelectTrigger>
-        <SelectValue>{trigger}</SelectValue>
-      </SelectTrigger>
+    <Select onValueChange={(e) => onChange(e)} value={value || ''}>
+      <SelectTrigger className={'max-w-[70%]'}>{value !== '' ? value : trigger}</SelectTrigger>
       <SelectContent>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>

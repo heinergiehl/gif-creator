@@ -4,38 +4,51 @@ import { observer } from 'mobx-react';
 import { AnimationResource } from '../entity/AnimationResource';
 import { getUid } from '@/utils';
 import { useStores } from '@/store';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
+import { Animation } from '@/types';
 export const AnimationsPanel = observer(() => {
   const store = useStores().animationStore;
-  const selectedElement = store?.editorStore?.selectedElement;
-  const selectedElementAnimations = store.animations.filter((animation) => {
-    return animation.targetId === selectedElement?.id;
-  });
-  const hasFadeInAnimation = selectedElementAnimations.some((animation) => {
-    return animation.type === 'fadeIn';
-  });
-  const hasFadeOutAnimation = selectedElementAnimations.some((animation) => {
-    return animation.type === 'fadeOut';
-  });
-  const hasSlideInAnimation = selectedElementAnimations.some((animation) => {
-    return animation.type === 'slideIn';
-  });
-  const hasSlideOutAnimation = selectedElementAnimations.some((animation) => {
-    return animation.type === 'slideOut';
-  });
-  const hasConsantAnimation = selectedElementAnimations.some((animation) => {
-    return animation.type === 'breathe';
-  });
+  const { canvasRef } = useCanvas();
+  const selectedElements = store?.editorStore?.selectedElements || [];
+  const selectedElementAnimations = store.animations.filter((animation) =>
+    selectedElements.some((el) => el.id === animation.targetId),
+  );
+  const hasFadeInAnimation = selectedElementAnimations.some(
+    (animation) => animation.type === 'fadeIn',
+  );
+  const hasFadeOutAnimation = selectedElementAnimations.some(
+    (animation) => animation.type === 'fadeOut',
+  );
+  const hasSlideInAnimation = selectedElementAnimations.some(
+    (animation) => animation.type === 'slideIn',
+  );
+  const hasSlideOutAnimation = selectedElementAnimations.some(
+    (animation) => animation.type === 'slideOut',
+  );
+  const hasConstantAnimation = selectedElementAnimations.some(
+    (animation) => animation.type === 'breathe',
+  );
+  const addAnimationToStore = (animation: Animation) => {
+    store.addAnimation(animation);
+    if (canvasRef.current) {
+      selectedElements.forEach((el) => {
+        const anim = { ...animation, targetId: el.id };
+        if (!canvasRef.current) return;
+        store.applyAnimation(anim, canvasRef.current);
+      });
+    }
+  };
   return (
     <>
       <div className="px-[16px] pb-[8px] pt-[16px] text-sm font-semibold">Animations</div>
-      {selectedElement && !hasFadeInAnimation ? (
+      {selectedElements.length > 0 && !hasFadeInAnimation ? (
         <div
           className="cursor-pointer px-[16px] py-[8px] text-sm font-semibold hover:bg-slate-700 hover:text-white"
           onClick={() => {
-            store.addAnimation({
+            addAnimationToStore({
               id: getUid(),
               type: 'fadeIn',
-              targetId: selectedElement?.id ?? '',
+              targetId: selectedElements[0].id,
               duration: 1000,
               properties: {},
             });
@@ -44,14 +57,14 @@ export const AnimationsPanel = observer(() => {
           Add Fade In
         </div>
       ) : null}
-      {selectedElement && !hasFadeOutAnimation ? (
+      {selectedElements.length > 0 && !hasFadeOutAnimation ? (
         <div
           className="cursor-pointer px-[16px] py-[8px] text-sm font-semibold hover:bg-slate-700 hover:text-white"
           onClick={() => {
-            store.addAnimation({
+            addAnimationToStore({
               id: getUid(),
               type: 'fadeOut',
-              targetId: selectedElement?.id ?? '',
+              targetId: selectedElements[0].id,
               duration: 1000,
               properties: {},
             });
@@ -60,14 +73,14 @@ export const AnimationsPanel = observer(() => {
           Add Fade Out
         </div>
       ) : null}
-      {selectedElement && !hasSlideInAnimation ? (
+      {selectedElements.length > 0 && !hasSlideInAnimation ? (
         <div
           className="cursor-pointer px-[16px] py-[8px] text-sm font-semibold hover:bg-slate-700 hover:text-white"
           onClick={() => {
-            store.addAnimation({
+            addAnimationToStore({
               id: getUid(),
               type: 'slideIn',
-              targetId: selectedElement?.id ?? '',
+              targetId: selectedElements[0].id,
               duration: 1000,
               properties: {
                 direction: 'left',
@@ -80,14 +93,14 @@ export const AnimationsPanel = observer(() => {
           Add Slide In
         </div>
       ) : null}
-      {selectedElement && !hasSlideOutAnimation ? (
+      {selectedElements.length > 0 && !hasSlideOutAnimation ? (
         <div
           className="cursor-pointer px-[16px] py-[8px] text-sm font-semibold hover:bg-slate-700 hover:text-white"
           onClick={() => {
-            store.addAnimation({
+            addAnimationToStore({
               id: getUid(),
               type: 'slideOut',
-              targetId: selectedElement?.id ?? '',
+              targetId: selectedElements[0].id,
               duration: 1000,
               properties: {
                 direction: 'right',
@@ -100,14 +113,14 @@ export const AnimationsPanel = observer(() => {
           Add Slide Out
         </div>
       ) : null}
-      {selectedElement && !hasConsantAnimation ? (
+      {selectedElements.length > 0 && !hasConstantAnimation ? (
         <div
           className="cursor-pointer px-[16px] py-[8px] text-sm font-semibold hover:bg-slate-700 hover:text-white"
           onClick={() => {
-            store.addAnimation({
+            addAnimationToStore({
               id: getUid(),
               type: 'breathe',
-              targetId: selectedElement?.id ?? '',
+              targetId: selectedElements[0].id,
               duration: 1000,
               properties: {},
             });

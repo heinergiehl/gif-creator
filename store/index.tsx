@@ -1,6 +1,6 @@
 'use client';
-import React, { createContext, useContext } from 'react';
-import { configure } from 'mobx';
+import React, { MutableRefObject, createContext, useContext } from 'react';
+import { configure, makeAutoObservable } from 'mobx';
 import { ScreenToVideoStore } from './ScreenToVideoStore';
 import { AnimationStore } from './AnimationStore';
 import { EditorStore } from './EditorStore';
@@ -9,37 +9,42 @@ import { UIStore } from './UIStore';
 import { EditorCarouselStore } from './EditorCarouselStore';
 import { FileStore } from './FileStore';
 import { HistoryStore } from './HistoryStore';
+import { FilterStore } from './FilterStore';
+import { injectStores } from '@mobx-devtools/tools';
+import { CanvasOptionsStore } from './CanvasOptionsStore';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
+import { observer } from 'mobx-react-lite';
+import { Canvas } from 'fabric/fabric-impl';
 configure({
   enforceActions: 'never',
 });
-class RootStore {
-  screenToVideoStore = new ScreenToVideoStore();
-  editorStore = new EditorStore();
-  historyStore = new HistoryStore();
-  animationStore = new AnimationStore();
-  timelineStore = new TimelineStore();
-  editorCarouselStore = new EditorCarouselStore();
-  fileStore = new FileStore();
+export class RootStore {
+  canvasRef: MutableRefObject<Canvas | null>;
+  constructor(canvasRef: MutableRefObject<Canvas | null>) {
+    this.canvasRef = canvasRef;
+    makeAutoObservable(this);
+  }
+  editorStore = new EditorStore(this);
+  animationStore = new AnimationStore(this);
+  timelineStore = new TimelineStore(this);
+  editorCarouselStore = new EditorCarouselStore(this);
+  historyStore = new HistoryStore(this);
+  canvasOptionsStore = new CanvasOptionsStore(this);
+  fileStore = new FileStore(this);
+  screenToVideoStore = new ScreenToVideoStore(this);
   uiStore = new UIStore();
-  constructor() {
-    this.setupDependencies();
-  }
-  // Method to configure all dependencies after instantiation
-  setupDependencies() {
-    this.historyStore.initialize(this.editorStore, this.animationStore);
-    this.animationStore.initialize(this.editorStore, this.historyStore);
-    this.timelineStore.initialize(this.animationStore, this.editorStore);
-    this.editorCarouselStore.initialize(this.editorStore, this.timelineStore);
-    this.editorStore.initialize(this.animationStore);
-  }
 }
 const StoreContext = createContext<RootStore | undefined>(undefined);
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const rootStore = new RootStore();
+  const canvasRef = useCanvas().canvasRef;
+  const rootStore = new RootStore(canvasRef);
+  injectStores({
+    rootStore: rootStore,
+  });
   return <StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>;
 };
 export const useStores = (): RootStore => {
-  const store = useContext(StoreContext);
+  const store: RootStore | undefined = useContext(StoreContext);
   if (!store) throw new Error('useStores must be used within a StoreProvider');
   return store;
 };
