@@ -98,16 +98,13 @@ let notifications = [
 ];
 notifications = Array.from({ length: 10 }, () => notifications).flat();
 export type FeautureType = {
-  Icon:
-    | ReactNode
-    | ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>
-    | LucideIcon;
+  Icon: any;
   name: string;
   description: string;
   href: string;
   cta: string;
   className: string;
-  background: ReactNode | ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  background: any;
 };
 const Notification = ({ name, description, icon, color, time }: Item) => {
   return (

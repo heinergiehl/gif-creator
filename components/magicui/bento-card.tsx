@@ -14,7 +14,7 @@ export const BentoCard = ({
 }: {
   name: string;
   className: string;
-  background: ReactNode;
+  background: any;
   Icon: any;
   description: string;
   href: string;
