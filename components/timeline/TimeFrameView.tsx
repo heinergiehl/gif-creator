@@ -68,7 +68,7 @@ export const TimeFrameView = observer((props: { element: EditorElement }) => {
           className={`${bgColorOnSelected} flex h-full w-full min-w-[0px] items-center gap-x-4 px-2 text-xs leading-[25px] text-white`}
         >
           {element.name}
-          <Image src={element.dataUrl} alt="element" width={20} height={20} />
+          <Image src={element.dataUrl || ''} alt="element" width={20} height={20} />
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={'outline'} className="m-0 h-5 w-5 rounded-full p-0">
