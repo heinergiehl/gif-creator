@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { FilterType } from '@/store/EditorStore';
 import { observer } from 'mobx-react';
 import { MdDelete } from 'react-icons/md';
 import CustomListItem from './CustomListItem';

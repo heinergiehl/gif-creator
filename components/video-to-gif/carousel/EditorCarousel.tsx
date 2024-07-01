@@ -15,7 +15,7 @@ import {
   useDndContext,
   DragOverlay,
 } from '@dnd-kit/core';
-import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import {
   CarouselItem,
   CarouselContent,
@@ -35,16 +35,19 @@ import { CSS } from '@dnd-kit/utilities';
 import { EditorElement } from '@/types';
 import SelectionArea from '@viselect/vanilla';
 import { useToast } from '@/components/ui/use-toast';
+import { throttle } from 'lodash';
 const Droppable = ({
   children,
   id,
   className,
+  style,
 }: {
   children: React.ReactNode;
   id: string;
   className: string;
+  style?: React.CSSProperties;
 }) => {
-  const { isOver, setNodeRef } = useDroppable({
+  const { isOver, setNodeRef, active } = useDroppable({
     id: String(id),
     data: {
       type: 'Frame',
@@ -53,6 +56,7 @@ const Droppable = ({
   return (
     <div
       data-id={id}
+      style={style}
       ref={setNodeRef}
       className={cn([
         isOver ? ' border-r-8 border-blue-500' : 'border-r-4 border-transparent',
@@ -71,7 +75,6 @@ export const EditorCarousel = observer(function EditorCarousel({
   containerWidth,
 }: EditorCarouselProps) {
   const store = useStores().editorStore;
-  const [api, setApi] = useState<CarouselApi>();
   const { clipboard, setClipboard } = useClipboard();
   const [selectionStart, setSelectionStart] = useState<number | null>(null);
   const [pasteIndicatorPosition, setPasteIndicatorPosition] = useState<number | null>(null);
@@ -106,7 +109,9 @@ export const EditorCarousel = observer(function EditorCarousel({
         .on('beforedrag', (e) => {
           selectionRef.current?.clearSelection();
         })
-        .on('start', ({ event }) => {
+        .on('start', ({ event, selection }) => {
+          if (active?.id) return;
+          // check if clicked on item with id timeline, if so, return
           selectionRef.current?.clearSelection();
           // remove all selected elements, meaning  selectedElements = [] and classList.remove('selected')
           if (!event?.ctrlKey && !event?.metaKey) {
@@ -144,7 +149,7 @@ export const EditorCarousel = observer(function EditorCarousel({
         selectionRef.current?.clearSelection();
       };
     }
-  }, [store.selectedElements, selectionRef.current]);
+  }, [store.selectedElements, selectionRef.current, active?.id]);
   const handleDeleteFrame = (index: number): void => {
     store.deleteFrame(index);
     if (index === store.currentKeyFrame || index === store.frames.length - 1) {
@@ -152,38 +157,14 @@ export const EditorCarousel = observer(function EditorCarousel({
       store.currentKeyFrame = newSelectedIndex;
     }
   };
-  const handleNextFrame = useCallback(() => {
-    if (api) {
-      const currentlySelectedFrame = store.currentKeyFrame;
-      if (currentlySelectedFrame < store.frames.length - 1) {
-        store.currentKeyFrame = currentlySelectedFrame + 1;
-        api.scrollNext();
-      }
-    }
-  }, [api, store.currentKeyFrame, store.frames.length]);
-  const handlePrevFrame = useCallback(() => {
-    if (api) {
-      const currentlySelectedFrame = store.currentKeyFrame;
-      if (currentlySelectedFrame > 0) {
-        store.currentKeyFrame = currentlySelectedFrame - 1;
-        api.scrollPrev();
-      }
-    }
-  }, [api, store.currentKeyFrame, store.frames.length]);
   const getBasisOfCardItem = () => {
     const carouselWidth = containerWidth;
-    if (carouselWidth <= 600) {
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 1) || 1}]`;
-    } else if (carouselWidth <= 900) {
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 2) || 1}]`;
-    } else {
-      return `basis-1/[${(api?.slidesInView() ? api.slidesInView().length : 3) || 1}]`;
-    }
   };
   const [shiftDirection, setShiftDirection] = useState<'left' | 'right' | null>(null);
   useDndMonitor({
     onDragOver: (event) => {
       const newIndex = store.frames.findIndex((frame) => frame.id === event.over?.id);
+      console.log('Drag69', event);
       updateHoverIndex(newIndex);
     },
     onDragEnd: () => {
@@ -191,33 +172,99 @@ export const EditorCarousel = observer(function EditorCarousel({
       store.isDragging = false;
     },
     onDragMove: (event) => {
-      const visibleIndexes = api?.slidesInView();
-      const firstVisibleIndex = visibleIndexes ? visibleIndexes[0] : 0;
-      const activeRect = event.active?.rect.current.translated;
-      const firstVisibleRect = api?.slideNodes()[firstVisibleIndex]?.getBoundingClientRect();
-      if (activeRect && firstVisibleRect) {
-        if (activeRect.left < firstVisibleRect.left) {
-          setShiftDirection('left');
-        } else if (activeRect.right > firstVisibleRect.right) {
-          setShiftDirection('right');
-        } else {
-          setShiftDirection(null);
-        }
+      // set shift direction based on the active over the over item
+      const carouselContent = document.getElementById('carousel-container');
+      if (!carouselContent) return;
+      const carouselContentRect = carouselContent.getBoundingClientRect();
+      // check if being on the edge, meaning left or right of the carousel content. if so, return and dont set shift direction
+      if (!event.active) return;
+      if (!event.active.rect.current.translated) return;
+      const draggedItemIsOnEdge =
+        event.active?.rect.current.translated?.left < carouselContentRect.left ||
+        event.active?.rect.current.translated?.right > carouselContentRect.right;
+      if (draggedItemIsOnEdge) return;
+      const sortableItems = document.querySelectorAll('.selectable');
+      if (sortableItems.length === 0) return;
+      const activeDraggable = document.getElementById(event.active?.id as string);
+      if (!activeDraggable) return;
+      const activeDraggableRect = activeDraggable.getBoundingClientRect();
+      if (!event.over) return;
+      // determine over index without the use of the overId, because this shall work with the overId being null for the case that the dragged item is not over any item but left or right of the over item
+      // get the nearest over element based on the position of the active draggable
+      const overElement = Array.from(sortableItems).reduce((prev, curr) => {
+        const currRect = curr.getBoundingClientRect();
+        const prevRect = prev.getBoundingClientRect();
+        const prevDistance = Math.abs(
+          activeDraggableRect.left - prevRect.left + prevRect.width / 2,
+        );
+        const currDistance = Math.abs(
+          activeDraggableRect.left - currRect.left + currRect.width / 2,
+        );
+        return prevDistance > currDistance ? prev : curr;
+      });
+      const overElementRect = overElement.getBoundingClientRect();
+      const overElementLeft = overElementRect.left;
+      const overElementRight = overElementRect.right;
+      const overElementWidth = overElementRect.width;
+      const overElementCenter = overElementLeft + overElementWidth / 2;
+      const mousePosition = event.active.rect.current.translated?.left;
+      if (!mousePosition) return;
+      const mousePositionRelativeToCarousel = mousePosition - carouselContentRect.left;
+      const shiftThreshold = overElementWidth / 2;
+      if (mousePositionRelativeToCarousel < overElementCenter - shiftThreshold) {
+        setShiftDirection('left');
+      } else if (mousePositionRelativeToCarousel > overElementCenter + shiftThreshold) {
+        setShiftDirection('right');
+      } else {
+        setShiftDirection(null);
       }
     },
   });
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const updateHoverIndex = (newIndex: number) => {
-    // setHoverIndex(newIndex);
+    setHoverIndex(newIndex);
   };
-  const calculateTransform = (index: number, hoverIndex: number) => {
-    if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
-    if (shiftDirection === 'right' && index >= hoverIndex) {
-      return 'translateX(100%)';
-    } else if (shiftDirection === 'left' && index <= hoverIndex) {
-      return 'translateX(-100%)';
-    }
-    return 'translateX(0px)';
-  };
+  const calculateTransform = useCallback(
+    (index: number, hoverIndex: number) => {
+      if (store.elements.find((el) => active?.id === el.id)) return 'translateX(0px)';
+      if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
+      const activeRect = active?.rect.current.translated;
+      const overRect = ctx.over?.rect.left;
+      if (!activeRect || !overRect) return 'translateX(0px)';
+      if (activeRect.left === overRect) return 'translateX(0px)';
+      // if (shiftDirection === 'right' && hoverIndex === 0) {
+      //   return 'translateX(-100%)';
+      // }
+      // check if the active draggable is over the first element, and if so, check if its on the left or right side of the first element
+      // depending on the side, return the corresponding transform
+      const activeDraggable = document.getElementById(active?.id as string);
+      if (!activeDraggable) return 'translateX(0px)';
+      const carouselContent = document.getElementById('carousel-container');
+      if (!carouselContent) return 'translateX(0px)';
+      const carouselContentRect = carouselContent.getBoundingClientRect();
+      // check if active draggable is on the edge of the carousel content on the left side, if so make sure to not shift the elements so it can be placed on the first position
+      const activeDraggableLeft = activeRect.left;
+      const activeDraggableRight = activeRect.right;
+      const carouselContentLeft = carouselContentRect.left;
+      const carouselContentRight = carouselContentRect.right;
+      const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
+      const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
+      if (activeDraggableIsOnLeftEdge) return 'translateX(100px)';
+      else if (shiftDirection === 'right' && index >= hoverIndex) {
+        return 'translateX(100%)';
+      } else if (shiftDirection === 'left' && index <= hoverIndex) {
+        return 'translateX(-100%)';
+      } else return 'translateX(0px)';
+    },
+    [
+      store.isDragging,
+      ctx.over?.id,
+      shiftDirection,
+      hoverIndex,
+      store.frames.length,
+      store.activeDraggable,
+    ],
+  );
   useEffect(() => {
     if (store.frames.length > 0 && store.progress.conversion === 100) {
       store.progress.conversion = 0;
@@ -286,7 +333,7 @@ export const EditorCarousel = observer(function EditorCarousel({
         duration: 3000,
       });
     }
-  }, [store.selectedElements, setClipboard, store.frames]);
+  }, [store.selectedElements, setClipboard, store.frames, store.elements]);
   const handlePaste = useCallback(
     (index: number, pasteBefore: boolean) => {
       if (clipboard && clipboard.elements) {
@@ -323,7 +370,7 @@ export const EditorCarousel = observer(function EditorCarousel({
         );
       }
     },
-    [clipboard, store, setClipboard],
+    [clipboard, store.elements, setClipboard, getUid],
   );
   const editorStore = useStores().editorStore;
   const handlePasteHotkey = useCallback(
@@ -346,32 +393,8 @@ export const EditorCarousel = observer(function EditorCarousel({
   useHotkeys('ctrl+c', handleCopy);
   useHotkeys('ctrl+x', handleCut);
   useHotkeys('ctrl+v', handlePasteHotkey);
-  const [selectionBox, setSelectionBox] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const handleMouseDrag = (event: React.MouseEvent) => {
-    if (selectionBox) {
-      const width = event.clientX - selectionBox.x;
-      const height = event.clientY - selectionBox.y;
-      setSelectionBox({ ...selectionBox, width, height });
-      console.log(
-        'Selection box',
-        selectionBox,
-        store.frames.map((frame) => frame.id),
-        store.selectedElements.map((el) => el.id),
-      );
-    }
-  };
   const handleMouseMove = (event: React.MouseEvent) => {
     setMousePosition({ x: event.clientX, y: event.clientY });
-    // if (selectionBox) {
-    //   const width = event.clientX - selectionBox.x;
-    //   const height = event.clientY - selectionBox.y;
-    //   setSelectionBox({ ...selectionBox, width, height });
-    // }
   };
   const handleMouseEnter = (index: number) => {
     setPasteIndicatorPosition(index);
@@ -379,35 +402,36 @@ export const EditorCarousel = observer(function EditorCarousel({
   const handleMouseLeave = () => {
     setPasteIndicatorPosition(null);
   };
-  const handleMouseDragEnd = (event: React.MouseEvent) => {
-    if (selectionBox) {
-      const selectionEnd = { x: event.clientX, y: event.clientY };
-      const selectedFrames = store.frames
-        .filter((frame) => {
-          const frameElement = document.getElementById(frame.id);
-          if (!frameElement) return false;
-          const { left, top, right, bottom } = frameElement.getBoundingClientRect();
-          return (
-            left >= selectionBox.x &&
-            right <= selectionEnd.x &&
-            top >= selectionBox.y &&
-            bottom <= selectionEnd.y
-          );
-        })
-        .map((frame) => frame.id);
-      console.log('Selected frames', selectedFrames);
-      store.setSelectedElements(selectedFrames);
-      store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === selectedFrames[0]);
-      setSelectionBox(null);
-      setSelectionStart(null);
+  useEffect(() => {
+    // scroll right or left depending on the mouse position or over index using the id of carousel content
+    const carouselContent = document.getElementById('carousel-container');
+    const positionOfActiveDraggable = active?.rect.current.translated;
+    if (!positionOfActiveDraggable || !carouselContent) return;
+    const carouselContentRect = carouselContent.getBoundingClientRect();
+    const carouselContentWidth = carouselContentRect.width;
+    const carouselContentLeft = carouselContentRect.left;
+    const carouselContentRight = carouselContentRect.right;
+    const activeDraggableLeft = positionOfActiveDraggable.left;
+    const activeDraggableRight = positionOfActiveDraggable.right;
+    // scroll speed based on how much the mouse is left or right of the carousel content
+    // make scroll speed faster if the mouse is further away from the carousel content
+    const scrollSpeedRight =
+      (100 * Math.abs(activeDraggableRight - carouselContentRight)) / carouselContentWidth;
+    const scrollSpeedLeft =
+      (100 * Math.abs(carouselContentLeft - activeDraggableLeft)) / carouselContentWidth;
+    if (activeDraggableRight > carouselContentRight) {
+      carouselContent.scrollLeft += scrollSpeedRight;
+    } else if (activeDraggableLeft < carouselContentLeft) {
+      carouselContent.scrollLeft -= scrollSpeedLeft;
     }
-  };
+  }, [active?.rect.current.translated]);
+  // set shift direction  based on position of active draggable relative to over index
+  // only set shift direction when its not scrolling as
   const width = `${containerWidth - 100}px`;
   return (
     <div
-      className="flex select-none flex-col items-center justify-center gap-y-4 px-16"
       draggable="false"
-      id="carousel-container"
+      className=" flex select-none flex-col items-center  justify-center gap-y-4"
       onMouseMove={handleMouseMove}
     >
       <Timeline
@@ -418,90 +442,64 @@ export const EditorCarousel = observer(function EditorCarousel({
         totalFrames={store.frames.length}
       />
       <div
-        className="flex flex-col items-center justify-center "
         style={{
           width,
           minHeight: '120px',
+          minWidth: width,
         }}
+        id="carousel-container"
+        className="relative  flex   items-center justify-start overflow-auto rounded-lg bg-muted"
       >
-        <Carousel
-          style={{
-            width,
-            minHeight: '120px',
-          }}
-          setApi={setApi}
-          opts={{
-            dragFree: true,
-            watchDrag: false,
-            watchSlides: true,
-            watchResize: true,
-          }}
-          id="carousel"
-          className="flex w-full items-start justify-start overflow-hidden rounded-lg bg-muted"
-          orientation="horizontal"
+        {store.frames.length === 0 && <CarouselDroppable />}
+        <SortableContext
+          items={store.frames.map((frame) => frame.id)}
+          strategy={rectSortingStrategy}
         >
-          {store.frames.length === 0 && <CarouselDroppable />}
-          <CarouselContent
-            style={{
-              overflowX: api?.slidesNotInView()?.length > 0 ? 'scroll' : 'hidden',
-              position: 'relative',
-            }}
-          >
-            {/* {selectionBox && !active?.id && (
-              <div
-                className="absolute border border-blue-500 bg-blue-500 bg-opacity-20"
-                style={{
-                  left: `${selectionBox.x}px`,
-                  top: `${selectionBox.y}px`,
-                  width: `${selectionBox.width}px`,
-                  height: `${selectionBox.height}px`,
-                }}
-              />
-            )} */}
-            <SortableContext
-              items={store.frames.map((frame) => frame.id)}
-              strategy={rectSortingStrategy}
+          {store.frames.map((frame, index) => (
+            <Droppable
+              id={frame.id}
+              key={index}
+              className=" selectable relative mx-4    rounded-md border-2 transition-all duration-300"
+              style={{
+                transform: calculateTransform(index, hoverIndex!),
+                transition: 'transform 0.2s',
+              }}
+              data-id={frame.id}
             >
-              {store.frames.map((frame, index) => (
-                <Droppable
+              <div>
+                {pasteIndicatorPosition === index && (
+                  <div
+                    className="absolute inset-y-0 left-0 w-1 bg-blue-500"
+                    style={{ height: '100%', zIndex: 10 }}
+                  />
+                )}
+                <SortableItem
+                  basisOfCardItem={getBasisOfCardItem()}
                   id={frame.id}
-                  active={active}
-                  key={index}
-                  className=" selectable relative mx-4 rounded-md border-2"
-                  data-id={frame.id}
-                >
-                  <div>
-                    {pasteIndicatorPosition === index && (
-                      <div
-                        className="absolute inset-y-0 left-0 w-1 bg-blue-500"
-                        style={{ height: '100%', zIndex: 10 }}
-                      />
-                    )}
-                    <SortableItem
-                      basisOfCardItem={getBasisOfCardItem()}
-                      id={frame.id}
-                      src={frame.src}
-                      index={index}
-                      onFrameSelect={handleSelectFrame}
-                      onFrameDelete={handleDeleteFrame}
-                      isSelected={store.selectedElements.map((el) => el.id).includes(frame.id)}
-                      onMouseEnter={() => handleMouseEnter(index)}
-                      onMouseLeave={handleMouseLeave}
-                    />
-                  </div>
-                </Droppable>
-              ))}
-            </SortableContext>
-          </CarouselContent>
-          <DragOverlay>
-            <DraggedImagePreview src={active?.data.current?.image} />
-          </DragOverlay>
-          <div>
-            <CarouselPrevious onClick={handlePrevFrame} />
-            <CarouselNext onClick={handleNextFrame} />
-          </div>
-        </Carousel>
+                  src={frame.src}
+                  index={index}
+                  onFrameSelect={handleSelectFrame}
+                  onFrameDelete={handleDeleteFrame}
+                  isSelected={store.selectedElements.map((el) => el.id).includes(frame.id)}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={handleMouseLeave}
+                />
+              </div>
+            </Droppable>
+          ))}
+        </SortableContext>
       </div>
+      {active && (
+        <DragOverlay>
+          {active?.data?.current?.dragOverlay ? (
+            active?.data?.current?.dragOverlay()
+          ) : (
+            <DraggedImagePreview
+              src={store.frames.find((frame) => frame.id === active?.id)?.src || ''}
+            />
+          )}
+        </DragOverlay>
+      )}
     </div>
   );
 });
@@ -513,7 +511,6 @@ interface Frame {
 interface SortableItemProps extends Frame {
   onFrameSelect: (id: string, multiSelect?: boolean) => void;
   onFrameDelete: (index: number) => void;
-  onMouseDown: (id: string, e: React.MouseEvent) => void;
   basisOfCardItem: string;
   index: number;
   isSelected: boolean;
@@ -541,15 +538,15 @@ const SortableItem: React.FC<SortableItemProps> = observer(
     const editorStore = useStores().editorStore;
     const [showHoverCard, setShowHoverCard] = useState(false);
     return (
-      <CarouselItem
+      <div
         key={index}
         ref={setNodeRef}
         style={style}
         {...attributes}
         {...listeners}
         className={cn([
-          'flex h-full cursor-pointer select-none items-center justify-center p-0 transition-colors duration-200 ease-in-out',
-          basisOfCardItem,
+          'flex h-full w-full cursor-pointer select-none items-center justify-center p-0 transition-colors duration-200 ease-in-out',
+          ,
         ])}
         onClick={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
@@ -574,7 +571,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                 ])}
               >{`Frame ${index + 1}/${editorStore.frames.length}`}</span>
             </div>
-            <CardContent className="flex h-full items-center justify-center p-0">
+            <CardContent className="flex h-full w-full items-center justify-center p-0">
               <Image
                 src={src}
                 alt={`Frame ${index + 1}`}
@@ -603,29 +600,40 @@ const SortableItem: React.FC<SortableItemProps> = observer(
             </CardContent>
           </Card>
         </div>
-      </CarouselItem>
+      </div>
     );
   },
 );
-const DraggedImagePreview = ({ src }: { src: string }) => {
-  const active = useDndContext().active;
+const DraggedImagePreview = observer(({ src }: { src: string }) => {
+  const store = useStores().editorCarouselStore;
   return (
-    <Card className="m-0 p-0">
+    <Card
+      className={cn([
+        'pointer-events-none absolute z-50',
+        'transition-all duration-300 ease-in-out',
+        'scale-125 opacity-65',
+      ])}
+    >
       <CardContent className="flex h-full items-center justify-center p-0">
         <Image
           src={src}
-          alt="Dragged frame"
+          alt={`DragOverlay`}
+          onLoad={(image) => {
+            store.cardItemHeight = image.currentTarget.naturalHeight;
+            store.cardItemWidth = image.currentTarget.naturalWidth;
+          }}
+          id={'DragOverlay'}
           width={100}
           height={100}
-          className="min-h-[100px] min-w-[100px]"
+          className="min-h-[100px] min-w-[100px] rounded-lg"
         />
       </CardContent>
     </Card>
   );
-};
+});
 const CarouselDroppable = () => {
   const { isOver, setNodeRef } = useDroppable({
-    id: 'carousel',
+    id: 'carousel-container',
     data: {
       type: 'Frame',
     },
@@ -634,9 +642,10 @@ const CarouselDroppable = () => {
     <div
       ref={setNodeRef}
       className={cn([
-        isOver ? 'absolute inset-0 border-8 border-blue-500' : 'border-4 border-transparent',
+        isOver ? ' border-8 border-blue-500' : ' border-4 border-transparent',
         'transition-colors duration-200 ease-in-out',
-        'h-full w-full rounded-lg bg-gray-100 bg-inherit text-inherit dark:bg-slate-900',
+        'h-full  rounded-lg bg-gray-100 bg-inherit text-inherit dark:bg-slate-900',
+        'absolute inset-0 ',
       ])}
     />
   );

@@ -26,7 +26,22 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
   ({ image, index }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id: `imageResource-${index}`,
-      data: { type: 'image', image: image.webformatURL, index },
+      data: {
+        type: 'image',
+        image: image.webformatURL,
+        index,
+        dragOverlay: () => (
+          <Image
+            id={`imageResource-${index}`}
+            src={image.webformatURL}
+            width={130}
+            height={170}
+            alt={'Draggable image resource'}
+            className="h-full w-full cursor-pointer rounded-lg object-contain"
+            crossOrigin="anonymous"
+          />
+        ),
+      },
     });
     const style = transform
       ? {
@@ -35,15 +50,20 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         }
       : undefined;
     return (
-      <div ref={setNodeRef} {...attributes} {...listeners} className="p-2">
+      <div
+        draggable="false"
+        id={'imageResource-' + index}
+        ref={setNodeRef}
+        {...attributes}
+        {...listeners}
+        className="p-2"
+      >
         <Image
-          id={'imageResource-' + index}
           src={image.webformatURL}
           width={image.previewWidth}
           height={image.previewHeight}
           objectFit="cover"
           alt={'Resource'}
-          style={style}
           className="rounded-lg object-fill"
           draggable={false} // It's important to disable the native HTML drag and drop
           crossOrigin="anonymous"

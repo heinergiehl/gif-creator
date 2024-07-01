@@ -26,11 +26,22 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
+  console.log('DRAGGABLEIMAGE', image, index);
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
     data: {
       image,
       index,
+      dragOverlay: () => (
+        <Image
+          id={`imageResource-${index}`}
+          src={image}
+          width={130}
+          height={170}
+          alt={'Draggable image resource'}
+          className="h-full w-full cursor-pointer rounded-lg object-contain"
+        />
+      ),
     },
   });
   const style = transform
@@ -39,7 +50,13 @@ const DraggableImage = observer(({ image, index }: { image: string; index: numbe
       }
     : undefined;
   return (
-    <div style={style} ref={setNodeRef} {...listeners} {...attributes} className="h-full w-full">
+    <div
+      draggable="false"
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className="h-full w-full"
+    >
       <Image
         id={`imageResource-${index}`}
         src={image}
@@ -81,7 +98,7 @@ const ImageResource = observer(() => {
   }, [magicContainerRef.current?.clientHeight]);
   return (
     <>
-      <div className="auto h-screen space-y-2 p-4">
+      <div className="auto h-screen space-y-2 p-4" draggable="false">
         <Label className="flex flex-col items-center justify-center gap-y-4">
           Upload Images
           <CustomInputFile onChange={handleImageChange} type="image" />

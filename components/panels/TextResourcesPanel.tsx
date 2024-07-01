@@ -19,26 +19,29 @@ type TextResourceProps = {
   fontSize: number;
   fontWeight: number;
   fontFamily: string;
-  fontColor: string;
+  fill: string;
   fontStyle: string;
   textBackground: string;
   sampleText: string;
-  fill: string;
 };
 const DraggableText = observer(
   ({
     fontSize,
     fontWeight,
     fontFamily,
-    fontColor,
+    fill,
     fontStyle,
     textBackground,
     sampleText,
-    fill,
     index,
   }: TextResourceProps & { index: number }) => {
     const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
       id: `textResource-${index}`,
+      data: {
+        dragOverlay: () => (
+          <TextResource fontSize={fontSize} fontWeight={fontWeight} sampleText={sampleText} />
+        ),
+      },
     });
     const style = transform
       ? {
@@ -49,14 +52,14 @@ const DraggableText = observer(
       : { cursor: 'grab' };
     const store = useStores().editorStore;
     return (
-      <div ref={setNodeRef} {...listeners} {...attributes} style={style}>
+      <div ref={setNodeRef} {...listeners} {...attributes}>
         <div
           className="text-start "
           id={`textResource-${index}`}
           style={{
             fontSize: `${fontSize}px`,
             fontWeight: `${fontWeight}`,
-            color: fontColor,
+            color: fill,
             fontFamily: fontFamily,
             fontStyle: fontStyle,
             backgroundColor: textBackground,
@@ -103,24 +106,24 @@ export const TextResourcesPanel = observer(() => {
   const store = useStores().editorStore;
   const [fontSize, setFontSize] = useState(14);
   const [fontWeight, setFontWeight] = useState('400');
-  const [fontColor, setFontColor] = useState('#000000');
+  const [fill, setfill] = useState('#000000');
   useEffect(() => {
-    store.fontColor = fontColor;
+    store.fill = fill;
     store.fontSize = fontSize;
-  }, [fontColor, fontSize]);
+  }, [fill, fontSize]);
   return (
     <div className="flex h-full w-full flex-col space-y-8 bg-slate-100 p-8 text-foreground dark:bg-slate-900 ">
       <div className="flex w-full flex-col items-start justify-between space-y-8">
         <FontPicker />
         {/* Additional controls like color picker and font size range */}
-        <Label htmlFor="textColor" className="mb-2 flex flex-col">
+        <Label htmlFor="fill" className="mb-2 flex flex-col">
           <span className="pb-4">Text Color</span>
           <Input
             type="color"
-            id="textColor"
-            name="textColor"
-            value={fontColor}
-            onChange={(e) => setFontColor(e.target.value)}
+            id="fill"
+            name="fill"
+            value={fill}
+            onChange={(e) => setfill(e.target.value)}
           />
         </Label>
         {/* <input
@@ -149,12 +152,12 @@ export const TextResourcesPanel = observer(() => {
             key={resource.name}
             fontSize={fontSize}
             fontFamily={store.fontFamily}
-            fontColor={store.fontColor}
+            fill={store.fill}
             fontStyle="normal"
             textBackground="dark:bg-inherit dark:text-white bg-inherit text-black"
             fontWeight={resource.fontWeight}
             sampleText={resource.name}
-            fill={store.textColor}
+            fill={fill}
             index={store.frames.length - 1}
           />
         ))}

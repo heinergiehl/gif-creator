@@ -14,11 +14,12 @@ export const TextResource = observer(({ fontSize, fontWeight, sampleText }: Text
   return (
     <div className="m-[15px] flex h-full flex-row items-center bg-secondary">
       <div
+        draggable={false}
         className="flex-1 px-2 py-1 "
         style={{
           fontSize: `${fontSize}px`,
           fontWeight: `${fontWeight}`,
-          color: store.textColor,
+          color: store.fill,
           fontFamily: store.fontFamily,
         }}
       >

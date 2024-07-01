@@ -3,7 +3,8 @@ import { RootStore } from '.';
 export class CanvasOptionsStore {
   width: number = 600;
   height: number = 400;
-  backgroundColor: string = 'white';
+  // white color by default
+  backgroundColor: string = '#ffffff';
   backgroundGradient: string = '';
   showCanvasOptions: boolean = false;
   // other important fabric canvas options
