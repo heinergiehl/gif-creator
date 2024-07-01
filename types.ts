@@ -37,7 +37,7 @@ export type TextEditorElement = EditorElementBase<
     fontSize: number;
     fontWeight: fabric.TextOptions['fontWeight'];
     fontFamily: string;
-    fontColor: string;
+    fill: string;
     textBackground: string;
     fontStyle: fabric.TextOptions['fontStyle'];
     textAlign: fabric.TextOptions['textAlign'];

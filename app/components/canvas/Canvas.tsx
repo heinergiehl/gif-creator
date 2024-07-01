@@ -21,6 +21,7 @@ import { fabric } from 'fabric';
 import { useHotkeys } from './useHotkeys';
 import { useMousePosition } from './useMousePosition';
 import { Card, CardContent } from '@/components/ui/card';
+import { FabricObjectFactory } from '@/utils/fabric-utils';
 interface CanvasProps {
   containerWidth: number;
 }
@@ -42,25 +43,15 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
   // useUpdateSelectedObject(canvasRef, store);
   // useSyncCanvasWithStore(canvasRef, store);
   useEffect(() => {
-    if (canvasRef.current) {
-      canvasStore.setHeight(canvasRef.current?.height ?? 0);
-      canvasStore.setWidth(canvasRef.current?.width ?? 0);
-      canvasStore.setBackgroundColor(
-        (canvasRef.current?.backgroundColor as string | undefined) ?? '#ffffff',
-      );
-      // Adjust objects size on canvas
-      if (canvasRef.current.getObjects().length > 0) {
-        canvasRef.current.getObjects().forEach((object) => {
-          object.scaleX && (object.scaleX *= canvasStore.width / containerWidth);
-          object.scaleY && (object.scaleY *= canvasStore.width / containerWidth);
-          object.left && (object.left *= canvasStore.width / containerWidth);
-          object.top && (object.top *= canvasStore.width / containerWidth);
-          object.setCoords();
-        });
-      }
-      canvasRef.current.requestRenderAll();
-    }
-  }, [canvasRef.current?.width, canvasRef.current?.height, canvasRef.current?.backgroundColor]);
+    applyChanges();
+    canvasRef.current?.requestRenderAll();
+  }, [
+    canvasRef.current?.width,
+    canvasRef.current?.height,
+    canvasStore.width,
+    canvasStore.height,
+    store.currentKeyFrame,
+  ]);
   const [backgroundColor, setBackgroundColor] = useState(canvasStore.backgroundColor);
   const applyChanges = () => {
     canvasRef.current?.setWidth(canvasStore.width);
@@ -81,7 +72,7 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
   const activeObject = canvasRef.current?.getActiveObject();
   console.log('CANVAS!', hasAlreadyFrames, isOver);
   return (
-    <div id="grid-canvas-container" className="relative flex">
+    <div id="grid-canvas-container" className="relative  flex">
       <canvas
         id="canvas"
         ref={setNodeRef}

@@ -78,7 +78,7 @@ export class EditorStore {
   elements: EditorElement[] = [];
   selectedElements: EditorElement[] = [];
   backgroundColor = '#ffffff';
-  fontColor = '#000000';
+  fill = '#000000';
   fontSize = 16;
   fontWeight = 400;
   textBackground = '#ffffff';
@@ -92,8 +92,8 @@ export class EditorStore {
   playInterval: NodeJS.Timeout | null = null;
   currentTimeInMs = 0;
   maxTime = 0;
-  textColor = '#000000';
-  imageType: 'Frame' | 'ObjectInFrame' = 'Frame';
+  fill = '#000000';
+  imageType: 'Frame' | 'None' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
   activeDraggable: DragStartEvent | null = null;
   progress = {
@@ -999,11 +999,10 @@ export class EditorStore {
     text: string;
     fontSize: number;
     fontWeight: number;
-    fontColor: string;
+    fill: string;
     fontFamily: string;
     fontStyle: string;
     textBackground: string;
-    fill: string;
     isFrame: boolean;
     id: string;
     index: number;
@@ -1045,13 +1044,12 @@ export class EditorStore {
         text: options.text,
         fontSize: options.fontSize,
         fontWeight: options.fontWeight,
-        fontColor: options.fontColor,
+        fill: options.fill,
         fontFamily: options.fontFamily,
         fontStyle: options.fontStyle,
         textBackground: options.textBackground,
         splittedTexts: [],
         textAlign: 'left',
-        fill: options.fill,
         underline: false,
         linethrough: false,
         overline: false, // Add missing property
@@ -1091,6 +1089,7 @@ export class EditorStore {
     this.elements = this.elements.filter((el) => el.id !== id).slice();
     // animations that are related to this element should be removed
     // this.animationStore?.removeAnimationsByTargetId(id);
+    this.selectedElements = this.selectedElements.filter((el) => el.id !== id);
   }
   deleteFrame(index: number) {
     this.frames = this.frames.filter((frame, i) => i !== index);

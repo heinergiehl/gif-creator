@@ -86,7 +86,7 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
       onDragLeave={handleDrag}
       onDrop={handleDrop}
       className={cn([
-        'relative flex h-20 w-[80%] max-w-sm  items-center justify-center gap-1.5 rounded border-2 transition-colors duration-300 ease-in-out',
+        'relative flex  max-h-40  max-w-xs  items-center justify-center gap-1.5 rounded border-2 transition-colors duration-300 ease-in-out',
         ,
         isValidType?.toString() === 'true'
           ? 'border-green-500'
@@ -127,11 +127,11 @@ const LabelContent = (fileType: string, isValidFile: boolean | null) => {
   const Icon = ({ className }: { className: string }) => {
     switch (fileType) {
       case 'video':
-        return <FaRegFileVideo className={className} />;
+        return <FaRegFileVideo className={className} size="30" />;
       case 'image':
-        return <FaRegImage className={className} />;
+        return <FaRegImage className={className} size="30" />;
       case 'gif':
-        return <AiOutlineFileGif className={className} />;
+        return <AiOutlineFileGif className={className} size="30" />;
       default:
         return null;
     }

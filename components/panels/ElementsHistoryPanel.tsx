@@ -9,10 +9,12 @@ import { DeleteIcon, RemoveFormattingIcon, XIcon } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { EditorElement } from '@/types';
 import Image from 'next/image';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
 const ElementsHistoryPanel = observer(() => {
   // display all the nested elements of the current gif frame in the history panel
   const rootStore = useStores();
   const store = rootStore.editorStore;
+  const canvasRef = useCanvas().canvasRef;
   return (
     <div className="mt-4  w-full " id="history">
       <span className=" ">Elements History</span>
@@ -32,6 +34,12 @@ const ElementsHistoryPanel = observer(() => {
                 className="h-5 w-5 rounded-full px-1 py-0"
                 onClick={() => {
                   store.removeElement(element.id);
+                  const objectToRemove = canvasRef.current
+                    ?.getObjects()
+                    .find((obj) => obj.id === element.id);
+                  if (!objectToRemove) return;
+                  canvasRef.current?.remove(objectToRemove);
+                  canvasRef.current?.renderAll();
                 }}
               >
                 <XIcon size={10} />

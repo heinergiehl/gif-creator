@@ -1,4 +1,5 @@
 import {
+  AppWindowIcon,
   Bell,
   CalendarIcon,
   EditIcon,
@@ -6,6 +7,7 @@ import {
   Globe,
   LucideIcon,
   ShareIcon,
+  SmileIcon,
   VideoIcon,
 } from 'lucide-react';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
@@ -13,50 +15,29 @@ import { Footer } from './components/ui/Footer';
 import { CustomAccordion } from './components/ui/CustomAccordion';
 import { InputIcon } from '@radix-ui/react-icons';
 import { CTA } from '@/components/pages/CTA';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import Marquee from '@/components/magicui/marquee';
-import { FileTextIcon } from '@radix-ui/react-icons';
-import { Share2Icon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import AnimatedBeamDemo from '@/components/pages/animated-beam-multiple-outputs';
 import { BorderBeam } from '@/components/magicui/border-beam';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { BentoGrid } from '@/components/magicui/bento-grid';
-import { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
-import { IconProps } from '@radix-ui/react-icons/dist/types';
+import { v2 as cloudinary } from 'cloudinary';
 const FadeInUpWrapper = dynamic(
   () => import('@/components/ui/FadeInWrapper').then((mod) => mod.FadeInUpWrapper),
   { ssr: false },
 );
 const files = [
   {
-    name: 'bitcoin.pdf',
-    body: 'Bitcoin is a cryptocurrency invented in 2008 by an unknown person or group of people using the name Satoshi Nakamoto.',
+    name: '⚡ Blazingly Fast',
+    body: 'GifMagic.app is designed to be fast and efficient, allowing you to convert videos to GIFs in seconds.',
   },
   {
-    name: 'finances.xlsx',
-    body: 'A spreadsheet or worksheet is a file made of rows and columns that help sort data, arrange data easily, and calculate numerical data.',
+    name: '💾No data will be stored',
+    body: 'This application runs entirely in your browser, and no data is stored on our servers, as we do not have any.',
   },
   {
-    name: 'logo.svg',
-    body: 'Scalable Vector Graphics is an Extensible Markup Language-based vector image format for two-dimensional graphics with support for interactivity and animation.',
-  },
-  {
-    name: 'keys.gpg',
-    body: 'GPG keys are used to encrypt and decrypt email, files, directories, and whole disk partitions and to authenticate messages.',
-  },
-  {
-    name: 'seed.txt',
-    body: 'A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover Bitcoin funds on-chain.',
+    name: '💻Feature Rich Editor',
+    body: 'Edit your GIFs with ease using our feature-rich editor. Add text, stickers, and more to your GIFs.',
   },
 ];
 interface Item {
@@ -106,66 +87,45 @@ export type FeautureType = {
   className: string;
   background: any;
 };
-const Notification = ({ name, description, icon, color, time }: Item) => {
-  return (
-    <FadeInUpWrapper>
-      <figure
-        className={cn(
-          'relative mx-auto min-h-fit w-full max-w-[400px] transform cursor-pointer overflow-hidden rounded-2xl p-4',
-          // animation styles
-          'transition-all duration-200 ease-in-out hover:scale-[103%]',
-          // light styles
-          'bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]',
-          // dark styles
-          'transform-gpu dark:bg-transparent dark:backdrop-blur-md dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]',
-        )}
-      >
-        <div className="flex flex-row items-center gap-3">
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-2xl"
-            style={{
-              backgroundColor: color,
-            }}
-          >
-            <span className="text-lg">{icon}</span>
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <figcaption className="flex flex-row items-center whitespace-pre text-lg font-medium dark:text-white ">
-              <span className="text-sm sm:text-lg">{name}</span>
-              <span className="mx-1">·</span>
-              <span className="text-xs text-gray-500">{time}</span>
-            </figcaption>
-            <p className="text-sm font-normal dark:text-white/60">{description}</p>
-          </div>
-        </div>
-      </figure>
-    </FadeInUpWrapper>
-  );
-};
+const optimizeVideoUrl = cloudinary.url(
+  'https://res.cloudinary.com/dwez4z3uv/video/upload/v1719792684/qp5i4nvqq8lhc6rwyvtg.mp4',
+  {
+    resource_type: 'video',
+    quality: 'auto',
+    fetch_format: 'auto',
+    effect: 'vibrance:100',
+    secure: true,
+    sign_url: true,
+  },
+);
 const features = [
   {
-    Icon: FileTextIcon,
-    name: 'Save your files',
-    description: 'We automatically save your files as you type.',
+    Icon: SmileIcon,
+    name: '🐙 Easy to use',
+    description: 'Drag And Drop Gif Editor.',
     href: '/',
     cta: 'Learn more',
-    className: 'col-span-3 lg:col-span-1',
+    className: 'col-span-3 lg:col-span-1 ',
     background: (
       <Marquee
         pauseOnHover
-        className="absolute top-10 [--duration:20s] [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] "
+        className={cn([
+          'absolute top-10 [--duration:20s] [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] ',
+          ' transition-all duration-500 ease-out hover:translate-y-[20%] hover:[mask-image:none]  ',
+        ])}
       >
         {files.map((f, idx) => (
           <figure
             key={idx}
             className={cn(
-              'relative w-32 cursor-pointer overflow-hidden rounded-xl border p-4',
+              'relative w-40 cursor-pointer overflow-hidden rounded-xl border p-2',
               'border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]',
               'dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]',
               'transform-gpu blur-[1px] transition-all duration-300 ease-out hover:blur-none',
+              'hover:scale-110',
             )}
           >
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-2 ">
               <div className="flex flex-col">
                 <figcaption className="text-sm font-medium dark:text-white ">{f.name}</figcaption>
               </div>
@@ -177,53 +137,34 @@ const features = [
     ),
   },
   {
-    Icon: InputIcon,
-    name: 'Full text search',
-    description: 'Search through all your files in one place.',
+    Icon: AppWindowIcon,
+    name: '💎 Beautiful UI',
+    description: 'Turn videos, images, and text into GIFs with ease.',
     href: '/',
     cta: 'Learn more',
-    className: 'col-span-3 lg:col-span-2',
+    className: 'col-span-3 lg:col-span-2 ',
     background: (
-      <Command className="absolute right-10 top-10 w-[70%] origin-top translate-x-0 border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:-translate-x-10">
-        <CommandInput placeholder="Type a command or search..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
-            <CommandItem>screenshot.png</CommandItem>
-            <CommandItem>bitcoin.pdf</CommandItem>
-            <CommandItem>finances.xlsx</CommandItem>
-            <CommandItem>logo.svg</CommandItem>
-            <CommandItem>keys.gpg</CommandItem>
-            <CommandItem>seed.txt</CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    ),
-  },
-  {
-    Icon: Share2Icon,
-    name: 'Integrations',
-    description: 'Supports 100+ integrations and counting.',
-    href: '/',
-    cta: 'Learn more',
-    className: 'col-span-3 lg:col-span-2',
-    background: (
-      <AnimatedBeamDemo className="absolute right-2 top-4 h-[300px] w-[600px] border-none transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105" />
-    ),
-  },
-  {
-    Icon: CalendarIcon,
-    name: 'Calendar',
-    description: 'Use the calendar to filter your files by date.',
-    className: 'col-span-3 lg:col-span-1',
-    href: '/',
-    cta: 'Learn more',
-    background: (
-      <Calendar
-        mode="single"
-        selected={new Date(2022, 4, 11, 0, 0, 0)}
-        className="absolute right-0 top-10 origin-top rounded-md border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
-      />
+      <div className="rounded-[2.5rem]" style={{}}>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            filter: 'brightness(1.2) contrast(1.0) saturate(1.2) ',
+            clipPath: 'inset(35px 4px 20px 2px)',
+          }}
+          className="
+        absolute
+        right-10 top-10 w-[70%] origin-top translate-x-0  border transition-all duration-500 ease-out  [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)]
+        group-hover:-translate-x-10
+        group-hover:scale-110
+        group-hover:[mask-image:none]
+        "
+        >
+          <source src={optimizeVideoUrl} type="video/mp4" />
+        </video>
+      </div>
     ),
   },
 ];

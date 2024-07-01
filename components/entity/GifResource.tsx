@@ -41,7 +41,7 @@ const GifResource = observer(() => {
         const id = getUid();
         frames.push({ id, src });
       }
-      editorStore.frames = frames;
+      editorStore.frames = [...editorStore.frames, ...frames];
       editorStore.addImages();
       editorCarouselStore.isCreatingGifs = false;
       setLoading(false);

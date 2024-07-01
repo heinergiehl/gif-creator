@@ -286,12 +286,8 @@ export class FabricObjectFactory {
             if (!FabricObjectFactory.canvas) return reject('No Canvas');
             const { x, y, width, height, scaleX, scaleY, rotation, zIndex } = placement;
             const shadowOptions = ele.shadow as fabric.IShadowOptions;
-            const filters = ele.filters?.map((filter) => {
-              return createFilter(filter.type || filter.filterType, filter);
-            });
             if (FabricObjectFactory.canvas)
               img.set({
-                filters: [...(filters || [])],
                 id,
                 left: x,
                 top: y,
@@ -317,8 +313,6 @@ export class FabricObjectFactory {
                 statefullCache: true,
               });
             img.setCoords();
-            img.applyFilters();
-            FabricObjectFactory.canvas?.requestRenderAll();
             resolve(img);
           },
           { crossOrigin: 'anonymous' },
@@ -345,8 +339,8 @@ export class FabricObjectFactory {
       zIndex,
       left: x,
       top: y,
-      width,
-      height,
+      width: width || image.width,
+      height: height || image.height,
       scaleX,
       scaleY,
       originX: 'left',
@@ -358,8 +352,6 @@ export class FabricObjectFactory {
       }),
     });
     image.setCoords();
-    image.applyFilters();
-    FabricObjectFactory.canvas?.requestRenderAll();
     return image;
   }
   static createFabricText(editorElement: TextEditorElement): Promise<fabric.Text> {

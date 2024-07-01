@@ -62,6 +62,7 @@ const Timeline: React.FC<TimelineProps> = observer(
     return (
       <>
         <div
+          id="timeline"
           style={{ width }}
           onMouseMove={handleMouseMove}
           className="relative m-auto flex flex-col items-end"
@@ -70,7 +71,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           }}
         >
           {/* display current time */}
-          <div className="flex space-x-4">
+          <div className="mr-20 flex space-x-4">
             <div className="text-sm font-semibold text-gray-500">
               {timelineStore && timelineStore?.formatCurrentTime()}
             </div>
@@ -107,6 +108,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           dark:bg-slate-800
           "
           style={{
+            minWidth: width,
             width,
             height: '80px',
           }}
@@ -114,6 +116,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           <div
             className="flex flex-col overflow-visible p-4 "
             style={{
+              minWidth: width,
               width,
             }}
           >

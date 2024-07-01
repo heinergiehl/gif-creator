@@ -22,6 +22,10 @@ export const useManageFabricObjects = () => {
           console.log('currentKeyFrame in useManageFabricObjects: ', currentKeyFrame);
           const selectedFrame = store.frames[currentKeyFrame];
           if (!selectedFrame) {
+            console.error('No frame selected');
+            canvas.setBackgroundColor(canvasStore.backgroundColor, () => {
+              canvas.requestRenderAll();
+            });
             return;
           }
           console.log('selectedFrame in useManageFabricObjects: ', selectedFrame);
@@ -32,6 +36,8 @@ export const useManageFabricObjects = () => {
           }
           const elementsInFrame = store.elementsInCurrentFrame;
           const frameFabricObject = await FabricObjectFactory.manageFabricObject(frame);
+          frameFabricObject?.setCoords();
+          canvas.requestRenderAll();
           // store.updateElement(frame?.id, {
           //   placement: {
           //     ...frame.placement,
@@ -58,11 +64,44 @@ export const useManageFabricObjects = () => {
           const fabricObjectsInFrameFullFilled = prms;
           const fabObjs: fabric.Object[] = [];
           fabObjs.push(frameFabricObject);
+          store.updateElement(frame?.id, {
+            placement: {
+              ...frame.placement,
+              scaleX: frameFabricObject.scaleX || frame.placement.scaleX || 1,
+              scaleY: frameFabricObject.scaleY || frame.placement.scaleY || 1,
+              rotation: frameFabricObject.angle || frame.placement.rotation || 0,
+              x: frameFabricObject.left || frame.placement.x || 0,
+              y: frameFabricObject.top || frame.placement.y || 0,
+              width: frameFabricObject.width || frame.placement.width || 0,
+              height: frameFabricObject.height || frame.placement.height || 0,
+            },
+          });
           fabricObjectsInFrameFullFilled.forEach((promiseObjSettled) => {
             if (promiseObjSettled.status === 'fulfilled') {
               const fabricObject = promiseObjSettled.value;
+              fabricObject?.setCoords();
               if (fabricObject) {
                 fabObjs.push(fabricObject);
+                // update the element with the new placement
+                const element = store.elements.find((el) => el.id === fabricObject.id);
+                if (element) {
+                  store.updateElement(element.id, {
+                    dataUrl: fabricObject.toDataURL({
+                      format: 'png',
+                      multiplier: 0.1,
+                    }),
+                    placement: {
+                      ...element.placement,
+                      scaleX: fabricObject.scaleX || element.placement.scaleX || 1,
+                      scaleY: fabricObject.scaleY || element.placement.scaleY || 1,
+                      rotation: fabricObject.angle || element.placement.rotation || 0,
+                      x: fabricObject.left || element.placement.x || 0,
+                      y: fabricObject.top || element.placement.y || 0,
+                      width: fabricObject.width || element.placement.width || 0,
+                      height: fabricObject.height || element.placement.height || 0,
+                    },
+                  });
+                }
               }
             }
           });
@@ -88,7 +127,6 @@ export const useManageFabricObjects = () => {
           ) {
             canvas.add(...fabObjs);
           }
-          canvas?.requestRenderAll();
         } catch (error) {
           console.error('Failed to load image', error);
         }
@@ -99,16 +137,24 @@ export const useManageFabricObjects = () => {
     const elementsInFrame = store.elementsInCurrentFrame;
     const frame = store.frames[store.currentKeyFrame];
     const frameFabricObject = canvasObjects?.find((obj) => obj.id === frame?.id);
-    // if (
-    //   !frameFabricObject ||
-    //   !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
-    // ) {
-    //   console.log('Updating canvas objects', canvasObjects, elementsInFrame, frameFabricObject);
-    // }
-    canvas?.clear();
+    if (
+      !frameFabricObject ||
+      !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
+    ) {
+      console.log('Updating canvas objects', canvasObjects, elementsInFrame, frameFabricObject);
+      canvas?.clear();
+    }
     canvas?.setBackgroundColor(canvasStore.backgroundColor, () => {
       manageFabricObjects();
-      canvas?.requestRenderAll();
     });
-  }, [store.currentKeyFrame, store.elementsInCurrentFrame, store.elements, store.frames]);
+  }, [
+    store.currentKeyFrame,
+    store.elements,
+    store.frames,
+    canvasRef.current?.width,
+    canvasRef.current?.height,
+    canvasStore.backgroundColor,
+    canvasStore.width,
+    canvasStore.height,
+  ]);
 };

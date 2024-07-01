@@ -14,14 +14,21 @@ import {
   treatAngle,
 } from './customControls';
 import { useCanvas } from './canvasContext';
-import { isImageEditorElement, stringToShadowOptions } from '@/utils/fabric-utils';
+import {
+  isImageEditorElement,
+  isTextEditorElement,
+  stringToShadowOptions,
+} from '@/utils/fabric-utils';
 import { EditorElement } from '@/types';
 import { EditorStore } from '@/store/EditorStore';
+import { getUid } from '@/utils';
 export const useInitializeCanvas = () => {
+  const rootStore = useStores();
   const store = useStores().editorStore;
   const canvasRef = useCanvas().canvasRef;
   useHotkeys(canvasRef);
   const canvasStore = useStores().canvasOptionsStore;
+  const timelineStore = useStores().timelineStore;
   useEffect(() => {
     const setupCustomControls = (store: any) => {
       fabric.Object.prototype.controls.remove = createCustomControl(
@@ -139,6 +146,8 @@ export const useInitializeCanvas = () => {
     ) => {
       const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
       store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
+      canvasRef.current?.remove(transform.target);
+      canvasRef.current?.renderAll();
       return true;
     };
     const handleCopy = (
@@ -150,13 +159,14 @@ export const useInitializeCanvas = () => {
       // when clicking on the copy icon, the selected object should be copied
       const target = transform.target;
       if (!target) return true;
-      const cloned = target.clone((clonedObj: fabric.Object) => {
+      target.clone((clonedObj: fabric.Object) => {
+        const id = `element-${Date.now()}`;
         clonedObj.set({
           left: clonedObj?.left || 0 + 10,
           top: clonedObj.top || 0 + 10,
-          id: `element-${Date.now()}`,
+          id,
         });
-        const selectedElement = store.elements.find((el: any) => el.id === target.id);
+        const selectedElement = store.elements.find((el: EditorElement) => el.id === target.id);
         let dataUrl = '';
         if (!selectedElement) return;
         if (isImageEditorElement(selectedElement)) {
@@ -167,14 +177,45 @@ export const useInitializeCanvas = () => {
             format: 'png',
           });
         }
-        if (selectedElement) {
+        if (selectedElement && isImageEditorElement(selectedElement)) {
           store.elements = [
             ...store.elements,
             {
               ...selectedElement,
+              order: store.elements.length,
+              index: store.elements.length,
               dataUrl,
-              id: clonedObj.id ?? '',
+              id: id,
               isFrame: false,
+              properties: {
+                ...selectedElement.properties,
+                elementId: id,
+              },
+              placement: {
+                ...selectedElement.placement,
+                x: clonedObj?.left || 0,
+                y: clonedObj?.top || 0,
+              },
+            },
+          ];
+        } else if (
+          selectedElement &&
+          isTextEditorElement(selectedElement) &&
+          clonedObj instanceof fabric.Textbox
+        ) {
+          store.elements = [
+            ...store.elements,
+            {
+              ...selectedElement,
+              order: store.elements.length,
+              index: store.elements.length,
+              dataUrl,
+              id: id,
+              isFrame: false,
+              properties: {
+                ...selectedElement.properties,
+                text: clonedObj.text || '',
+              },
               placement: {
                 ...selectedElement.placement,
                 x: clonedObj?.left || 0,
@@ -183,9 +224,16 @@ export const useInitializeCanvas = () => {
             },
           ];
         }
+        clonedObj.set('id', id);
+        clonedObj.set('zIndex', store.elements.length);
+        clonedObj.setCoords();
         canvasRef.current?.add(clonedObj);
         canvasRef.current?.setActiveObject(clonedObj);
       });
+      const timeFrame = store.elements.find((el: EditorElement) => el.id === target.id)?.timeFrame;
+      const ele = store.elements.find((el: EditorElement) => el.id === target.id);
+      if (!timeFrame || !ele) return;
+      timelineStore.updateEditorElementTimeFrame(ele, timeFrame);
       return true;
     };
     let guideline: AlignGuidelines;
@@ -253,6 +301,34 @@ export const useInitializeCanvas = () => {
       if (typeof modifiedObject.shadow === 'string') {
         shadow = stringToShadowOptions(modifiedObject.shadow);
       }
+      console.log('modifiedObject: ', modifiedObject.width, modifiedObject.height);
+      // if fabricobject is text, we need to update the text property
+      if (modifiedObject instanceof fabric.Textbox) {
+        const textElement = store.elements.find((el) => el.id === modifiedObject.id);
+        if (textElement) {
+          store.updateElement(modifiedObject.id, {
+            dataUrl,
+            text: modifiedObject.text || '',
+            properties: {
+              ...textElement.properties,
+              text: modifiedObject.text || '',
+            },
+            placement: {
+              zIndex: modifiedObject.zIndex || 0,
+              x: modifiedObject.left || 0,
+              y: modifiedObject.top || 0,
+              scaleX: modifiedObject.scaleX || 1,
+              scaleY: modifiedObject.scaleY || 1,
+              width: modifiedObject.width || 200,
+              height: modifiedObject.height || 200,
+              rotation: modifiedObject.angle || 0,
+              fill: modifiedObject.fill || '',
+            },
+            shadow,
+          });
+        }
+        return;
+      }
       store.updateElement(modifiedObject.id, {
         dataUrl,
         placement: {
@@ -261,19 +337,16 @@ export const useInitializeCanvas = () => {
           y: modifiedObject.top || 0,
           scaleX: modifiedObject.scaleX || 1,
           scaleY: modifiedObject.scaleY || 1,
-          width: modifiedObject.width || 0,
-          height: modifiedObject.height || 0,
+          width: modifiedObject.width || 200,
+          height: modifiedObject.height || 200,
           rotation: modifiedObject.angle || 0,
+          fill: modifiedObject.fill || '',
         },
         shadow,
       });
       store.fabricObjectUpdated = false;
     };
     const setupEventHandlers = (canvas: fabric.Canvas, store: EditorStore) => {
-      canvas.on('object:modified', (e) => {
-        if (!e?.target) return;
-        updateElementState(e.target);
-      });
       const getObjectCenter = (obj: fabric.Object) => {
         const { left, top, width, height } = obj.getBoundingRect();
         return {
@@ -281,6 +354,27 @@ export const useInitializeCanvas = () => {
           y: top + height / 2,
         };
       };
+      const handleSelectionChange = throttle((selectedObjects: fabric.Object[]) => {
+        const newSelectedElementIds = selectedObjects.map((obj) => obj.id || '');
+        const currentSelectedIds = store.selectedElements.map((el) => el.id);
+        const hasChanged =
+          newSelectedElementIds.length !== currentSelectedIds.length ||
+          !newSelectedElementIds.every((id) => currentSelectedIds.includes(id));
+        console.log(
+          'Selection changed!!!!,',
+          newSelectedElementIds,
+          currentSelectedIds,
+          hasChanged,
+        );
+        if (hasChanged) {
+          store.setSelectedElements(newSelectedElementIds);
+          console.log('Selected elements in handleSelectionChange:', store.selectedElements);
+        }
+      }, 300);
+      canvas.on('object:modified', (e) => {
+        if (!e?.target) return;
+        updateElementState(e.target);
+      });
       canvas.on('object:moving', (e) => {
         const activeObject = e.target;
         if (activeObject) {
@@ -302,7 +396,7 @@ export const useInitializeCanvas = () => {
           if (widthAndHeightHtmlElement) {
             widthAndHeightHtmlElement.innerText = `${Math.round(activeObject.getScaledWidth())}x${Math.round(activeObject.getScaledHeight())}`;
           }
-          // make sure to update the overlay position
+          // Update overlay position
           const sizeOverlay = document.getElementById('size-overlay');
           const angleOverlay = document.getElementById('angle-overlay');
           if (sizeOverlay && angleOverlay) {
@@ -328,22 +422,12 @@ export const useInitializeCanvas = () => {
           }
         }, 300),
       );
-      const handleSelectionChange = throttle((selectedObjects: fabric.Object[]) => {
-        console.log('Selection changed!!!!');
-        const newSelectedElementIds = selectedObjects.map((obj) => obj.id || '');
-        const currentSelectedIds = store.selectedElements.map((el) => el.id);
-        const hasChanged =
-          newSelectedElementIds.length !== currentSelectedIds.length ||
-          !newSelectedElementIds.every((id) => currentSelectedIds.includes(id));
-        if (hasChanged) {
-          store.setSelectedElements(newSelectedElementIds);
-          console.log('Selected elements in handleSelectionChange:', store.selectedElements);
-        }
-      }, 300);
       canvas.on('selection:created', (e) => {
+        console.log('selectionCreated', e);
         handleSelectionChange(e.selected || []);
       });
       canvas.on('selection:updated', (e) => {
+        console.log('SelectionUpdated', e || []);
         handleSelectionChange(e.selected || []);
       });
       canvas.on('selection:cleared', (e) => {
@@ -354,23 +438,8 @@ export const useInitializeCanvas = () => {
         e.target?.set('stroke', 'none');
         const selectedElement = store.selectedElements.find((el) => el.id === e.target?.id);
         if (!selectedElement && e.target?.id) {
+          console.log('OBJECT SELECTED: ', e.target);
           store.setSelectedElements([e.target?.id]);
-        }
-      });
-      canvas.on('mouse:up', (e) => {
-        const target = e.target;
-        if (target) {
-          target.set('stroke', 'none');
-          console.log(
-            'MOUSEUP: ',
-            target.id,
-            canvas.getActiveObjects().map((obj) => obj.id),
-          );
-          if (canvas.getObjects().find((obj) => obj.id === target.id)) return;
-          if (!target?.id) {
-            return;
-          }
-          store.setSelectedElements([target.id]);
         }
       });
       canvas.on('mouse:down', (e) => {
@@ -398,32 +467,16 @@ export const useInitializeCanvas = () => {
           if (!rect.left || !rect.top) return;
           rect.set({ width: pointer.x - rect.left, height: pointer.y - rect.top });
           rect.setCoords();
-          canvas.requestRenderAll();
         });
         canvas.on('mouse:up', (e) => {
           console.log('mouse:up');
           canvas.off('mouse:move');
-          canvas.off('mouse:up');
-          canvas.off('mouse:down');
           guideline?.clearGuideline();
           const rect = canvas.getObjects().find((obj) => obj.id === 'selection-rectangle');
-          console.log('mouseUP: ', rect);
           if (!rect) return;
           canvas.remove(...canvas.getObjects().filter((obj) => obj.id === 'selection-rectangle'));
         });
       });
-      return () => {
-        canvas.off('object:modified');
-        canvas.off('selection:created');
-        canvas.off('selection:updated');
-        canvas.off('selection:cleared');
-        canvas.off('object:selected');
-        canvas.off('mouse:up');
-        canvas.off('mouse:out');
-        canvas.off('object:rotating');
-        canvas.off('object:scaling');
-        canvas.off('object:moving');
-      };
     };
     if (canvasRef.current === null) {
       const c = new fabric.Canvas('canvas', {
@@ -439,14 +492,17 @@ export const useInitializeCanvas = () => {
         imageSmoothingEnabled: true,
         stateful: true,
         snapThreshold: 1,
+        centeredScaling: true,
       });
       canvasRef.current = c;
+      rootStore.canvasRef.current = c;
     }
     const canvas = canvasRef.current;
     if (canvas) {
       fabric.Object.prototype.transparentCorners = false;
       fabric.Object.prototype.cornerColor = 'blue';
       fabric.Object.prototype.cornerStyle = 'circle';
+      fabric.Object.prototype.centeredScaling = true;
       fabric.Object.prototype.cornerSize = 20;
       fabric.Object.prototype.borderScaleFactor = 5;
       fabric.Object.prototype.id = '';
@@ -467,6 +523,25 @@ export const useInitializeCanvas = () => {
       startRenderLoop(canvas);
       setupEventHandlers(canvas, store);
     }
-    // Cleanup on unmount
-  }, [canvasRef, canvasStore.backgroundColor, canvasStore.height, canvasStore.width, store]);
+    return () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.off('object:modified');
+      canvas.off('selection:created');
+      canvas.off('selection:updated');
+      canvas.off('selection:cleared');
+      canvas.off('object:selected');
+      canvas.off('mouse:out');
+      canvas.off('mouse:down');
+      canvas.off('object:rotating');
+      canvas.off('object:scaling');
+      canvas.off('object:moving');
+    };
+  }, [
+    canvasRef.current,
+    canvasStore.backgroundColor,
+    canvasStore.height,
+    canvasStore.width,
+    store,
+  ]);
 };
