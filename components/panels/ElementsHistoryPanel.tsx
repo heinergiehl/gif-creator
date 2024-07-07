@@ -16,22 +16,23 @@ const ElementsHistoryPanel = observer(() => {
   const store = rootStore.editorStore;
   const canvasRef = useCanvas().canvasRef;
   return (
-    <div className="mt-4  w-full " id="history">
-      <span className=" ">Elements History</span>
-      <Separator className="my-2" />
-      <MagicContainer className="flex-start flex flex-wrap   justify-stretch  gap-4">
+    <div className="flex h-full w-full flex-col" id="history">
+      <div className="dark:bg-slate-900">
+        <span className="flex h-[50px] items-center justify-center text-sm">Elements History</span>
+      </div>
+      <MagicContainer className="flex-start m-4 flex  flex-wrap justify-stretch  gap-4">
         {store.elementsInCurrentFrame?.map((element) => (
           <MagicCard
             onClick={() => {
               store.setSelectedElements([element.id]);
             }}
             key={element.id}
-            className="overflow-hiddenshadow-2xl relative flex h-[90px] max-w-[200px] cursor-pointer flex-col items-start justify-center"
+            className="relative flex h-[90px] w-[80%] max-w-[200px] cursor-pointer flex-col items-start justify-center overflow-hidden shadow-2xl"
           >
-            <div className="absolute left-[85%] top-[2%] h-full  w-full ">
+            <div className="absolute left-[82%] top-[2%]    ">
               <Button
                 variant={'destructive'}
-                className="h-5 w-5 rounded-full px-1 py-0"
+                className="h-5 w-5 rounded-full px-0 py-0"
                 onClick={() => {
                   store.removeElement(element.id);
                   const objectToRemove = canvasRef.current

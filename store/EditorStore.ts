@@ -404,6 +404,7 @@ export class EditorStore {
         });
       }
     });
+    this.fabricObjectUpdated = false;
   }
   increaseZIndexOfSelectedElements(canvas: fabric.Canvas) {
     this.selectedElements.forEach((element) => {

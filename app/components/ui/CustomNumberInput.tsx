@@ -32,7 +32,7 @@ const CustomNumberInput: React.FC<CustomNumberInputPropbs> = ({
     () =>
       debounce((value: number) => {
         onChange(value);
-      }, 500), // 500ms delay
+      }, 5), // 500ms delay
     [onChange],
   );
   useEffect(() => {
