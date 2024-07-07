@@ -35,7 +35,7 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
             id={`imageResource-${index}`}
             src={image.webformatURL}
             width={130}
-            height={170}
+            height={100}
             alt={'Draggable image resource'}
             className="h-full w-full cursor-pointer rounded-lg object-contain"
             crossOrigin="anonymous"
@@ -93,7 +93,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
             <div>
               <Popover>
                 <PopoverTrigger asChild>
-                  <div className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
+                  <div className="absolute left-[20%] top-[20%] translate-x-[-50%] translate-y-[-50%]">
                     <ShinyButton className="flex h-10 w-10 items-center justify-center p-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <PlusIcon />
                     </ShinyButton>

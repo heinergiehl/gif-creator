@@ -62,6 +62,21 @@ const ExportPanel = observer(() => {
     rootStore.canvasOptionsStore.height,
     rootStore.canvasOptionsStore.backgroundColor,
   ]);
+  // when changing one of the paramters above, create new gif url
+  useEffect(() => {
+    if (store.elements.some((el) => el.isFrame)) {
+      setGifUrl(null);
+    }
+  }, [
+    animtionStore.fps,
+    store.frames,
+    fileStore.gifQuality,
+    store.elements,
+    rootStore.canvasRef.current,
+    rootStore.canvasOptionsStore.width,
+    rootStore.canvasOptionsStore.height,
+    rootStore.canvasOptionsStore.backgroundColor,
+  ]);
   return (
     <div className="flex h-full  flex-col space-y-2 p-4">
       <ScrollArea className="flex h-[90%] flex-col  gap-y-2 pr-8">
@@ -89,6 +104,7 @@ const ExportPanel = observer(() => {
             </div>
           </Label>
         </>
+        <Separator className="my-4" />
         <>
           <Label className="flex flex-col   ">
             <span className="text-xs ">Quality</span>
@@ -111,6 +127,7 @@ const ExportPanel = observer(() => {
             </div>
           </Label>
         </>
+        <Separator className="my-4" />
         <CanvasOptions />
         {previewUrl && (
           <>
@@ -121,10 +138,11 @@ const ExportPanel = observer(() => {
             </Label>
           </>
         )}
+        <Separator className="my-4" />
         {store.elements.some((el) => el.isFrame) && !gifUrl && (
-          <Button variant={'ghost'} onClick={handleCreateGif} className="btn btn-primary w-[150px]">
+          <ShinyButton onClick={handleCreateGif} className=" ">
             Create Gif
-          </Button>
+          </ShinyButton>
         )}
         {gifUrl && (
           <>
@@ -173,35 +191,37 @@ const CanvasOptions = observer(() => {
   ]);
   return (
     <>
-      <Label>
-        <div className="flex flex-col gap-y-2">
-          Width
-          <CustomTextInput
-            onChange={(value) => {
-              canvasOptionsStore.setWidth(parseInt(value));
-            }}
-            className="w-20"
-            name="width"
-            inputTooltip="Adjust the width of the canvas"
-            value={String(canvasOptionsStore.width)}
-          />
-        </div>
-      </Label>
-      <Label>
-        <div className="flex flex-col gap-y-2">
-          <span> Height</span>
-          <CustomTextInput
-            onChange={(value) => {
-              canvasOptionsStore.setHeight(parseInt(value));
-            }}
-            className=" w-20"
-            name="height"
-            inputTooltip="Adjust the height of the canvas"
-            value={String(canvasOptionsStore.height)}
-          />
-        </div>
-      </Label>
-      <SelectSeparator className="col-span-2" />
+      <div className="flex flex-wrap  gap-x-4">
+        <Label>
+          <div className="flex flex-col gap-y-2">
+            Width
+            <CustomTextInput
+              onChange={(value) => {
+                canvasOptionsStore.setWidth(parseInt(value));
+              }}
+              className="w-20"
+              name="width"
+              inputTooltip="Adjust the width of the canvas"
+              value={String(canvasOptionsStore.width)}
+            />
+          </div>
+        </Label>
+        <Label>
+          <div className="flex flex-col gap-y-2">
+            <span> Height</span>
+            <CustomTextInput
+              onChange={(value) => {
+                canvasOptionsStore.setHeight(parseInt(value));
+              }}
+              className=" w-20"
+              name="height"
+              inputTooltip="Adjust the height of the canvas"
+              value={String(canvasOptionsStore.height)}
+            />
+          </div>
+        </Label>
+      </div>
+      <SelectSeparator className="my-4" />
       <Label>
         <div className="flex flex-col gap-y-2">
           <span>Background Color</span>

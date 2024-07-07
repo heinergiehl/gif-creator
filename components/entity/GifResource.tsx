@@ -54,7 +54,7 @@ const GifResource = observer(() => {
     }
   };
   return (
-    <div className="relative z-[100] h-full p-8">
+    <div className="relative z-[100] h-full">
       <CustomDialog
         header="Add more frames from another GIF"
         open={openModal}
@@ -92,8 +92,10 @@ const GifResource = observer(() => {
         <CustomProgress />
       </CustomDialog>
       <>
-        <h2 className="mb-8 font-semibold">Upload a GIF to extract frames</h2>
-        <div className="flex w-full flex-col items-start justify-center gap-y-4 text-xs">
+        <div className="flex h-[50px] w-full items-center justify-center bg-slate-200 text-sm dark:bg-slate-900">
+          Upload GIF
+        </div>
+        <div className="flex w-full flex-col items-start justify-center gap-y-4 p-8  text-xs">
           {store.frames.length === 0 && store.elements.length === 0 && (
             <>
               <Label className="flex w-full max-w-xs flex-col gap-y-4">

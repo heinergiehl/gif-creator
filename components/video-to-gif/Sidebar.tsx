@@ -104,14 +104,6 @@ const MENU_OPTIONS = [
       store.setSelectedMenuOption('Gif');
     },
   },
-  // smilies
-  {
-    name: 'Smilies',
-    icon: FaRegSmile,
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Smilies');
-    },
-  },
   {
     name: 'Text',
     icon: MdTitle,

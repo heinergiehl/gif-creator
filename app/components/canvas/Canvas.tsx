@@ -70,7 +70,6 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
     };
   };
   const activeObject = canvasRef.current?.getActiveObject();
-  console.log('CANVAS!', hasAlreadyFrames, isOver);
   return (
     <div id="grid-canvas-container" className="relative  flex">
       <canvas

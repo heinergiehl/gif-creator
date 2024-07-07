@@ -1,7 +1,5 @@
-// allows to add images to a specific gif frame (nested object)
-// Compare this snippet from components/panels/TexResourcesPanel.tsx:
 'use client';
-import React, { Suspense, use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import Image from 'next/image';
 import { useStores } from '@/store';
@@ -25,8 +23,10 @@ import { MagicCard, MagicContainer } from '@/components/magicui/magic-card';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
+import imageCompression from 'browser-image-compression';
+import ShinyButton from '@/components/magicui/shiny-button';
+import { DeleteIcon, LucideDelete, RemoveFormattingIcon, Trash2Icon } from 'lucide-react';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
-  console.log('DRAGGABLEIMAGE', image, index);
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
     data: {
@@ -36,10 +36,10 @@ const DraggableImage = observer(({ image, index }: { image: string; index: numbe
         <Image
           id={`imageResource-${index}`}
           src={image}
-          width={130}
-          height={170}
+          height={60}
+          width={80}
           alt={'Draggable image resource'}
-          className="h-full w-full cursor-pointer rounded-lg object-contain"
+          className=" cursor-pointer rounded-lg "
         />
       ),
     },
@@ -60,12 +60,10 @@ const DraggableImage = observer(({ image, index }: { image: string; index: numbe
       <Image
         id={`imageResource-${index}`}
         src={image}
-        width={130}
-        height={170}
+        width={80}
+        height={60}
         alt={'Draggable image resource'}
-        className="
-            h-full w-full cursor-pointer rounded-lg object-contain
-          "
+        className="h-full w-full cursor-pointer rounded-lg object-contain"
       />
     </div>
   );
@@ -75,93 +73,130 @@ const ImageResource = observer(() => {
   const [imageType, setImageType] = useState('vector');
   const rootStore = useStores();
   const store = rootStore.editorStore;
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     for (let i = 0; i < e.target.files.length; i++) {
       const file = e.target.files[i];
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        store.progress.conversion = 0;
-        store.images.push(reader.result as string);
-        store.progress.conversion = 100;
-      };
+      try {
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.5, // Maximum file size
+          maxWidthOrHeight: 1024, // Maximum width or height
+          useWebWorker: true,
+        });
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          store.progress.conversion = 0;
+          store.images.push(reader.result as string);
+          store.progress.conversion = 100;
+        };
+      } catch (error) {
+        console.error('Error compressing image:', error);
+      }
     }
   };
   const magicContainerRef = React.useRef<HTMLDivElement>(null);
   const [fileUploadScrollAreaHeight, setFileUploadScrollAreaHeight] = useState(0);
   useEffect(() => {
+    // height of magContainerRef.current based on the number of children
+    let overAllHeight = 0;
     if (magicContainerRef.current) {
-      setFileUploadScrollAreaHeight(magicContainerRef.current.clientHeight);
+      const height = magicContainerRef.current?.offsetHeight;
+      if (height < 200) magicContainerRef.current.style.height = 'auto';
+      console.log('HEIGHT!!!', height);
+      setFileUploadScrollAreaHeight(height);
     }
-    console.log('magicContainerRef.current?.clientHeight', magicContainerRef.current?.clientHeight);
-  }, [magicContainerRef.current?.clientHeight]);
+    console.log('offsetHeight', magicContainerRef.current?.offsetHeight);
+  }, [
+    store.images,
+    fileUploadScrollAreaHeight,
+    magicContainerRef.current?.offsetHeight,
+    magicContainerRef.current?.children.length,
+  ]);
+  const handleDeleteImage = (index: number) => {
+    store.images.splice(index, 1);
+    // check if it has been added as element already, if so, remove it as well
+  };
   return (
-    <>
-      <div className="auto h-screen space-y-2 p-4" draggable="false">
-        <Label className="flex flex-col items-center justify-center gap-y-4">
+    <ScrollArea className="h-screen">
+      <div className="flex max-h-[550px]  w-full flex-col space-y-2 " draggable="false">
+        <div className="flex h-[50px] w-full items-center justify-center bg-slate-200 text-sm dark:bg-slate-900">
           Upload Images
-          <CustomInputFile onChange={handleImageChange} type="image" />
-        </Label>
-        <ScrollArea
-          className={cn([
-            ' max-h-[450px] w-full overflow-y-auto overflow-x-hidden',
-            fileUploadScrollAreaHeight > 450 ? 'h-[450px] ' : '',
-          ])}
-          id="scroll-area"
-        >
-          <MagicContainer
-            id="magic-container"
-            className={'group relative flex flex-wrap  items-stretch justify-center gap-2'}
-          >
-            {store.images.map((image, index) => (
-              <MagicCard key={index} className="h-auto w-full max-w-[130px] p-1">
-                <DraggableImage image={image} index={index} />
-                <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-              </MagicCard>
-            ))}
-          </MagicContainer>
-        </ScrollArea>
-        <Separator orientation={'horizontal'} className="w-full" />
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <Label className="flex flex-col gap-y-4">
-            <div> Search for Images online</div>
-            <div className="flex gap-x-4">
-              <CustomTextInput
-                value={query}
-                onChange={(value) => setQuery(value)}
-                name="search"
-                inputTooltip='Search for images like "smilies" or "cats"'
-              />
-              <Select value={imageType} onValueChange={(value) => setImageType(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select an image type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Image Type</SelectLabel>
-                    <SelectItem value="vector">Vector</SelectItem>
-                    <SelectItem value="photo">Photo</SelectItem>
-                    <SelectItem value="illustration">Illustration</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </Label>
-          <div className="flex gap-x-4"></div>
-          <ImageSearchSuspended query={query} imageType={imageType} />
         </div>
+        <CustomInputFile onChange={handleImageChange} type="image" />
+        <Separator orientation={'horizontal'} className="w-full" />
+        {fileUploadScrollAreaHeight < 200 && (
+          <div style={{}} className={`flex h-full  w-[95%]`} ref={magicContainerRef}>
+            <MagicContainer
+              id="magic-container"
+              className={`h-[${fileUploadScrollAreaHeight}px] group relative flex  flex-wrap items-stretch justify-center  gap-2`}
+            >
+              {store.images.map((image, index) => (
+                <MagicCard key={index} className="relative  h-[100px] max-w-[130px] p-1">
+                  <ShinyButton
+                    onClick={() => handleDeleteImage(index)}
+                    className="right-100 absolute top-0 rounded-full bg-inherit bg-red-500 p-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+                  >
+                    <Trash2Icon className="rounded-full" />
+                  </ShinyButton>
+                  <DraggableImage image={image} index={index} />
+                  <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+                </MagicCard>
+              ))}
+            </MagicContainer>
+          </div>
+        )}
+        {/* if magiccontainerRef higher than 200px, use ScrollArea */}
+        {fileUploadScrollAreaHeight >= 200 && store.images.length > 0 && (
+          <ScrollArea className="h-[200px]" ref={magicContainerRef}>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {store.images.map((image, index) => (
+                <MagicCard key={index} className="relative  h-[100px] max-w-[130px] p-1">
+                  <ShinyButton
+                    onClick={() => handleDeleteImage(index)}
+                    className="right-100 absolute top-0 rounded-full bg-inherit bg-red-500 p-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+                  >
+                    <Trash2Icon className="rounded-full" />
+                  </ShinyButton>
+                  <DraggableImage image={image} index={index} />
+                  <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+                </MagicCard>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
       </div>
-    </>
+      {store.images.length > 0 && <Separator orientation={'horizontal'} className="w-full" />}
+      <div className="flex flex-col space-y-4 p-4">
+        <Label className="flex flex-col gap-y-4">
+          <div> Search for Images online</div>
+          <div className="flex gap-x-4">
+            <CustomTextInput
+              className="min-w-[100px]"
+              value={query}
+              onChange={(value) => setQuery(value)}
+              name="search"
+              inputTooltip='Search for images like "smilies" or "cats"'
+            />
+            <Select value={imageType} onValueChange={(value) => setImageType(value)}>
+              <SelectTrigger className="ring-none rounded-none focus:outline-none focus:ring-0">
+                <SelectValue placeholder="Select an image type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Image Type</SelectLabel>
+                  <SelectItem value="vector">Vector</SelectItem>
+                  <SelectItem value="photo">Photo</SelectItem>
+                  <SelectItem value="illustration">Illustration</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </Label>
+        <Separator orientation={'horizontal'} className="w-full" />
+        <ImageSearchSuspended query={query} imageType={imageType} />
+      </div>
+    </ScrollArea>
   );
 });
-const Fallback = () => {
-  return (
-    <div className="flex h-screen w-full items-center justify-center">
-      {Array.from({ length: 100 }).map((_, index) => (
-        <Skeleton key={index} className="h-20 max-w-[130px]" />
-      ))}
-    </div>
-  );
-};
 export default ImageResource;

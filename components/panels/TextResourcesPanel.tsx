@@ -8,6 +8,8 @@ import { set } from 'animejs';
 import { Label } from '../ui/label';
 import { CustomSelect } from '@/app/components/ui/CustomSelect';
 import { Input } from '../ui/input';
+import { Separator } from '../ui/separator';
+import CustomTextInput from '@/app/components/ui/CustomTextInput';
 const TEXT_RESOURCES = [
   {
     name: 'Title',
@@ -54,7 +56,7 @@ const DraggableText = observer(
     return (
       <div ref={setNodeRef} {...listeners} {...attributes}>
         <div
-          className="text-start "
+          className="flex  overflow-hidden break-all"
           id={`textResource-${index}`}
           style={{
             fontSize: `${fontSize}px`,
@@ -88,17 +90,15 @@ const FontPicker = observer(() => {
     store.fontFamily = value;
   };
   return (
-    <div className="flex flex-col items-center ">
-      <Label htmlFor="fontPicker" className="space-y-4 ">
-        <span className="">Font</span>
-        <CustomSelect
-          options={fontOptions}
-          trigger={store.fontFamily}
-          value={store.fontFamily}
-          onChange={handleFontChange}
-        />
-      </Label>
-    </div>
+    <Label htmlFor="fontPicker" className="flex flex-col space-y-2">
+      <span className="">Font</span>
+      <CustomSelect
+        options={fontOptions}
+        trigger={store.fontFamily}
+        value={store.fontFamily}
+        onChange={handleFontChange}
+      />
+    </Label>
   );
 });
 // TextResourcesPanel component
@@ -111,56 +111,82 @@ export const TextResourcesPanel = observer(() => {
     store.fill = fill;
     store.fontSize = fontSize;
   }, [fill, fontSize]);
+  const [sampleText, setSampleText] = useState('Sample Text');
   return (
-    <div className="flex h-full w-full flex-col space-y-8 bg-slate-100 p-8 text-foreground dark:bg-slate-900 ">
-      <div className="flex w-full flex-col items-start justify-between space-y-8">
-        <FontPicker />
-        {/* Additional controls like color picker and font size range */}
-        <Label htmlFor="fill" className="mb-2 flex flex-col">
-          <span className="pb-4">Text Color</span>
-          <Input
-            type="color"
-            id="fill"
-            name="fill"
-            value={fill}
-            onChange={(e) => setfill(e.target.value)}
-          />
-        </Label>
-        {/* <input
-          type="range"
-          min="10"
-          max="100"
-          value={fontSize}
-          onChange={(e) => setFontSize(parseFloat(e.target.value))}
-        /> */}
-        <Label htmlFor="fontSize" className="mb-2 flex flex-col">
-          <span className="pb-4">Font Size</span>
-          <Input
-            type="range"
-            id="fontSize"
-            name="fontSize"
-            min="10"
-            max="100"
-            value={fontSize}
-            onChange={(e) => setFontSize(parseFloat(e.target.value))}
-          />
-        </Label>
+    <div className="flex h-full w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
+      <div className="flex h-[50px] w-full items-center justify-center  bg-slate-200 text-sm dark:bg-slate-900">
+        Add Text
       </div>
-      <div className="flex flex-col space-y-4">
-        {TEXT_RESOURCES.map((resource, index) => (
-          <DraggableText
-            key={resource.name}
-            fontSize={fontSize}
-            fontFamily={store.fontFamily}
-            fill={store.fill}
-            fontStyle="normal"
-            textBackground="dark:bg-inherit dark:text-white bg-inherit text-black"
-            fontWeight={resource.fontWeight}
-            sampleText={resource.name}
-            fill={fill}
-            index={store.frames.length - 1}
+      <div className="flex h-full flex-col p-8">
+        <div className="flex w-full   flex-wrap">
+          <FontPicker />
+          {/* Additional controls like color picker and font size range */}
+          <Label htmlFor="fill" className="space-y-2 ">
+            <span className="">Text Color</span>
+            <Input
+              className="rounded-none"
+              type="color"
+              id="fill"
+              name="fill"
+              value={fill}
+              onChange={(e) => setfill(e.target.value)}
+            />
+          </Label>
+        </div>
+        <Separator orientation="horizontal" className="my-4" />
+        <Label htmlFor="fontSize" className="mb-2 flex flex-col">
+          <span className="">Font Size</span>
+          <div className="flex  flex-row flex-wrap space-x-2">
+            <Input
+              className="basis-3/4"
+              type="range"
+              id="fontSize"
+              name="fontSize"
+              min="10"
+              max="100"
+              value={fontSize}
+              onChange={(e) => setFontSize(parseFloat(e.target.value))}
+            />
+            <CustomTextInput
+              name="fontSize"
+              inputTooltip="Font Size"
+              className="min-w-[50px] basis-1/5 rounded-none"
+              value={String(fontSize)}
+              onChange={(value) => setFontSize(parseFloat(value))}
+            />
+          </div>
+        </Label>
+        <Separator orientation="horizontal" className="my-4" />
+        <Label htmlFor="sampleText" className="mb-2 flex flex-col space-y-2">
+          <span className="">Sample Text</span>
+          <CustomTextInput
+            name="sampleText"
+            inputTooltip="Sample Text"
+            className="rounded-none"
+            value={sampleText}
+            onChange={(value) => setSampleText(value)}
           />
-        ))}
+        </Label>
+        <Separator orientation="horizontal" className="my-4" />
+        <div className="flex w-[90%] flex-col space-y-4">
+          <Label htmlFor="textResources" className="flex flex-col space-y-2">
+            <span>Text Preview</span>
+            {TEXT_RESOURCES.map((resource, index) => (
+              <DraggableText
+                key={resource.name}
+                fontSize={fontSize}
+                fontFamily={store.fontFamily}
+                fill={store.fill}
+                fontStyle="normal"
+                textBackground=""
+                fontWeight={resource.fontWeight}
+                sampleText={sampleText}
+                fill={fill}
+                index={store.frames.length - 1}
+              />
+            ))}
+          </Label>
+        </div>
       </div>
     </div>
   );

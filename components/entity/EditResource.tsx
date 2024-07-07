@@ -9,10 +9,16 @@ import CustomColorPicker from '@/app/components/ui/CustomColorPicker';
 import CustomNumberInput from '@/app/components/ui/CustomNumberInput';
 import { Button } from '../ui/button';
 import { FabricObjectFactory } from '@/utils/fabric-utils';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
 const EditResource = observer(() => {
   const store = useStores().editorStore;
+  const canvas = useCanvas().canvasRef.current;
   const handleChange = (property: keyof fabric.ITextOptions, value: string | number | boolean) => {
     console.log('handleChange', property, value);
+    const activeObject = canvas?.getActiveObject();
+    canvas?.fire('object:modified', {
+      target: activeObject,
+    });
     store.updateTextProperties(property, value);
   };
   const selectedElements = store.selectedElements;
@@ -30,14 +36,14 @@ const EditResource = observer(() => {
     store.setAllOptionsToFalse();
   }, [uiStore.selectedMenuOption]);
   return (
-    <div className="flex  w-full flex-row items-center justify-start bg-gray-100 bg-inherit text-inherit dark:bg-slate-900">
+    <div className="flex h-[50px] w-full flex-row items-center justify-start bg-gray-100 bg-inherit text-inherit dark:bg-slate-900">
       <div className="flex h-full w-full flex-row items-center justify-center">
         {selectedElements.length > 0 &&
           selectedElements?.every((element, index, array) =>
             FabricObjectFactory.isTextEditorElement(element),
           ) && (
             <>
-              <div className="ml-8 flex basis-1/3 flex-row items-center">
+              <div className="ml-8 flex  basis-1/3 flex-row items-center">
                 <CustomTextInput
                   className="w-full"
                   inputTooltip="Text"
@@ -50,7 +56,7 @@ const EditResource = observer(() => {
                   onChange={(value) => handleChange('text', value)}
                 />
               </div>
-              <div className="flex w-full flex-row items-center">
+              <div className="flex h-full w-full flex-row items-center">
                 <div className="flex h-full w-[240px] basis-1/4 flex-row items-center justify-evenly">
                   <CustomColorPicker
                     label="Text Color"

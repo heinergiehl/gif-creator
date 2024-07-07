@@ -275,20 +275,20 @@ const Editor = React.memo(
               }}
             >
               <>
-                <ResizablePanel defaultSize={12} id="resources" order={3}>
+                <ResizablePanel defaultSize={15} id="resources" order={3}>
                   <Resources />
                 </ResizablePanel>
                 <ResizableHandle withHandle={true} />
               </>
               <>
-                <ResizablePanel defaultSize={78} id="editor" order={4}>
+                <ResizablePanel defaultSize={75} id="editor" order={4}>
                   <ResizablePanelGroup direction="vertical">
-                    <ResizablePanel defaultSize={6} order={5}>
+                    <ResizablePanel defaultSize={8} order={5}>
                       <EditResource />
                     </ResizablePanel>
-                    <ResizablePanel defaultSize={94} id="editor-container" order={6}>
+                    <ResizablePanel defaultSize={92} id="editor-container" order={6}>
                       <ScrollArea
-                        className="flex  h-[95%] w-[100%] flex-col items-stretch justify-between gap-y-8 pr-8"
+                        className="flex  h-[100%] w-[100%] flex-col items-stretch justify-between gap-y-8 pr-8"
                         id="editor-container"
                       >
                         <CustomAlertDialog />
