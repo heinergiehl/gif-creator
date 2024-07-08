@@ -151,7 +151,11 @@ export const EditorCarousel = observer(function EditorCarousel({
     }
   }, [store.selectedElements, selectionRef.current, active?.id]);
   const handleDeleteFrame = (index: number): void => {
-    store.deleteFrame(index);
+    console.log('HANDLEDELETEFRAME', index, store.frames.length, store.elements.length);
+    const frameToDelete = store.frames[index];
+    // get the corresponding element to the frame
+    store.elements = store.elements.filter((element) => element.id !== frameToDelete.id);
+    store.frames = store.frames.filter((frame) => frame.id !== store.frames[index].id);
     if (index === store.currentKeyFrame || index === store.frames.length - 1) {
       const newSelectedIndex = (index === 0 ? 0 : index - 1) % store.frames.length;
       store.currentKeyFrame = newSelectedIndex;
@@ -587,6 +591,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                 variant={'outline'}
                 onMouseDown={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   onFrameDelete(index);
                 }}
                 className={cn([

@@ -80,7 +80,7 @@ const Editor = React.memo(
       const overId = over?.id;
       const activeIndex = store.frames.findIndex((element) => element.id === active.id);
       const overIndex = store.frames.findIndex((frame) => frame.id === overId);
-      // important to check if dragend is right next to the last frame, if so  then insert it at the end
+      // Move within frames if the active item is found in frames
       if (activeIndex !== -1) {
         store.frames = arrayMove(store.frames, activeIndex, overIndex);
         store.elements = arrayMove(store.elements, activeIndex, overIndex);
@@ -97,38 +97,41 @@ const Editor = React.memo(
         if (!activeDraggableRect || !overDraggableRect) return;
         const activeCenter = {
           x:
-            activeDraggableRect.current.translated?.left ||
-            0 + activeDraggableRect.current.initial?.width ||
-            0,
+            (activeDraggableRect.current.translated?.left || 0) +
+            (activeDraggableRect.current.initial?.width || 0),
           y:
-            activeDraggableRect.current.translated?.top ||
-            0 + activeDraggableRect.current.initial?.height ||
-            0,
+            (activeDraggableRect.current.translated?.top || 0) +
+            (activeDraggableRect.current.initial?.height || 0),
         };
         const overCenter = {
-          x: overDraggableRect.left || 0 + overDraggableRect.width || 0,
-          y: overDraggableRect.left || 0 + overDraggableRect.height || 0,
+          x: (overDraggableRect.left || 0) + (overDraggableRect.width || 0),
+          y: (overDraggableRect.top || 0) + (overDraggableRect.height || 0),
         };
         const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
-        const insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
+        let insertIndex = 0;
+        if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
+          insertIndex = 0;
+        } else {
+          insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
+        }
         if (resourceType.startsWith('imageResource')) {
           const frameId = getUid();
           const newFrame = { id: frameId, src: active?.data?.current?.image };
-          if (store.frames.length < 2) {
-            store.frames.push(newFrame);
-            store.addImage(0, active?.data?.current?.image, true, frameId);
+          // if (store.frames.length < 2) {
+          //   store.frames.push(newFrame);
+          //   store.addImage(0, active?.data?.current?.image, true, frameId);
+          //   return;
+          // }
+          if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
+            store.frames.unshift(newFrame);
+            store.addImage(-1, active?.data?.current?.image, true, frameId);
             return;
           }
-          // if the frame is dragged to the right side of the last frame, then insert it at the end
-          if (overIndex === store.frames.length) {
-            store.frames.push(newFrame);
-            store.addImage(store.frames.length, active?.data?.current?.image, true, frameId);
-            return;
-          }
-          // store.frames.splice(overIndex + 1, 0, newFrame);
-          // store.addImage(overIndex + 1, active?.data?.current?.image, true, frameId);
-          // refactor code above; check whether the frame is dragged to the right side of the first frame
-          // depending on that, insert it at overIndex or overIndex + 1
+          // if (overIndex === store.frames.length) {
+          //   store.frames.push(newFrame);
+          //   store.addImage(store.frames.length, active?.data?.current?.image, true, frameId);
+          //   return;
+          // }
           store.frames.splice(insertIndex, 0, newFrame);
           store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
         } else if (resourceType.startsWith('textResource')) {
@@ -166,7 +169,7 @@ const Editor = React.memo(
             fontFamily: store.fontFamily,
             fontStyle: store.fontStyle,
             isFrame: true,
-            index: overIndex,
+            index: insertIndex,
           });
         }
       } else if (isCanvas) {

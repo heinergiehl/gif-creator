@@ -144,8 +144,10 @@ export const useInitializeCanvas = () => {
     ) => {
       // const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
       // store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
+      console.log('handleDelete in useInitializeCanvas', transform.target?.id);
       canvasRef.current?.remove(transform.target);
-      canvasRef.current?.renderAll();
+      store.elements = store.elements.filter((el) => el.id !== transform.target?.id);
+      store.frames = store.frames.filter((frame) => frame.id !== transform.target?.id);
       return true;
     };
     const handleCopy = (
@@ -320,7 +322,6 @@ export const useInitializeCanvas = () => {
               width: modifiedObject.width || 200,
               height: modifiedObject.height || 200,
               rotation: modifiedObject.angle || 0,
-              fill: modifiedObject.fill || '',
             },
             shadow,
           });
@@ -338,7 +339,6 @@ export const useInitializeCanvas = () => {
           width: modifiedObject.width || 200,
           height: modifiedObject.height || 200,
           rotation: modifiedObject.angle || 0,
-          fill: modifiedObject.fill || '',
         },
         shadow,
       });
@@ -387,13 +387,13 @@ export const useInitializeCanvas = () => {
           }
         }
       });
-      canvas.on('object:removed', (e) => {
-        console.log('object:removed', e.target);
-        const target = e.target;
-        if (!target?.id) return;
-        store.elements = store.elements.filter((el) => el.id !== target.id);
-        store.frames = store.frames.filter((frame) => frame.id !== target.id);
-      });
+      // canvas.on('object:removed', (e) => {
+      //   console.log('object:removed', e.target);
+      //   const target = e.target;
+      //   if (!target?.id) return;
+      //   store.elements = store.elements.filter((el) => el.id !== target.id);
+      //   store.frames = store.frames.filter((frame) => frame.id !== target.id);
+      // });
       canvas.on('object:scaling', (e) => {
         const activeObject = e.target;
         if (activeObject?.height && activeObject?.width) {
@@ -549,8 +549,5 @@ export const useInitializeCanvas = () => {
     canvasStore.height,
     canvasStore.width,
     store,
-    timelineStore,
-    store.elements,
-    store.frames,
   ]);
 };
