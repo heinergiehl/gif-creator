@@ -12,12 +12,12 @@ type TextResourceProps = {
 export const TextResource = observer(({ fontSize, fontWeight, sampleText }: TextResourceProps) => {
   const store = useStores().editorStore;
   return (
-    <div className="m-[15px] flex h-full flex-row items-center bg-secondary">
+    <div className="m-[15px] flex  h-[100px] w-[100px] flex-row items-center rounded-md border-2  border-blue-500 leading-tight shadow-current drop-shadow-xl dark:bg-slate-500">
       <div
         draggable={false}
         className="flex-1 px-2 py-1 "
         style={{
-          fontSize: `${fontSize}px`,
+          fontSize: `20px`,
           fontWeight: `${fontWeight}`,
           color: store.fill,
           fontFamily: store.fontFamily,
@@ -25,9 +25,6 @@ export const TextResource = observer(({ fontSize, fontWeight, sampleText }: Text
       >
         {sampleText}
       </div>
-      <button className=" z-10 flex h-[32px] w-[32px] items-center justify-center rounded py-1 font-bold ">
-        <MdAdd size="25" />
-      </button>
     </div>
   );
 });

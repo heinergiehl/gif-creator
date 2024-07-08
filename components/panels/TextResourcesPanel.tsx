@@ -10,6 +10,7 @@ import { CustomSelect } from '@/app/components/ui/CustomSelect';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import CustomTextInput from '@/app/components/ui/CustomTextInput';
+import { ScrollArea } from '../ui/scroll-area';
 const TEXT_RESOURCES = [
   {
     name: 'Title',
@@ -56,10 +57,10 @@ const DraggableText = observer(
     return (
       <div ref={setNodeRef} {...listeners} {...attributes}>
         <div
-          className="flex  overflow-hidden break-all"
+          className="flex  overflow-hidden break-all rounded-md bg-slate-200 p-1 leading-10 dark:bg-slate-800"
           id={`textResource-${index}`}
           style={{
-            fontSize: `${fontSize}px`,
+            fontSize: `45px`,
             fontWeight: `${fontWeight}`,
             color: fill,
             fontFamily: fontFamily,
@@ -113,11 +114,11 @@ export const TextResourcesPanel = observer(() => {
   }, [fill, fontSize]);
   const [sampleText, setSampleText] = useState('Sample Text');
   return (
-    <div className="flex h-full w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
+    <div className="flex h-screen w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
       <div className="flex h-[50px] w-full items-center justify-center  bg-slate-200 text-sm dark:bg-slate-900">
         Add Text
       </div>
-      <div className="flex h-full flex-col p-8">
+      <ScrollArea className="flex h-full flex-col p-8">
         <div className="flex w-full   flex-wrap">
           <FontPicker />
           {/* Additional controls like color picker and font size range */}
@@ -133,29 +134,6 @@ export const TextResourcesPanel = observer(() => {
             />
           </Label>
         </div>
-        <Separator orientation="horizontal" className="my-4" />
-        <Label htmlFor="fontSize" className="mb-2 flex flex-col">
-          <span className="">Font Size</span>
-          <div className="flex  flex-row flex-wrap space-x-2">
-            <Input
-              className="basis-3/4"
-              type="range"
-              id="fontSize"
-              name="fontSize"
-              min="10"
-              max="100"
-              value={fontSize}
-              onChange={(e) => setFontSize(parseFloat(e.target.value))}
-            />
-            <CustomTextInput
-              name="fontSize"
-              inputTooltip="Font Size"
-              className="min-w-[50px] basis-1/5 rounded-none"
-              value={String(fontSize)}
-              onChange={(value) => setFontSize(parseFloat(value))}
-            />
-          </div>
-        </Label>
         <Separator orientation="horizontal" className="my-4" />
         <Label htmlFor="sampleText" className="mb-2 flex flex-col space-y-2">
           <span className="">Sample Text</span>
@@ -178,16 +156,15 @@ export const TextResourcesPanel = observer(() => {
                 fontFamily={store.fontFamily}
                 fill={store.fill}
                 fontStyle="normal"
-                textBackground=""
+                textBackground="dark:bg-slate-800"
                 fontWeight={resource.fontWeight}
                 sampleText={sampleText}
-                fill={fill}
                 index={store.frames.length - 1}
               />
             ))}
           </Label>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 });

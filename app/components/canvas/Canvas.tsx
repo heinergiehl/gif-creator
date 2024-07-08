@@ -18,7 +18,6 @@ import { Label } from '@/components/ui/label';
 import CustomColorPicker from '../ui/CustomColorPicker';
 import { Input } from '@/components/ui/input';
 import { fabric } from 'fabric';
-import { useHotkeys } from './useHotkeys';
 import { useMousePosition } from './useMousePosition';
 import { Card, CardContent } from '@/components/ui/card';
 import { FabricObjectFactory } from '@/utils/fabric-utils';

@@ -92,6 +92,25 @@ const Editor = React.memo(
       store.updateMaxTime();
       store.updateEditorElementsForFrames();
       if (isCarousel) {
+        const activeDraggableRect = active?.rect;
+        const overDraggableRect = over?.rect;
+        if (!activeDraggableRect || !overDraggableRect) return;
+        const activeCenter = {
+          x:
+            activeDraggableRect.current.translated?.left ||
+            0 + activeDraggableRect.current.initial?.width ||
+            0,
+          y:
+            activeDraggableRect.current.translated?.top ||
+            0 + activeDraggableRect.current.initial?.height ||
+            0,
+        };
+        const overCenter = {
+          x: overDraggableRect.left || 0 + overDraggableRect.width || 0,
+          y: overDraggableRect.left || 0 + overDraggableRect.height || 0,
+        };
+        const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
+        const insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
         if (resourceType.startsWith('imageResource')) {
           const frameId = getUid();
           const newFrame = { id: frameId, src: active?.data?.current?.image };
@@ -110,25 +129,6 @@ const Editor = React.memo(
           // store.addImage(overIndex + 1, active?.data?.current?.image, true, frameId);
           // refactor code above; check whether the frame is dragged to the right side of the first frame
           // depending on that, insert it at overIndex or overIndex + 1
-          const activeDraggableRect = active?.rect;
-          const overDraggableRect = over?.rect;
-          if (!activeDraggableRect || !overDraggableRect) return;
-          const activeCenter = {
-            x:
-              activeDraggableRect.current.translated?.left ||
-              0 + activeDraggableRect.current.initial?.width ||
-              0,
-            y:
-              activeDraggableRect.current.translated?.top ||
-              0 + activeDraggableRect.current.initial?.height ||
-              0,
-          };
-          const overCenter = {
-            x: overDraggableRect.left || 0 + overDraggableRect.width || 0,
-            y: overDraggableRect.left || 0 + overDraggableRect.height || 0,
-          };
-          const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
-          const insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
           store.frames.splice(insertIndex, 0, newFrame);
           store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
         } else if (resourceType.startsWith('textResource')) {
@@ -147,9 +147,9 @@ const Editor = React.memo(
             fontFamily: store.fontFamily,
             fontStyle: store.fontStyle,
             isFrame: true,
-            index: overIndex,
+            index: insertIndex,
           });
-          store.frames.splice(overIndex, 0, {
+          store.frames.splice(insertIndex, 0, {
             ...newFrame,
             src: fabricText.toDataURL({
               format: 'png',

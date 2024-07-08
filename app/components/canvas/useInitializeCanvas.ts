@@ -3,7 +3,6 @@ import { fabric } from 'fabric';
 import { throttle } from 'lodash';
 import { useStores } from '@/store';
 import { AlignGuidelines } from 'fabric-guideline-plugin';
-import { useHotkeys } from './useHotkeys';
 import {
   copiedImg,
   copiedSuccessImg,
@@ -26,7 +25,6 @@ export const useInitializeCanvas = () => {
   const rootStore = useStores();
   const store = useStores().editorStore;
   const canvasRef = useCanvas().canvasRef;
-  useHotkeys(canvasRef);
   const canvasStore = useStores().canvasOptionsStore;
   const timelineStore = useStores().timelineStore;
   useEffect(() => {
@@ -144,8 +142,8 @@ export const useInitializeCanvas = () => {
       x: number,
       y: number,
     ) => {
-      const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
-      store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
+      // const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
+      // store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
       canvasRef.current?.remove(transform.target);
       canvasRef.current?.renderAll();
       return true;
@@ -389,6 +387,13 @@ export const useInitializeCanvas = () => {
           }
         }
       });
+      canvas.on('object:removed', (e) => {
+        console.log('object:removed', e.target);
+        const target = e.target;
+        if (!target?.id) return;
+        store.elements = store.elements.filter((el) => el.id !== target.id);
+        store.frames = store.frames.filter((frame) => frame.id !== target.id);
+      });
       canvas.on('object:scaling', (e) => {
         const activeObject = e.target;
         if (activeObject?.height && activeObject?.width) {
@@ -536,6 +541,7 @@ export const useInitializeCanvas = () => {
       canvas.off('object:rotating');
       canvas.off('object:scaling');
       canvas.off('object:moving');
+      canvas.off('object:removed');
     };
   }, [
     canvasRef.current,
@@ -543,5 +549,8 @@ export const useInitializeCanvas = () => {
     canvasStore.height,
     canvasStore.width,
     store,
+    timelineStore,
+    store.elements,
+    store.frames,
   ]);
 };

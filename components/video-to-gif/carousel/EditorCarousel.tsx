@@ -361,7 +361,6 @@ export const EditorCarousel = observer(function EditorCarousel({
         store.frames = framesCopy;
         store.elements = store.elements.concat(pastedElements);
         setClipboard(null);
-        store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === pastedFrames[0].id);
         store.setSelectedElements([...pastedElements.map((el) => el.id)]);
         console.log(
           'Pasted elements',
