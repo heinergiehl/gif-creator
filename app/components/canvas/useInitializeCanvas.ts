@@ -498,6 +498,7 @@ export const useInitializeCanvas = () => {
         stateful: true,
         snapThreshold: 1,
         centeredScaling: true,
+        preserveObjectStacking: true,
       });
       canvasRef.current = c;
       rootStore.canvasRef.current = c;

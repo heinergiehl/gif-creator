@@ -41,13 +41,17 @@ export type TextEditorElement = EditorElementBase<
     textBackground: string;
     fontStyle: fabric.TextOptions['fontStyle'];
     textAlign: fabric.TextOptions['textAlign'];
-    fill: string;
     underline: boolean;
     linethrough: boolean;
     overline: boolean;
   }
 >;
-export type EditorElement = ImageEditorElement | AudioEditorElement | TextEditorElement;
+export type VideoEditorElement = EditorElementBase<'video', { src: string; elementId: string }>;
+export type EditorElement =
+  | ImageEditorElement
+  | AudioEditorElement
+  | TextEditorElement
+  | VideoEditorElement;
 export type Placement = {
   x: number;
   y: number;

@@ -5,6 +5,17 @@ import { getUid, isHtmlImageElement } from '@/utils';
 import { AnimationStore } from './AnimationStore';
 import { DragStartEvent } from '@dnd-kit/core';
 import { RootStore } from '.';
+export interface Video {
+  id: string;
+  user_id: string;
+  video_url: string;
+  uploaded_at: string;
+  title?: string; // Additional metadata like title can be added
+  thumbnail_url?: string;
+  duration?: number;
+  width?: number;
+  height?: number;
+}
 export interface Frame {
   id: string;
   src: string;
@@ -87,12 +98,12 @@ export class EditorStore {
   currentKeyFrame = 0;
   frames: Frame[] = [];
   images: string[] = [];
+  videos: Video[] = [];
   isPaused = false;
   isPlaying = false;
   playInterval: NodeJS.Timeout | null = null;
   currentTimeInMs = 0;
   maxTime = 0;
-  fill = '#000000';
   imageType: 'Frame' | 'None' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
   activeDraggable: DragStartEvent | null = null;
@@ -152,6 +163,18 @@ export class EditorStore {
     this.toggleOptions.forEach((value, key) => {
       this.toggleOptions.set(key, false);
     });
+  }
+  // Method to set videos
+  setVideos(videos: Video[]) {
+    this.videos = videos;
+  }
+  // Method to add a single video
+  addVideo(video: Video) {
+    this.videos.push(video);
+  }
+  // Method to remove a video
+  removeVideo(videoId: string) {
+    this.videos = this.videos.filter((video) => video.id !== videoId);
   }
   toggleOption(option: string): void {
     //make sure all other options are set to false

@@ -31,7 +31,8 @@
     "public/**/*.js",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "tailwind.config.js"
+    "tailwind.config.js",
+    "app/login"
   ],
   "exclude": ["node_modules"]
 }

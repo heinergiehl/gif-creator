@@ -1,7 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['pixabay.com', 'cdn.pixabay.com', 'localhost', 'via.placeholder.com'],
+    remotePatterns: [{
+      protocol: 'https',
+      hostname: 'via.placeholder.com',
+    },
+    {
+      protocol: 'https',
+      hostname: 'heeczuugnxrlqpbhqbnj.supabase.co',
+    },
+    {
+      protocol: 'https',
+      hostname: 'supabase.com',
+    },
+    {
+      protocol: 'https',
+      hostname: 'supabase.co',
+    }, {
+      protocol: 'https',
+      hostname: 'heeczuugnxrlqpbhqbnj.supabase.co',
+    }
+    ],
   },
   reactStrictMode: true,
   webpack: (config) => {

@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import React from 'react';
 export interface CustomTooltipProps {
   children: React.ReactNode;
-  content: string;
+  content: string | React.ReactNode;
 }
 const CustomTooltip = React.forwardRef(({ children, content }: CustomTooltipProps) => {
   return (

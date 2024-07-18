@@ -15,6 +15,11 @@ import { FaRemoveFormat } from 'react-icons/fa';
 import { FaDeleteLeft } from 'react-icons/fa6';
 import { MdDelete } from 'react-icons/md';
 import { CustomDialog } from '@/app/components/ui/CustomDialog';
+import { fetchUserVideos } from '@/utils/supabase/fetchUserVideos';
+import { createClient } from '@/utils/supabase/client';
+import { Separator } from '@radix-ui/react-select';
+import { MagicCard, MagicContainer } from '../magicui/magic-card';
+import Image from 'next/image';
 export const VideoResource = observer(() => {
   const rootStore = useStores();
   const store = rootStore.editorStore;
@@ -23,6 +28,9 @@ export const VideoResource = observer(() => {
   const [videoSrc, setVideoSrc] = useState<string>('');
   const ffmpegRef = useRef<FFmpeg>(new FFmpeg());
   const [inputKey, setInputKey] = useState(Date.now());
+  const editorStore = useStores().editorStore;
+  const supabase = useStores().supabase;
+  const [loading, setLoading] = useState<boolean>(true);
   const loadFFMPEG = async () => {
     const ffmpeg = ffmpegRef.current;
     ffmpeg.on('log', ({ message }) => {
@@ -51,6 +59,16 @@ export const VideoResource = observer(() => {
     };
     load();
   }, []);
+  useEffect(() => {
+    const loadUserVideos = async () => {
+      const userId = (await supabase.auth.getUser())?.data?.user?.id;
+      if (!userId) return;
+      const videos = await fetchUserVideos(userId);
+      editorStore.setVideos(videos);
+      setLoading(false);
+    };
+    loadUserVideos();
+  }, [editorStore.videos, supabase, supabase.auth]);
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log('handleFileChange', event.target.files?.[0]);
     if (!ffmpegRef.current.loaded) return;
@@ -113,6 +131,7 @@ export const VideoResource = observer(() => {
     }
   };
   const [openModal, setOpenModal] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   return (
     <div className="relative z-[100] h-full ">
       <CustomDialog
@@ -214,6 +233,37 @@ export const VideoResource = observer(() => {
             </div>
           )}
           <CustomProgress />
+          <Separator />
+          <MagicContainer>
+            {loading ? (
+              <div className="flex h-48 w-full items-center justify-center">
+                <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-slate-300 dark:border-slate-800" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {editorStore.videos.map((video) => (
+                  <MagicCard key={video.id} className="relative">
+                    <video
+                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+                      onMouseLeave={(e) => (e.target as HTMLVideoElement).pause()}
+                      width={120}
+                      height={120}
+                      crossOrigin="anonymous"
+                      src={video.video_url || ''}
+                      className="h-48 w-full object-cover"
+                    />
+                    <div className=" inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-xs text-white">{video.title}</span>
+                        <span className="text-xs text-white">{video.duration}</span>
+                      </div>
+                    </div>
+                    <div className="pointer-events-none  inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+                  </MagicCard>
+                ))}
+              </div>
+            )}
+          </MagicContainer>
         </div>
       </>
     </div>

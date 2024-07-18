@@ -15,13 +15,17 @@ import { CanvasOptionsStore } from './CanvasOptionsStore';
 import { useCanvas } from '@/app/components/canvas/canvasContext';
 import { observer } from 'mobx-react-lite';
 import { Canvas } from 'fabric/fabric-impl';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client';
 configure({
   enforceActions: 'never',
 });
 export class RootStore {
   canvasRef: MutableRefObject<Canvas | null>;
+  supabase: SupabaseClient;
   constructor(canvasRef: MutableRefObject<Canvas | null>) {
     this.canvasRef = canvasRef;
+    this.supabase = createClient();
     makeAutoObservable(this);
   }
   editorStore = new EditorStore(this);
