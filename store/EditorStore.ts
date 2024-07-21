@@ -111,6 +111,8 @@ export class EditorStore {
     conversion: 0,
     rendering: 0,
   };
+  conversion = 0;
+  rendering = 0;
   fabricObjectUpdated: boolean = false;
   info = {
     header: '',
@@ -146,6 +148,12 @@ export class EditorStore {
       bringToFrontSelectedElements: action,
       sendToBackSelectedElements: action,
     });
+  }
+  setConversionProgress(progress: number) {
+    this.conversion = progress;
+  }
+  setRenderingProgress(progress: number) {
+    this.rendering = progress;
   }
   get animationStore(): AnimationStore | undefined {
     return this.rootStore.animationStore;

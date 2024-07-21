@@ -52,6 +52,8 @@
     "@types/formidable": "^3.4.5",
     "@types/lodash": "^4.17.0",
     "@types/react-color": "^3.0.12",
+    "@types/react-virtualized-auto-sizer": "^1.0.4",
+    "@types/react-window": "^1.8.8",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.1",
     "@vercel/analytics": "^1.2.2",
@@ -111,9 +113,13 @@
     "react-resizable-panels": "^2.0.19",
     "react-spring-carousel": "^2.0.19",
     "react-video-seek-slider": "^6.0.6",
+    "react-virtualized-auto-sizer": "^1.0.24",
+    "react-window": "^1.8.10",
+    "react-window-infinite-loader": "^1.0.9",
     "shadcn-ui": "^0.8.0",
     "tailwindcss-animate": "^1.0.7",
-    "use-debounce": "^10.0.0"
+    "use-debounce": "^10.0.0",
+    "virtua": "^0.33.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",

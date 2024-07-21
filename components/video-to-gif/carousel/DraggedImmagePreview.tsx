@@ -1,8 +1,9 @@
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/store';
-import { cn } from '@/utils/cn';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/utils/cn';
 const DraggedImagePreview = observer(({ src }: { src: string }) => {
   const store = useStores().editorCarouselStore;
   return (
@@ -17,14 +18,10 @@ const DraggedImagePreview = observer(({ src }: { src: string }) => {
         <Image
           src={src}
           alt={`DragOverlay`}
-          onLoad={(image) => {
-            store.cardItemHeight = image.currentTarget.naturalHeight;
-            store.cardItemWidth = image.currentTarget.naturalWidth;
-          }}
           id={'DragOverlay'}
           width={100}
           height={100}
-          className="max-h-[100px] min-h-[100px]  min-w-[100px] rounded-lg"
+          className="min-h-[100px] min-w-[100px] rounded-lg"
         />
       </CardContent>
     </Card>

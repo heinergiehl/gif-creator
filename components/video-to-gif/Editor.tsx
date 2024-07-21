@@ -31,7 +31,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resi
 import CanvasComponent from '@/app/components/canvas/Canvas';
 import EditResource from '../entity/EditResource';
 import { throttle } from 'lodash';
-import { EditorCarousel } from './carousel/EditorCarousel';
+import EditorCarousel from './carousel/EditorCarousel';
 import { getUid } from '@/utils';
 import { usePathname } from 'next/navigation';
 import { Resources } from './Resources';
@@ -74,7 +74,8 @@ const Editor = React.memo(
         activationConstraint: { distance: 5 },
       }),
     );
-    const handleDragEnd = (event: DragEndEvent) => {
+    const supabase = rootStore.supabase;
+    const handleDragEnd = async (event: DragEndEvent) => {
       const { active, over } = event;
       store.isDragging = false;
       const overId = over?.id;
@@ -134,6 +135,12 @@ const Editor = React.memo(
           // }
           store.frames.splice(insertIndex, 0, newFrame);
           store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
+          // make sure to upload to superbase frames bucket
+          await supabase.storage
+            .from('frames')
+            .upload(frameId, new Blob([active?.data?.current?.image], { type: 'image/png' }), {
+              upsert: true,
+            });
         } else if (resourceType.startsWith('textResource')) {
           const textElement = document.getElementById(String(active.id));
           if (!textElement) {
@@ -152,12 +159,13 @@ const Editor = React.memo(
             isFrame: true,
             index: insertIndex,
           });
+          const src = fabricText.toDataURL({
+            format: 'png',
+            quality: 1,
+          });
           store.frames.splice(insertIndex, 0, {
             ...newFrame,
-            src: fabricText.toDataURL({
-              format: 'png',
-              quality: 1,
-            }),
+            src,
           });
           store.addText({
             id: String(newFrame.id),
@@ -286,16 +294,21 @@ const Editor = React.memo(
               <>
                 <ResizablePanel defaultSize={75} id="editor" order={4}>
                   <ResizablePanelGroup direction="vertical">
-                    <ResizablePanel defaultSize={8} order={5}>
+                    <ResizablePanel defaultSize={6} order={5}>
                       <EditResource />
                     </ResizablePanel>
-                    <ResizablePanel defaultSize={92} id="editor-container" order={6}>
+                    <ResizablePanel
+                      defaultSize={94}
+                      id="editor-container"
+                      order={6}
+                      className="m-0 p-0"
+                    >
                       <ScrollArea
-                        className="flex  h-[100%] w-[100%] flex-col items-stretch justify-between gap-y-8 pr-8"
+                        className=" flex h-[100%] w-[100%] flex-col items-stretch justify-between "
                         id="editor-container"
                       >
                         <CustomAlertDialog />
-                        <div className="flex h-[90vh] flex-col" draggable="false">
+                        <div className="flex flex-col " draggable="false">
                           <div className="flex h-full w-full justify-center ">
                             <div className=" items-center justify-center pt-16  ">
                               <div className="flex h-full flex-col items-center justify-center">

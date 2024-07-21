@@ -78,7 +78,7 @@ const ExportPanel = observer(() => {
     rootStore.canvasOptionsStore.backgroundColor,
   ]);
   return (
-    <div className="flex h-full  flex-col space-y-2 p-4">
+    <div className="flex h-screen  flex-col space-y-2 p-4">
       <ScrollArea className="flex h-[90%] flex-col  gap-y-2 pr-8">
         <span>Export Your GIF</span>
         <Separator className="my-4" />

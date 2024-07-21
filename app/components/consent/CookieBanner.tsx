@@ -23,7 +23,7 @@ export default function CookieBanner() {
   return (
     <div
       className={cn([
-        `fixed bottom-0 left-0 right-0
+        `fixed bottom-0 left-0 right-0 z-[999]
                         mx-auto my-10 max-w-max flex-col 
                          items-center justify-between gap-4 rounded-lg bg-gray-700 px-3 py-3 shadow  
                          sm:flex-row md:max-w-screen-sm md:px-4 `,

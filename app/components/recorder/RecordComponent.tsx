@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { CustomTooltip } from '../ui/CustomTooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/client';
+import { CustomProgress } from '@/components/ui/CustomProgress';
 const RecordComponent = observer(() => {
   const supabase = useStores().supabase;
   const editorStore = useStores().editorStore;
@@ -46,15 +47,15 @@ const RecordComponent = observer(() => {
       // append the video to the DOM to get the duration
       if (!videoRef.current) return;
       setStoppedRecording(true);
-      getBlobDuration(blob).then(async (duration) => {
-        setVideoDuration(duration);
-        await getThumbnails(duration).then(async (thumbnails) => {
-          if (thumbnails && thumbnails.length > 0) {
-            setThumbnails(thumbnails);
-            setThumbnailUrl(thumbnailUrl);
-            await processVideo();
-          }
-        });
+      const duration = await getBlobDuration(blob);
+      setVideoDuration(duration);
+      await getThumbnails(duration).then(async (thumbnails) => {
+        console.log('DURATION', duration, videoDuration);
+        if (thumbnails && thumbnails.length > 0) {
+          setThumbnails(thumbnails);
+          setThumbnailUrl(thumbnails[2]);
+          await processVideo(duration, thumbnails[2]);
+        }
       });
     },
   });
@@ -71,7 +72,9 @@ const RecordComponent = observer(() => {
       // console.log(message);
     });
     ffmpeg.on('progress', (e) => {
-      // console.error(e);
+      const progress = Math.round(e.progress * 100);
+      editorStore.progress.conversion = progress;
+      editorStore.progress.rendering = progress;
     });
     await ffmpeg.load({
       coreURL: await toBlobURL(
@@ -178,6 +181,8 @@ const RecordComponent = observer(() => {
       endTimeInSecs,
       '-c',
       'copy',
+      '-preset',
+      'ultrafast',
       'output.mp4',
     ]);
     const data = await ffmpeg.readFile('output.mp4');
@@ -185,26 +190,6 @@ const RecordComponent = observer(() => {
     setTrimmedVideoUrl(URL.createObjectURL(videoBlob));
     setIsTrimming(false);
   };
-  // // const generateThumbnails = async (ffmpeg: FFmpeg, inputFile: string) => {
-  // //   const thumbnails = [];
-  // //   const intervals = [1, 2, 3]; // Adjust intervals as needed
-  // //   for (const interval of intervals) {
-  // //     const thumbnailFile = `thumbnail_${interval}.png`;
-  // //     await ffmpeg.exec([
-  // //       '-i',
-  // //       inputFile,
-  // //       '-vf',
-  // //       `thumbnail,scale=640:360`,
-  // //       '-frames:v',
-  // //       '1',
-  // //       '-ss',
-  // //       `${interval}`,
-  // //       thumbnailFile,
-  // //     ]);
-  // //     thumbnails.push(thumbnailFile);
-  // //   }
-  // //   return thumbnails;
-  // // };
   const uploadThumbnail = async (blob: Blob) => {
     const fileName = `thumbnail_${Date.now()}.png`;
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -216,14 +201,15 @@ const RecordComponent = observer(() => {
     }
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from('thumbnails')
-      .createSignedUrl(fileName, 60 * 60); // URL valid for 1 hour
+      .createSignedUrl(fileName, 60 * 606000); // URL valid for 1 hour
     if (signedUrlError) {
       console.error('Error generating signed URL:', signedUrlError);
       return null;
     }
     return signedUrlData.signedUrl;
   };
-  const processVideo = async () => {
+  const processVideo = async (duration: number, tURL: string) => {
+    const videoDuration = duration;
     if (!videoDataRef.current || !ready) {
       console.log('videoDataRef.current no available', videoDataRef.current, 'ready', ready);
       return;
@@ -237,6 +223,8 @@ const RecordComponent = observer(() => {
       fps.toString(),
       '-s',
       `${resolution.width}x${resolution.height}`,
+      '-preset',
+      'ultrafast',
       'output_processed.mp4',
     ]);
     const data = await ffmpeg.readFile('output_processed.mp4');
@@ -251,15 +239,17 @@ const RecordComponent = observer(() => {
     }
     const { data: videoSignedUrlData, error: videoSignedUrlError } = await supabase.storage
       .from('videos')
-      .createSignedUrl(videoFileName, 60 * 60); // URL valid for 1 hour
+      .createSignedUrl(videoFileName, 60 * 60000); // URL valid for 1 hour
     if (videoSignedUrlError) {
       console.error('Error generating video signed URL:', videoSignedUrlError);
       return;
     }
     const user = (await supabase.auth.getUser()).data.user;
-    const thumbnailBlob = await fetchFile(thumbnails[0]);
+    const thumbnailBlob = await fetchFile(tURL);
     const thumbnailUrl = await uploadThumbnail(new Blob([thumbnailBlob], { type: 'image/png' }));
     if (!thumbnailUrl) return;
+    if (!user) return;
+    console.log('videoDUration123', videoDuration);
     const { data: videoData, error: insertError } = await supabase.from('videos').insert([
       {
         user_id: user.id,
@@ -278,7 +268,7 @@ const RecordComponent = observer(() => {
   };
   // once resolution or fps changes, process the video
   useEffect(() => {
-    if (stoppedRecording) processVideo();
+    if (stoppedRecording) processVideo(videoDuration);
   }, [fps, resolution.height, resolution.width]);
   const addVideoToCanvas = async () => {
     if (stoppedRecording && canvas) {
@@ -426,31 +416,6 @@ const RecordComponent = observer(() => {
         </div>
       </div>
       <div className="  inset-0 flex h-full flex-col justify-start">
-        {/* <div className="relative">
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            loop
-            style={{
-              display: !stoppedRecording && previewStream ? 'block' : 'none',
-              width: '640px',
-              height: '480px',
-              objectFit: 'cover',
-              borderRadius: '10px',
-              position: 'absolute',
-            }}
-          />
-          <canvas
-            id="canvas"
-            style={{
-              opacity: stoppedRecording ? '100%' : '0',
-            }}
-            className={cn([
-              'absolute inset-0 h-[480px] w-[640px] transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
-            ])}
-          />
-        </div> */}
         <div className="mx-4 flex gap-x-4">
           {/* processing options */}
           <ProcessingOptions
@@ -509,19 +474,10 @@ const RecordComponent = observer(() => {
                           }}
                         />
                       </Button>
+                      <CustomProgress />
                     </div>
                   }
                 />
-                {/* {trimmedVideoUrl && (
-                  <div>
-                    <video controls src={trimmedVideoUrl} className="mt-4" />
-                    <a href={trimmedVideoUrl} download="trimmed_video.mp4">
-                      <Button className="btn btn-primary m-2 max-w-[150px]">
-                        Download Trimmed Video
-                      </Button>
-                    </a>
-                  </div>
-                )} */}
                 <DownloadSection trimmedVideoUrl={trimmedVideoUrl} />
               </div>
             )}

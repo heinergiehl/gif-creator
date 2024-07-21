@@ -19,7 +19,10 @@ const nextConfig = {
     }, {
       protocol: 'https',
       hostname: 'heeczuugnxrlqpbhqbnj.supabase.co',
-    }
+    }, {
+      protocol: 'https',
+      hostname: 'pixabay.com',
+    },
     ],
   },
   reactStrictMode: true,

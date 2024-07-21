@@ -3,7 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { TextResourcesPanel } from '@/components/panels/TextResourcesPanel';
-import VideoResource from '../entity/VideoResource';
+import VideoResource from '../entity/videoResource/VideoResource';
 import ImageResource from '../entity/imageResource/ImageResource';
 import SmiliesResource from '../entity/SmiliesResource';
 import GifResource from '../entity/GifResource';
