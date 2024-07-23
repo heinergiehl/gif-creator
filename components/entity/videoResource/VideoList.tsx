@@ -49,7 +49,7 @@ const VideoList: React.FC<VideoListProps> = ({ videos, onAddButtonClick }) => {
           <Button
             onClick={() => onAddButtonClick(video.video_url)}
             variant="default"
-            className="absolute left-2 top-2 z-[999] h-8 w-8 rounded-full p-1 opacity-0 group-hover:opacity-100"
+            className="absolute left-2 top-2 z-[101] h-8 w-8 rounded-full p-1 opacity-0 group-hover:opacity-100"
           >
             <MdAddCircle />
           </Button>

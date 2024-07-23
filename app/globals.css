@@ -65,3 +65,26 @@
 .selected {
   border-color: rgba(46, 115, 252, 0.81);
 }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* styles.css or a relevant CSS file */
+.resources-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1002; /* Ensure this is higher than other elements */
+  background-color: white; /* Optional: for better visibility */
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+.resources-drawer {
+  position: relative;
+  height: 300px; /* Initial height */
+  max-height: 80vh; /* Optional: to prevent it from covering too much */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  resize: horizontal; /* Allow resizing */
+}

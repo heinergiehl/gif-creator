@@ -51,13 +51,13 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         {...attributes}
         {...listeners}
         className={cn([
-          'flex h-full w-full cursor-pointer select-none items-center justify-center p-0 transition-colors duration-200 ease-in-out',
+          'flex  w-full cursor-pointer select-none items-center justify-center p-0  transition-colors duration-200 ease-in-out',
         ])}
         onClick={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >
-        <Card className="relative">
+        <Card className="relative flex  items-center justify-center">
           <div
             className={cn([
               'absolute inset-0 rounded-lg opacity-50 transition-all duration-300 dark:hover:bg-slate-700',
@@ -68,16 +68,16 @@ const SortableItem: React.FC<SortableItemProps> = observer(
               className={cn(['absolute text-xs transition-opacity duration-500'])}
             >{`Frame ${index + 1}`}</span>
           </div>
-          <CardContent className="flex h-full w-full items-center justify-center p-0">
+          <CardContent className="flex min-h-[70px] w-full  min-w-[70px] items-center justify-center  rounded-lg p-0 md:min-h-[100px] md:min-w-[100px]">
             <Suspense fallback={<SkeletonLoader />}>
               <Image
                 loading="eager"
                 src={src}
                 alt={`Frame ${index + 1}`}
                 id={id}
-                width={100}
-                height={100}
-                className={`} min-h-[100px] min-w-[100px] rounded-lg`}
+                width={80}
+                height={80}
+                className={``}
                 style={{
                   display: imageLoaded ? 'block' : 'none',
                 }}

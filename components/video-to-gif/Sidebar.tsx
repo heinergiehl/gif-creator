@@ -15,6 +15,7 @@ import { usePathname } from 'next/navigation';
 import { FaRegSmile } from 'react-icons/fa';
 import { UIStore } from '@/store/UIStore';
 import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
 type ConversionType = 'videoToGif' | 'imageToGif' | 'gifToGif';
 export const Sidebar = observer(() => {
   const pathName = usePathname();
@@ -50,14 +51,15 @@ export const Sidebar = observer(() => {
   //   }
   // }, [pathName])
   return (
-    <ul className="flex h-full w-[90px]   gap-y-4  border-4 pt-[80px] shadow-lg  shadow-secondary  dark:bg-gray-800 sm:flex-col lg:h-screen lg:flex-col">
+    <div className="absolute bottom-0 z-[1002] flex w-screen items-center     justify-center md:flex-col">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name;
         return (
           <li
             key={option.name}
             className={`
-              flex
+               mx-1
+               flex
               h-[72px]
               w-[72px]
               flex-col
@@ -65,7 +67,9 @@ export const Sidebar = observer(() => {
               justify-center rounded-lg  `}
           >
             <button
-              onClick={() => option.action(store)}
+              onClick={() => {
+                option.action(store);
+              }}
               className={cn([
                 'flex h-full w-full flex-col items-center justify-center rounded-lg',
                 isSelected
@@ -79,7 +83,7 @@ export const Sidebar = observer(() => {
           </li>
         );
       })}
-    </ul>
+    </div>
   );
 });
 const MENU_OPTIONS = [

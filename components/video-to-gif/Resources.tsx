@@ -15,6 +15,7 @@ import { useCanvas } from '@/app/components/canvas/canvasContext';
 import ShadowOptionsPanel from '../panels/ShadowOptionsPanel';
 import TextStyleOptions from '../panels/TextStyleOptions';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ScrollArea } from '../ui/scroll-area';
 export type AnimationResourceProps = {
   animation: Animation;
 };
@@ -26,7 +27,11 @@ export const Resources = observer(() => {
   useEffect(() => {
     editorStore.setAllOptionsToFalse();
   }, [selectedMenuOption, editorStore.toggleOptions]);
-  return <RenderResource />;
+  return (
+    <div className="   bg-slate-600 md:w-full">
+      <RenderResource />
+    </div>
+  );
 });
 const RenderResource = observer(({}: {}) => {
   const store = useStores().uiStore;

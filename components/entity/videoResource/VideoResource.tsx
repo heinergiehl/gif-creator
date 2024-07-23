@@ -27,20 +27,39 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
     loadUserVideos(supabase, editorStore, setLoading);
   }, [supabase, editorStore]);
   return (
-    <div className="relative flex h-screen flex-col gap-4">
-      <CustomDialog
-        header="Add more frames from another video"
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-      >
-        <FrameSettings
-          frameRate={frameRate}
-          setFrameRate={setFrameRate}
-          quality={quality}
-          setQuality={setQuality}
-        />
+    <ScrollArea className=" mb-[90px] h-[85vh]">
+      <div className="relative flex  flex-col items-center justify-center gap-4">
+        <CustomDialog
+          header="Add more frames from another video"
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+        >
+          <FrameSettings
+            frameRate={frameRate}
+            setFrameRate={setFrameRate}
+            quality={quality}
+            setQuality={setQuality}
+          />
+          <FileInput
+            key={inputKey}
+            onChange={(event) =>
+              handleFileChange(
+                event,
+                ffmpegRef,
+                frameRate,
+                quality,
+                editorStore,
+                setInputKey,
+                supabase,
+              )
+            }
+          />
+          <CustomProgress />
+        </CustomDialog>
+        <div className=" w-full bg-slate-200 text-sm dark:bg-slate-900">
+          <span className="flex h-[50px]  items-center justify-center"> Upload Video</span>
+        </div>
         <FileInput
-          key={inputKey}
           onChange={(event) =>
             handleFileChange(
               event,
@@ -53,31 +72,20 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
             )
           }
         />
-        <CustomProgress />
-      </CustomDialog>
-      <div className=" w-full bg-slate-200 text-sm dark:bg-slate-900">
-        <span className="flex h-[50px]  items-center justify-center"> Upload Video</span>
-      </div>
-      <FileInput
-        onChange={(event) =>
-          handleFileChange(event, ffmpegRef, frameRate, quality, editorStore, setInputKey, supabase)
-        }
-      />
-      <div className="flex w-full flex-col items-start justify-center gap-y-4 p-8 text-xs">
-        <FrameSettings
-          frameRate={frameRate}
-          setFrameRate={setFrameRate}
-          quality={quality}
-          setQuality={setQuality}
-        />
-        <CustomProgress />
-        <Separator />
-        {loading ? (
-          <div className="flex h-48 w-full items-center justify-center">
-            <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-slate-300 dark:border-slate-800" />
-          </div>
-        ) : (
-          <ScrollArea className="h-[25vh]">
+        <div className="flex  w-full flex-col items-start justify-center gap-y-4 p-8 text-xs">
+          <FrameSettings
+            frameRate={frameRate}
+            setFrameRate={setFrameRate}
+            quality={quality}
+            setQuality={setQuality}
+          />
+          <CustomProgress />
+          <Separator />
+          {loading ? (
+            <div className="flex h-48 w-full items-center justify-center">
+              <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-slate-300 dark:border-slate-800" />
+            </div>
+          ) : (
             <VideoList
               videos={editorStore.videos}
               onAddButtonClick={(videoUrl) =>
@@ -97,10 +105,10 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
                 )
               }
             />
-          </ScrollArea>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 });
 export default VideoResource;

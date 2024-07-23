@@ -224,7 +224,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   return (
     <div
       draggable="false"
-      className="flex select-none flex-col items-center justify-center gap-y-4"
+      className="flex  select-none  flex-col items-center justify-center gap-y-4 md:w-full"
       onMouseMove={debouncedHandleMouseMove}
     >
       <Timeline
@@ -238,11 +238,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       <div
         style={{
           width,
-          height: '160px',
           minWidth: width,
         }}
         id="carousel-container"
-        className="relative flex h-full items-center justify-start gap-4 rounded-lg bg-muted"
+        className=" flex  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
         ref={carouselRef}
       >
         <SortableContext
@@ -250,7 +249,12 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           strategy={horizontalListSortingStrategy}
         >
           <VList
-            style={{ width: containerWidth, height: 140 }}
+            overscan={2}
+            style={{
+              width: containerWidth,
+              height: 120,
+              padding: '13px ',
+            }}
             horizontal
             count={store.frames.length}
           >
@@ -258,7 +262,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
               <Droppable
                 id={frame.id}
                 key={index}
-                className="selectable relative  rounded-md border-2 transition-all duration-300"
+                className="selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 "
                 style={{
                   transform: calculateTransform(index, hoverIndex!),
                   transition: 'transform 0.2s',

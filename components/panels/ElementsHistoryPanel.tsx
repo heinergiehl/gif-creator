@@ -17,7 +17,7 @@ const ElementsHistoryPanel = observer(() => {
   const store = rootStore.editorStore;
   const canvasRef = useCanvas().canvasRef;
   return (
-    <div className="flex h-screen w-full flex-col" id="history">
+    <div className="flex w-full flex-col" id="history">
       <div className="dark:bg-slate-900">
         <span className="flex h-[50px] items-center justify-center text-sm">Elements History</span>
       </div>
