@@ -334,7 +334,7 @@ const Editor = React.memo(
                   </div>
                   <EditorCarousel containerWidth={containerWidth} />
                   {/* RESOURCES */}
-                  <ScrollArea className="h-[100vh]  w-screen  md:hidden">
+                  <ScrollArea className="h-[100vh]  min-h-[300px]  w-screen md:hidden">
                     {' '}
                     <Resources />
                   </ScrollArea>
