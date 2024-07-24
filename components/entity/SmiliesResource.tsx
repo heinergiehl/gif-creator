@@ -81,7 +81,7 @@ const SmiliesResource = observer(() => {
     store.addImage(store.elements.length, url, isFrame, id);
   };
   return (
-    <div className="h-screen w-full space-y-2 p-4">
+    <div className="h-screen w-full space-y-2 p-4" draggable="false">
       <span className="text-xs font-semibold text-gray-700">Add Smilies</span>
       <select value={imageType} onChange={(e) => setImageType(e.target.value)}>
         <option value="vector">Vector</option>

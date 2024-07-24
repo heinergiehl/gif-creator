@@ -9,12 +9,12 @@ const DraggedImagePreview = observer(({ src }: { src: string }) => {
   return (
     <Card
       className={cn([
-        'pointer-events-none absolute z-50',
+        ' pointer-events-none absolute ',
         'transition-all duration-300 ease-in-out',
         'scale-125 opacity-65',
       ])}
     >
-      <CardContent className="flex h-full items-center justify-center p-0">
+      <CardContent className="z-[9999] flex h-full items-center justify-center p-0">
         <Image
           src={src}
           alt={`DragOverlay`}

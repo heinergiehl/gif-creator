@@ -53,7 +53,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         className={cn([
           'flex  w-full cursor-pointer select-none items-center justify-center p-0  transition-colors duration-200 ease-in-out',
         ])}
-        onClick={() => onFrameSelect(id)}
+        onPointerDown={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >

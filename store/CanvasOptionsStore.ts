@@ -1,8 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import { RootStore } from '.';
 export class CanvasOptionsStore {
-  width: number = 600;
-  height: number = 400;
+  width: number = 400;
+  height: number = 280;
   // white color by default
   backgroundColor: string = '#ffffff';
   backgroundGradient: string = '';

@@ -224,7 +224,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   return (
     <div
       draggable="false"
-      className="flex  select-none  flex-col items-center justify-center gap-y-4 md:w-full"
+      className="flex w-screen  select-none  flex-col items-center justify-center gap-y-4 md:w-full  md:items-start"
       onMouseMove={debouncedHandleMouseMove}
     >
       <Timeline

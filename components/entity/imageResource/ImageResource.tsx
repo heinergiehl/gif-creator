@@ -132,7 +132,7 @@ const ImageResource = observer(() => {
               className={`h-[${fileUploadScrollAreaHeight}px] group relative flex  flex-wrap items-stretch justify-center  gap-2`}
             >
               {store.images.map((image, index) => (
-                <MagicCard key={index} className="relative  h-[100px] max-w-[130px] p-1">
+                <MagicCard key={index} className="relative z-[9999]  h-[100px] max-w-[130px] p-1">
                   <ShinyButton
                     onClick={() => handleDeleteImage(index)}
                     className="right-100 absolute top-0 rounded-full bg-inherit bg-red-500 p-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"

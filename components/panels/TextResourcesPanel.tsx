@@ -118,7 +118,7 @@ export const TextResourcesPanel = observer(() => {
       <div className="flex h-[50px] w-full items-center justify-center  bg-slate-200 text-sm dark:bg-slate-900">
         Add Text
       </div>
-      <ScrollArea className="flex h-full flex-col p-8">
+      <div className="flex h-full flex-col p-8">
         <div className="flex w-full   flex-wrap">
           <FontPicker />
           {/* Additional controls like color picker and font size range */}
@@ -164,7 +164,7 @@ export const TextResourcesPanel = observer(() => {
             ))}
           </Label>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 });

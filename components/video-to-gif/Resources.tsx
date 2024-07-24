@@ -28,7 +28,7 @@ export const Resources = observer(() => {
     editorStore.setAllOptionsToFalse();
   }, [selectedMenuOption, editorStore.toggleOptions]);
   return (
-    <div className="   bg-slate-600 md:w-full">
+    <div className="dark:bg-slate-800">
       <RenderResource />
     </div>
   );

@@ -41,24 +41,7 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
   // useUpdateFabricObjects(canvasRef, store);
   // useUpdateSelectedObject(canvasRef, store);
   // useSyncCanvasWithStore(canvasRef, store);
-  useEffect(() => {
-    applyChanges();
-    canvasRef.current?.requestRenderAll();
-  }, [
-    canvasRef.current?.width,
-    canvasRef.current?.height,
-    canvasStore.width,
-    canvasStore.height,
-    store.currentKeyFrame,
-  ]);
   const [backgroundColor, setBackgroundColor] = useState(canvasStore.backgroundColor);
-  const applyChanges = () => {
-    canvasRef.current?.setWidth(canvasStore.width);
-    canvasRef.current?.setHeight(canvasStore.height);
-    canvasStore.setBackgroundColor(backgroundColor);
-    canvasRef.current?.renderAll();
-    setClose(true);
-  };
   const [close, setClose] = useState(true);
   const hasAlreadyFrames = store.frames.length > 0;
   const getObjectCenter = (obj: fabric.Object) => {
@@ -70,12 +53,12 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
   };
   const activeObject = canvasRef.current?.getActiveObject();
   return (
-    <div id="grid-canvas-container" className="relative  flex">
+    <div id="grid-canvas-container" className="relative  flex items-center justify-center">
       <canvas
         id="canvas"
         ref={setNodeRef}
         className={cn([
-          'relative transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
+          'relative flex  transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
           isOver && hasAlreadyFrames
             ? 'border-4 border-blue-500'
             : isOver && !hasAlreadyFrames
@@ -136,64 +119,90 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
           </div>
         </>
       )}
-      <Popover open={!close}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" onClick={() => setClose(!close)}>
-            <CustomTooltip content="Resize Canvas">
-              <ScalingIcon />
-            </CustomTooltip>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="grid w-full grid-cols-2 items-center justify-center gap-4">
-          <Label>
-            <div className="flex flex-col gap-y-2">
-              Width
-              <CustomTextInput
-                onChange={(value) => {
-                  canvasStore.setWidth(parseInt(value));
-                }}
-                className="w-20"
-                name="width"
-                inputTooltip="Adjust the width of the canvas"
-                value={String(canvasStore.width)}
-              />
-            </div>
-          </Label>
-          <Label>
-            <div className="flex flex-col gap-y-2">
-              <span> Height</span>
-              <CustomTextInput
-                onChange={(value) => {
-                  canvasStore.setHeight(parseInt(value));
-                }}
-                className=" w-20"
-                name="height"
-                inputTooltip="Adjust the height of the canvas"
-                value={String(canvasStore.height)}
-              />
-            </div>
-          </Label>
-          <SelectSeparator className="col-span-2" />
-          <Label>
-            <div className="flex flex-col gap-y-2">
-              <span>Background Color</span>
-              <Input
-                type="color"
-                name="backgroundColor"
-                onChange={(e) => {
-                  setBackgroundColor(e.target.value);
-                }}
-                value={backgroundColor}
-              />
-            </div>
-          </Label>
-          <SelectSeparator className="col-span-2" />
-          <Button onClick={applyChanges} variant="outline">
-            Apply
-          </Button>
-        </PopoverContent>
-      </Popover>
     </div>
   );
 });
 export default CanvasComponent;
+export const CanvasSettings = observer(() => {
+  const canvasStore = useStores().canvasOptionsStore;
+  const [backgroundColor, setBackgroundColor] = useState(canvasStore.backgroundColor);
+  const [close, setClose] = useState(true);
+  const canvasRef = useCanvas().canvasRef;
+  const applyChanges = () => {
+    canvasRef.current?.setWidth(canvasStore.width);
+    canvasRef.current?.setHeight(canvasStore.height);
+    canvasStore.setBackgroundColor(backgroundColor);
+    canvasRef.current?.renderAll();
+    setClose(true);
+  };
+  const store = useStores().editorStore;
+  useEffect(() => {
+    applyChanges();
+    canvasRef.current?.requestRenderAll();
+  }, [
+    canvasRef.current?.width,
+    canvasRef.current?.height,
+    canvasStore.width,
+    canvasStore.height,
+    store.currentKeyFrame,
+  ]);
+  return (
+    <Popover open={!close}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" onClick={() => setClose(!close)}>
+          <CustomTooltip content="Resize Canvas">
+            <ScalingIcon />
+          </CustomTooltip>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="grid w-full grid-cols-2 items-center justify-center gap-4">
+        <Label>
+          <div className="flex flex-col gap-y-2">
+            Width
+            <CustomTextInput
+              onChange={(value) => {
+                canvasStore.setWidth(parseInt(value));
+              }}
+              className="w-20"
+              name="width"
+              inputTooltip="Adjust the width of the canvas"
+              value={String(canvasStore.width)}
+            />
+          </div>
+        </Label>
+        <Label>
+          <div className="flex flex-col gap-y-2">
+            <span> Height</span>
+            <CustomTextInput
+              onChange={(value) => {
+                canvasStore.setHeight(parseInt(value));
+              }}
+              className=" w-20"
+              name="height"
+              inputTooltip="Adjust the height of the canvas"
+              value={String(canvasStore.height)}
+            />
+          </div>
+        </Label>
+        <SelectSeparator className="col-span-2" />
+        <Label>
+          <div className="flex flex-col gap-y-2">
+            <span>Background Color</span>
+            <Input
+              type="color"
+              name="backgroundColor"
+              onChange={(e) => {
+                setBackgroundColor(e.target.value);
+              }}
+              value={backgroundColor}
+            />
+          </div>
+        </Label>
+        <SelectSeparator className="col-span-2" />
+        <Button onClick={applyChanges} variant="outline">
+          Apply
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+});

@@ -51,14 +51,14 @@ export const Sidebar = observer(() => {
   //   }
   // }, [pathName])
   return (
-    <div className="absolute bottom-0 z-[1002] flex w-screen items-center     justify-center md:flex-col">
+    <div className="absolute bottom-0 left-0 flex w-screen items-center justify-center dark:bg-gray-800 md:top-0  md:h-screen   md:w-[90px] md:flex-col">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name;
         return (
           <li
             key={option.name}
             className={`
-               mx-1
+               m-1
                flex
               h-[72px]
               w-[72px]
