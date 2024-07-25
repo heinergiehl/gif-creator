@@ -332,11 +332,7 @@ const Editor = React.memo(
                     </div>
                     <CanvasComponent containerWidth={containerWidth} />
                   </div>
-                  <ScrollArea
-                    className="h-svh"
-                    style={{ width: '100%', height: '100%' }}
-                    draggable="false"
-                  >
+                  <ScrollArea className="h-[15vh]" style={{ width: '100%' }} draggable="false">
                     <EditorCarousel containerWidth={containerWidth} />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
