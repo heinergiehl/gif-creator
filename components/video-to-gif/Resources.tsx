@@ -27,11 +27,7 @@ export const Resources = observer(() => {
   useEffect(() => {
     editorStore.setAllOptionsToFalse();
   }, [selectedMenuOption, editorStore.toggleOptions]);
-  return (
-    <div className="dark:bg-slate-800">
-      <RenderResource />
-    </div>
-  );
+  return <RenderResource />;
 });
 const RenderResource = observer(({}: {}) => {
   const store = useStores().uiStore;

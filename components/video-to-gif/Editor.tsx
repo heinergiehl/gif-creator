@@ -336,7 +336,7 @@ const Editor = React.memo(
                     <EditorCarousel containerWidth={containerWidth} />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-[320px]">
+                  <ScrollArea className="h-[320px] w-full">
                     <Resources />
                   </ScrollArea>
                   <div className="md:hidden">
