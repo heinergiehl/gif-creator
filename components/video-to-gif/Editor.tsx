@@ -275,10 +275,10 @@ const Editor = React.memo(
         collisionDetection={rectIntersection}
       >
         <div
-          className=" flex h-full flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
+          className="flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
           draggable="false"
         >
-          <div className="relative hidden h-screen  flex-row md:flex md:flex-col">
+          <div className="relative hidden  flex-row md:flex md:flex-col">
             <Sidebar />
             <div className=" top-0   ml-[90px] hidden h-full  md:flex">
               <Resources />
@@ -333,11 +333,7 @@ const Editor = React.memo(
                     <CanvasComponent containerWidth={containerWidth} />
                   </div>
                   <EditorCarousel containerWidth={containerWidth} />
-                  {/* RESOURCES */}
-                  <ScrollArea className="h-[100vh]  min-h-[300px]  w-screen md:hidden">
-                    {' '}
-                    <Resources />
-                  </ScrollArea>
+                  {/* RESOURCES */} <Resources />
                   <div className="md:hidden">
                     <Sidebar />
                   </div>
