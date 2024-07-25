@@ -275,7 +275,7 @@ const Editor = React.memo(
         collisionDetection={rectIntersection}
       >
         <div
-          className="flex  h-svh  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
+          className="flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
           draggable="false"
         >
           <div className="relative hidden  flex-row md:flex md:flex-col">
