@@ -275,7 +275,7 @@ const Editor = React.memo(
         collisionDetection={rectIntersection}
       >
         <div
-          className="flex  h-[dvh]  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
+          className="flex  h-[100svh]  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
           draggable="false"
         >
           <div className="relative hidden  flex-row md:flex md:flex-col">
@@ -284,7 +284,7 @@ const Editor = React.memo(
               <Resources />
             </div>
           </div>
-          <div className=" flex w-screen flex-col  items-center justify-center md:w-full">
+          <div className="flex h-[100svh] w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
               className="flex h-[calc(100svh-50px)] w-screen  flex-col items-center justify-center md:w-full"
@@ -334,7 +334,7 @@ const Editor = React.memo(
                   </div>
                   <EditorCarousel containerWidth={containerWidth} />
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-screen">
+                  <ScrollArea className="h-svh">
                     <Resources />
                   </ScrollArea>
                   <div className="md:hidden">
