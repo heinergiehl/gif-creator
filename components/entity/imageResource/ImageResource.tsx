@@ -118,8 +118,8 @@ const ImageResource = observer(() => {
     // check if it has been added as element already, if so, remove it as well
   };
   return (
-    <ScrollArea className="h-screen">
-      <div className="flex max-h-[550px]  w-full flex-col space-y-2 " draggable="false">
+    <ScrollArea className={cn('h-screen ')} draggable="false">
+      <div className="flex max-h-[550px]  w-full flex-col space-y-2 ">
         <div className="flex h-[50px] w-full items-center justify-center bg-slate-200 text-sm dark:bg-slate-900">
           Upload Images
         </div>

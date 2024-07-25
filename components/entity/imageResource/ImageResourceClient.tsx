@@ -121,7 +121,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
     setIsPopoverOpen(true);
   };
   return (
-    <ScrollArea className=" h-[450px] w-full">
+    <ScrollArea className=" h-[450px] w-full ">
       <MagicContainer
         className={'z-[9999] flex w-full flex-wrap items-center justify-center gap-2'}
       >

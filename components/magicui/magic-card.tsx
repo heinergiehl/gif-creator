@@ -139,10 +139,12 @@ interface MagicCardProps {
    * */
   background?: string;
   [key: string]: any;
+  onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
 }
 const MagicCard: React.FC<MagicCardProps> = ({
   className,
   children,
+  onPointerDown,
   size = 200,
   spotlight = true,
   borderColor = 'hsl(0 0% 50%)',
@@ -151,6 +153,7 @@ const MagicCard: React.FC<MagicCardProps> = ({
 }) => {
   return (
     <div
+      onPointerDown={onPointerDown}
       style={
         {
           '--mask-size': `${size}px`,

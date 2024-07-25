@@ -30,7 +30,7 @@ import { CustomAlertDialog } from '@/app/components/ui/CustomAlertDialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import CanvasComponent, { CanvasSettings } from '@/app/components/canvas/Canvas';
 import EditResource from '../entity/EditResource';
-import { throttle } from 'lodash';
+import { set, throttle } from 'lodash';
 import EditorCarousel from './carousel/EditorCarousel';
 import { getUid } from '@/utils';
 import { usePathname } from 'next/navigation';
@@ -39,6 +39,7 @@ import { ClipboardProvider, useClipboard } from '@/app/hooks/useClipboard';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { fabric } from 'fabric';
 import DraggableDrawer from './DraggableDrawer';
+import { cn } from '@/lib/utils';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {
@@ -217,10 +218,12 @@ const Editor = React.memo(
           });
         }
       }
+      setTouchAction(true);
     };
     const handleDragStart = (e: DragStartEvent) => {
       store.isDragging = true;
       store.activeDraggable = e;
+      setTouchAction(false);
     };
     const [containerWidth, setContainerWidth] = useState(0);
     const [percentageWidthOfEditorContainer, setPercentageWidthOfEditorContainer] = useState(0);
@@ -264,6 +267,8 @@ const Editor = React.memo(
     // useUpdateSelectedObject(canvasRef, store);
     // useSyncCanvasWithStore(canvasRef, store);
     const [isDrawerOpen, setDrawerOpen] = useState(false);
+    const setTouchAction = useStores().setTouchActionEnabled;
+    const touchActionEnabled = useStores().touchActionEnabled;
     return (
       <DndContext
         modifiers={[snapCenterToCursor]}
@@ -275,7 +280,10 @@ const Editor = React.memo(
         collisionDetection={rectIntersection}
       >
         <div
-          className="flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
+          className={cn([
+            'flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
+            touchActionEnabled ? '' : 'touch-none',
+          ])}
           draggable="false"
         >
           <div className="relative hidden  flex-row md:flex md:flex-col">

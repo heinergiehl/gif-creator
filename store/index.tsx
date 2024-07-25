@@ -23,11 +23,15 @@ configure({
 export class RootStore {
   canvasRef: MutableRefObject<Canvas | null>;
   supabase: SupabaseClient;
+  touchActionEnabled = false;
   constructor(canvasRef: MutableRefObject<Canvas | null>) {
     this.canvasRef = canvasRef;
     this.supabase = createClient();
     makeAutoObservable(this);
   }
+  setTouchActionEnabled = (value: boolean) => {
+    this.touchActionEnabled = value;
+  };
   editorStore = new EditorStore(this);
   animationStore = new AnimationStore(this);
   timelineStore = new TimelineStore(this);
