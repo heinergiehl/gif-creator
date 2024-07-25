@@ -36,7 +36,7 @@ import { getUid } from '@/utils';
 import { usePathname } from 'next/navigation';
 import { Resources } from './Resources';
 import { ClipboardProvider, useClipboard } from '@/app/hooks/useClipboard';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { fabric } from 'fabric';
 import DraggableDrawer from './DraggableDrawer';
 // make sure the getActiveObject return type is correct and includes the id
@@ -334,14 +334,17 @@ const Editor = React.memo(
                   </div>
                   <ScrollArea className="h-[15vh]" draggable="false">
                     <EditorCarousel containerWidth={containerWidth} />
+                    <ScrollBar orientation="vertical" />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
                   <ScrollArea className="h-[320px] w-full">
                     <Resources />
+                    <ScrollBar orientation="vertical" />
                   </ScrollArea>
                   <div className="md:hidden">
                     <Sidebar />
                   </div>
+                  <ScrollBar orientation="vertical" />
                 </ScrollArea>
               </div>
             </div>
