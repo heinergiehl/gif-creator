@@ -69,7 +69,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  touch-action: none;
 }
 /* styles.css or a relevant CSS file */
 .resources-container {
