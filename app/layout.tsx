@@ -14,9 +14,14 @@ const inter = Inter({ subsets: ['latin'] });
 const CookieBanner = dynamic(() => import('@/app/components/consent/CookieBanner'), {
   ssr: false,
 });
-export const metaData: Metadata = {
-  // meta initial zoom
-  content: 'width=device-width, initial-scale=1',
+import type { Viewport } from 'next';
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  // Also supported by less commonly used
+  // interactiveWidget: 'resizes-visual',
 };
 export default function RootLayout({
   children,
