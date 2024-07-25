@@ -295,7 +295,7 @@ const Editor = React.memo(
                 className="relative  flex h-full  w-full flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full"
                 draggable="false"
               >
-                <ScrollArea className="m-auto  flex h-[calc(100svh-50px)] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
+                <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-[95%] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
                   <div className="flex  flex-col items-center justify-center gap-4  md:flex-row">
                     <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
                       <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
@@ -332,12 +332,12 @@ const Editor = React.memo(
                     </div>
                     <CanvasComponent containerWidth={containerWidth} />
                   </div>
-                  <ScrollArea className="h-[15vh]" draggable="false">
+                  <ScrollArea className="h-[15vh] w-[95%]" draggable="false">
                     <EditorCarousel containerWidth={containerWidth} />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-[320px] w-full">
+                  <ScrollArea className="h-[320px] w-[95%]">
                     <Resources />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
