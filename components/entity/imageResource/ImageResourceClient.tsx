@@ -12,6 +12,7 @@ import { PopoverClose } from '@radix-ui/react-popover';
 import { getUid } from '@/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 interface ImageProps {
   id: string;
   webformatURL: string;
@@ -120,13 +121,24 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
     setSelectedImage(image);
     setIsPopoverOpen(true);
   };
+  const [isDragging, setIsDragging] = useState(false);
   return (
-    <ScrollArea className=" h-[450px] w-full ">
+    <ScrollArea className=" h-[450px] w-full">
       <MagicContainer
-        className={'z-[9999] flex w-full flex-wrap items-center justify-center gap-2'}
+        className={cn(
+          'z-[9999] flex w-full flex-wrap items-center justify-center gap-2',
+          isDragging ? 'touch-none' : '',
+        )}
       >
         {images.map((image, index) => (
-          <MagicCard key={image.id} className="group relative  h-auto w-full max-w-[130px] p-2">
+          <MagicCard
+            key={image.id}
+            className="group relative  h-auto w-full max-w-[130px] p-2"
+            onMouseDown={() => setIsDragging(true)}
+            onMouseUp={() => setIsDragging(false)}
+            onPointerDown={() => setIsDragging(true)}
+            onPointerUp={() => setIsDragging(false)}
+          >
             <div className="absolute left-[20%] top-[20%] translate-x-[-50%] translate-y-[-50%]">
               <Button
                 onPointerDown={() => openPopover(image)}

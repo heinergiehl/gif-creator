@@ -282,7 +282,7 @@ const Editor = React.memo(
         <div
           className={cn([
             'flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
-            touchActionEnabled ? '' : 'touch-none',
+            ,
           ])}
           draggable="false"
         >
