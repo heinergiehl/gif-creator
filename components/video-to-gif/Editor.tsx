@@ -284,18 +284,18 @@ const Editor = React.memo(
               <Resources />
             </div>
           </div>
-          <div className="flex h-full w-screen flex-col  items-center justify-center md:w-full">
+          <div className=" flex w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
-              className="flex h-screen w-screen  flex-col items-center justify-center md:w-full"
+              className="flex h-[calc(100vh-50px)] w-screen  flex-col items-center justify-center md:w-full"
               id="editor-container"
             >
               <CustomAlertDialog />
               <div
-                className="relative  flex h-[calc(100vh-0px)]  w-full flex-col items-start justify-start  md:h-[calc(100vh-50px)] md:w-full"
+                className="relative  flex h-full  w-full flex-col items-start justify-start  md:h-[calc(100vh-50px)] md:w-full"
                 draggable="false"
               >
-                <ScrollArea className="m-auto  flex h-[calc(100vh-150px)]  flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
+                <ScrollArea className="m-auto  flex h-[calc(100vh-0px)] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
                   <div className="flex h-full flex-col items-center justify-center gap-4  md:flex-row">
                     <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
                       <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
