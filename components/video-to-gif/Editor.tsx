@@ -275,7 +275,7 @@ const Editor = React.memo(
         collisionDetection={rectIntersection}
       >
         <div
-          className="flex  h-[100svh]  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
+          className="flex  h-svh  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row"
           draggable="false"
         >
           <div className="relative hidden  flex-row md:flex md:flex-col">
@@ -284,7 +284,7 @@ const Editor = React.memo(
               <Resources />
             </div>
           </div>
-          <div className="flex h-[100svh] w-screen flex-col  items-center justify-center md:w-full">
+          <div className="flex h-svh w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
               className="flex h-[calc(100svh-50px)] w-screen  flex-col items-center justify-center md:w-full"
@@ -295,8 +295,8 @@ const Editor = React.memo(
                 className="relative  flex h-full  w-full flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full"
                 draggable="false"
               >
-                <ScrollArea className="m-auto  flex h-[calc(100svh)] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
-                  <div className="flex h-full flex-col items-center justify-center gap-4  md:flex-row">
+                <ScrollArea className="m-auto  flex h-[calc(100svh-50px)] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
+                  <div className="flex  flex-col items-center justify-center gap-4  md:flex-row">
                     <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
                       <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
                         <label htmlFor="speed" className="flex flex-col font-semibold ">
@@ -332,7 +332,13 @@ const Editor = React.memo(
                     </div>
                     <CanvasComponent containerWidth={containerWidth} />
                   </div>
-                  <EditorCarousel containerWidth={containerWidth} />
+                  <ScrollArea
+                    className="h-svh"
+                    style={{ width: '100%', height: '100%' }}
+                    draggable="false"
+                  >
+                    <EditorCarousel containerWidth={containerWidth} />
+                  </ScrollArea>
                   {/* RESOURCES */}{' '}
                   <ScrollArea className="h-svh">
                     <Resources />
