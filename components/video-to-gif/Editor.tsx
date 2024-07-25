@@ -284,7 +284,7 @@ const Editor = React.memo(
               <Resources />
             </div>
           </div>
-          <div className="flex h-svh w-screen flex-col  items-center justify-center md:w-full">
+          <div className="flex h-full w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
               className="flex h-[calc(100svh-50px)] w-screen  flex-col items-center justify-center md:w-full"
@@ -336,7 +336,7 @@ const Editor = React.memo(
                     <EditorCarousel containerWidth={containerWidth} />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-svh">
+                  <ScrollArea className="h-[40vh]">
                     <Resources />
                   </ScrollArea>
                   <div className="md:hidden">
