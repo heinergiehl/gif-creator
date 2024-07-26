@@ -281,7 +281,7 @@ const Editor = React.memo(
       >
         <div
           className={cn([
-            'flex  h-full  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
+            'flex h-full  w-screen  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
             ,
           ])}
           draggable="false"
@@ -295,16 +295,16 @@ const Editor = React.memo(
           <div className="flex h-full w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
-              className="flex h-[calc(100svh-50px)] w-screen  flex-col items-center justify-center md:w-full"
+              className="flex h-[calc(100svh-50px)]   flex-col items-center justify-center md:w-full md:max-w-[900px]"
               id="editor-container"
             >
               <CustomAlertDialog />
               <div
-                className="relative  flex h-full  w-full flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full"
+                className="relative flex h-full flex-col  items-start justify-start  md:mt-[50px] md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
                 draggable="false"
               >
-                <ScrollArea className="m-auto  flex h-[calc(100svh-50px)] flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
-                  <div className="flex  flex-col items-center justify-center gap-4  md:flex-row">
+                <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-full flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
+                  <div className="flex w-full flex-col items-center justify-center gap-4  md:flex-row md:justify-start">
                     <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
                       <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
                         <label htmlFor="speed" className="flex flex-col font-semibold ">
@@ -340,12 +340,12 @@ const Editor = React.memo(
                     </div>
                     <CanvasComponent containerWidth={containerWidth} />
                   </div>
-                  <ScrollArea className="h-[15vh]" draggable="false">
+                  <ScrollArea className="h-[15vh] w-screen md:h-full md:w-full" draggable="false">
                     <EditorCarousel containerWidth={containerWidth} />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-[320px] w-full">
+                  <ScrollArea className="h-[320px] w-full md:hidden">
                     <Resources />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>

@@ -123,15 +123,15 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   };
   const [isDragging, setIsDragging] = useState(false);
   return (
-    <ScrollArea className=" h-[450px] w-full">
+    <ScrollArea className=" h-[450px] w-full max-w-[400px]">
       <MagicContainer
-        className={cn(
-          'z-[9999] flex w-full flex-wrap items-center justify-center gap-2',
-          isDragging ? 'touch-none' : '',
-        )}
+        className={cn('z-[9999] flex w-full flex-wrap items-center justify-center gap-2')}
       >
         {images.map((image, index) => (
           <MagicCard
+            style={{
+              touchAction: 'none',
+            }}
             key={image.id}
             className="group relative  h-auto w-full max-w-[130px] p-2"
             onMouseDown={() => setIsDragging(true)}

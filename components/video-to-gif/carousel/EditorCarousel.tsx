@@ -21,6 +21,7 @@ import Droppable from './Droppable';
 import { getUid } from '@/utils';
 import { throttle } from 'lodash';
 import SelectionArea from '@viselect/vanilla';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 export interface EditorCarouselProps {
   containerWidth: number;
 }
@@ -147,7 +148,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   const handleMouseLeave = () => {
     setPasteIndicatorPosition(null);
   };
-  const width = `${containerWidth - 100}px`;
+  const width = `${containerWidth - 0.0}px`;
   const itemCount = store.frames.length;
   const itemSize = 150; // Width of each item in the list
   const debouncedHandleMouseMove = (e) => {
@@ -158,6 +159,12 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   useEffect(() => {
     if (active?.id) {
       selectionRef.current?.cancel();
+      return;
+    }
+    // check if being on small screen, if so, return
+    if (window.innerWidth < 768) {
+      selectionRef.current?.cancel();
+      console.log('SMALL SCREEN');
       return;
     }
     if (selectionRef.current === undefined && store.elements.length > 0) {
@@ -221,15 +228,16 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       store.currentKeyFrame = newSelectedIndex;
     }
   };
+  const vListRef = useRef<HTMLDivElement>(null);
   return (
     <div
       draggable="false"
-      className="flex w-screen  select-none  flex-col items-center justify-center gap-y-4 md:w-full  md:items-start"
+      className="flex w-screen select-none  flex-col  items-center justify-center gap-y-4 md:w-full md:max-w-[900px] md:items-start"
       onMouseMove={debouncedHandleMouseMove}
     >
       <Timeline
-        maxWidth={containerWidth}
-        minWidth={containerWidth}
+        maxWidth={containerWidth + 100}
+        minWidth={containerWidth + 100}
         currentFrame={store.currentKeyFrame}
         onSelectFrame={() => handleSelectFrame(store.frames[store.currentKeyFrame].id)}
         totalFrames={store.frames.length}
@@ -241,7 +249,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           minWidth: width,
         }}
         id="carousel-container"
-        className=" flex  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
+        className="flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
         ref={carouselRef}
       >
         <SortableContext
@@ -249,11 +257,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           strategy={horizontalListSortingStrategy}
         >
           <VList
-            overscan={2}
             style={{
               width: containerWidth,
               height: 120,
-              padding: '13px ',
+              padding: '22px ',
             }}
             horizontal
             count={store.frames.length}

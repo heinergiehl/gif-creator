@@ -111,7 +111,7 @@ const features = [
         pauseOnHover
         className={cn([
           'absolute top-10 [--duration:20s] [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] ',
-          ' transition-all duration-500 ease-out hover:translate-y-[20%] hover:[mask-image:none]  ',
+          ' transition-all duration-500 ease-out hover:translate-y-[20%] hover:[mask-image:none]   ',
         ])}
       >
         {files.map((f, idx) => (
@@ -178,7 +178,7 @@ export default function Home() {
     //...other FAQ data
   ];
   return (
-    <div className=" relative   z-40 h-full w-full text-black dark:text-white">
+    <div className=" relative   z-40 h-full w-screen text-black dark:text-white md:w-full">
       <div
         className="absolute inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
        [background:radial-gradient(125%_125%_at_50%_50%,#fdfdfd_30%,#63e_100%)]
@@ -189,12 +189,12 @@ export default function Home() {
         bg-[size:24px_24px] opacity-30 dark:bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
         dark:bg-[size:24px_24px] dark:opacity-100"
       ></div>
-      <div className="relative z-40  flex  flex-col opacity-100 ">
-        <section className=" mt-[100px] h-screen ">
-          <div className="flex items-stretch justify-center">
-            <div className="flex h-screen min-h-screen max-w-6xl flex-col items-center justify-center">
+      <div className="relative z-40 flex w-full  flex-col items-center  justify-center opacity-100 ">
+        <section className=" mt-[100px] h-screen w-full">
+          <div className=" flex items-center justify-center">
+            <div className="flex h-screen min-h-screen max-w-6xl flex-col items-center justify-center gap-x-2">
               <FadeInUpWrapper>
-                <NeonGradientCard className="max-w-2xl items-center justify-center ">
+                <NeonGradientCard className="mx-auto  flex max-w-2xl items-center justify-center">
                   <span className="pointer-events-none z-10  text-pretty bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-7xl font-bold leading-none tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
                     Feature Rich Free To Use GIF Maker
                   </span>
@@ -206,12 +206,12 @@ export default function Home() {
                   sign-up required!
                 </p>
               </FadeInUpWrapper>
-              <div className="flex flex-col items-center justify-center space-x-4 space-y-8">
+              <div className="mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
                 <FadeInUpWrapper>
                   <CTA />
                 </FadeInUpWrapper>
                 <FadeInUpWrapper>
-                  <div className="relative rounded-xl">
+                  <div className="relative  items-center rounded-xl">
                     <Image
                       src="/hero-dark.png"
                       alt="Hero Image"

@@ -65,7 +65,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           id="timeline"
           style={{ width }}
           onMouseMove={handleMouseMove}
-          className="relative m-auto flex flex-col items-end"
+          className="relative flex flex-col items-end"
           onClick={() => {
             editorStore.currentKeyFrame = frameNumber - 1;
           }}

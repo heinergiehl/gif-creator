@@ -38,25 +38,42 @@ const DragableView = observer(function DragableView(props: {
     data.initialLeft = data.div.offsetLeft;
     document.body.style.userSelect = 'none';
   };
-  const handleMouseMove = (event: MouseEvent) => {
+  const handleMouseMove = (event: MouseEvent | TouchEvent) => {
     if (!data.div || !data.isDragging) return;
-    const newValue = calculateNewValue(event.clientX);
+    let newValue = 0;
+    if (window.innerWidth > 768) {
+      newValue = calculateNewValue((event as MouseEvent).clientX);
+    } else {
+      newValue = calculateNewValue((event as TouchEvent).changedTouches[0].clientX);
+    }
     data.div.style.left = `${(newValue / props.total) * 100}%`;
     event.preventDefault();
   };
-  const handleMouseUp = (event: MouseEvent) => {
+  const handleMouseUp = (event: MouseEvent | TouchEvent) => {
     if (!data.div || !data.isDragging) return;
     data.isDragging = false;
-    props.onChange(calculateNewValue(event.clientX));
+    if (window.innerWidth > 768) {
+      props.onChange(calculateNewValue((event as MouseEvent).clientX));
+    } else {
+      props.onChange(calculateNewValue((event as TouchEvent).changedTouches[0].clientX));
+    }
     document.body.style.userSelect = 'auto';
     event.preventDefault();
   };
   useEffect(() => {
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mousemove', handleMouseMove);
+    if (window.innerWidth < 768) {
+      window.addEventListener('touchend', handleMouseUp);
+      window.addEventListener('touchmove', handleMouseMove);
+    }
     return () => {
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
+      if (window.innerWidth < 768) {
+        window.removeEventListener('touchend', handleMouseUp);
+        window.removeEventListener('touchmove', handleMouseMove);
+      }
     };
   }, [handleMouseUp, handleMouseMove]);
   return (
@@ -71,7 +88,7 @@ const DragableView = observer(function DragableView(props: {
         bottom: 0,
         ...props.style,
       }}
-      onMouseDown={handleMouseDown}
+      onPointerDown={handleMouseDown}
     >
       {props.children}
     </div>

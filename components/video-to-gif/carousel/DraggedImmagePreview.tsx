@@ -8,20 +8,16 @@ const DraggedImagePreview = observer(({ src }: { src: string }) => {
   const store = useStores().editorCarouselStore;
   return (
     <Card
-      className={cn([
-        ' pointer-events-none absolute ',
-        'transition-all duration-300 ease-in-out',
-        'scale-125 opacity-65',
-      ])}
+      className={cn([' pointer-events-none absolute ', 'transition-all duration-300 ease-in-out'])}
     >
       <CardContent className="z-[9999] flex h-full items-center justify-center p-0">
         <Image
           src={src}
           alt={`DragOverlay`}
           id={'DragOverlay'}
-          width={100}
-          height={100}
-          className="min-h-[100px] min-w-[100px] rounded-lg"
+          width={80}
+          height={80}
+          className="min-h-[80px] min-w-[80px] rounded-lg"
         />
       </CardContent>
     </Card>
