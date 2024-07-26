@@ -286,7 +286,7 @@ const Editor = React.memo(
           ])}
           draggable="false"
         >
-          <div className="relative hidden  flex-row md:flex md:flex-col">
+          <div className="relative hidden flex-row  md:flex md:h-screen md:flex-col">
             <Sidebar />
             <div className=" top-0   ml-[90px] hidden h-full  md:flex">
               <Resources />
