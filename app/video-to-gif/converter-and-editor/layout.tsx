@@ -6,5 +6,5 @@ export const metadata: Metadata = {
   keywords: 'video, gif, converter, editor, free',
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <div className="touch-none">{children}</div>;
+  return <div>{children}</div>;
 }

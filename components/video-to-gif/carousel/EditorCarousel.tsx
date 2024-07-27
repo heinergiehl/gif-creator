@@ -218,7 +218,6 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     }
   }, [store.selectedElements]);
   const handleDeleteFrame = (index: number): void => {
-    console.log('HANDLEDELETEFRAME', index, store.frames.length, store.elements.length);
     const frameToDelete = store.frames[index];
     // get the corresponding element to the frame
     store.elements = store.elements.filter((element) => element.id !== frameToDelete.id);
@@ -252,18 +251,18 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         className="flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
         ref={carouselRef}
       >
-        <SortableContext
-          items={store.frames.map((frame) => frame.id)}
-          strategy={horizontalListSortingStrategy}
+        <VList
+          style={{
+            width: containerWidth,
+            height: 120,
+            padding: '22px ',
+          }}
+          horizontal
+          count={store.frames.length}
         >
-          <VList
-            style={{
-              width: containerWidth,
-              height: 120,
-              padding: '22px ',
-            }}
-            horizontal
-            count={store.frames.length}
+          <SortableContext
+            items={store.frames.map((frame) => frame.id)}
+            strategy={horizontalListSortingStrategy}
           >
             {store.frames.map((frame, index) => (
               <Droppable
@@ -298,20 +297,9 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                 </div>
               </Droppable>
             ))}
-          </VList>
-        </SortableContext>
+          </SortableContext>
+        </VList>
       </div>
-      {active && (
-        <DragOverlay>
-          {active?.data?.current?.dragOverlay ? (
-            active?.data?.current?.dragOverlay()
-          ) : (
-            <DraggedImagePreview
-              src={store.frames.find((frame) => frame.id === active?.id)?.src || ''}
-            />
-          )}
-        </DragOverlay>
-      )}
     </div>
   );
 });

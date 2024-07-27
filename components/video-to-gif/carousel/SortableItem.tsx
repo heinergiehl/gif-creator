@@ -84,7 +84,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                 onLoad={() => setImageLoaded(true)}
               />
               {!imageLoaded && (
-                <div className="skeleton-loader h-[100px] w-[100px] animate-pulse rounded-lg bg-gray-300"></div>
+                <div className="skeleton-loader h-[70px] w-[70px] animate-pulse rounded-lg bg-gray-300"></div>
               )}
               <Button
                 variant={'outline'}

@@ -15,41 +15,11 @@ import { usePathname } from 'next/navigation';
 import { FaRegSmile } from 'react-icons/fa';
 import { UIStore } from '@/store/UIStore';
 import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-type ConversionType = 'videoToGif' | 'imageToGif' | 'gifToGif';
 export const Sidebar = observer(() => {
   const pathName = usePathname();
   const store = useStores().uiStore;
-  let conversionType: ConversionType = 'videoToGif';
-  switch (pathName) {
-    case '/image-to-gif':
-      conversionType = 'imageToGif';
-      break;
-    case '/video-to-gif':
-      conversionType = 'videoToGif';
-      break;
-    case '/edit-gifs':
-      conversionType = 'gifToGif';
-      break;
-    default:
-      break;
-  }
-  // useEffect(() => {
-  //   setConversionTypeState(conversionType)
-  //   switch (conversionType) {
-  //     case "videoToGif":
-  //       store.setSelectedMenuOption("Video")
-  //       break
-  //     case "imageToGif":
-  //       store.setSelectedMenuOption("Image")
-  //       break
-  //     case "gifToGif":
-  //       store.setSelectedMenuOption("Gif")
-  //       break
-  //     default:
-  //       break
-  //   }
-  // }, [pathName])
+  const editorStore = useStores().editorStore;
+  const progress = editorStore.progress;
   return (
     <div className="absolute bottom-0 left-0 flex w-screen items-center justify-center dark:bg-gray-800 md:top-0  md:h-screen   md:w-[90px] md:flex-col">
       {MENU_OPTIONS.map((option) => {
@@ -58,6 +28,7 @@ export const Sidebar = observer(() => {
           <li
             key={option.name}
             className={`
+              relative
                m-1
                flex
               h-[72px]

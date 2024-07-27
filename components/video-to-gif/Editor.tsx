@@ -22,6 +22,8 @@ import {
   UniqueIdentifier,
   rectIntersection,
   closestCorners,
+  DragOverlay,
+  useDndContext,
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -40,6 +42,7 @@ import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { fabric } from 'fabric';
 import DraggableDrawer from './DraggableDrawer';
 import { cn } from '@/lib/utils';
+import CircularProgress from '@/app/components/ui/CircularProgress';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {
@@ -68,14 +71,12 @@ const Editor = React.memo(
     const editorCarouselStore = rootStore.editorCarouselStore;
     const animationStore = rootStore.animationStore;
     const timelineStore = rootStore.timelineStore;
-    const sensors = useSensors(
-      useSensor(MouseSensor),
-      useSensor(TouchSensor),
-      useSensor(KeyboardSensor),
-      useSensor(PointerSensor, {
-        activationConstraint: { distance: 5 },
-      }),
-    );
+    const [isMobile, setIsMobile] = useState(false);
+    const mouseSensor = useSensor(MouseSensor, {});
+    const touchSensor = useSensor(TouchSensor, {});
+    const pointerSensor = useSensor(PointerSensor, {});
+    const keyboardSensor = useSensor(KeyboardSensor, {});
+    const sensors = useSensors(mouseSensor, touchSensor, pointerSensor, keyboardSensor);
     const supabase = rootStore.supabase;
     const handleDragEnd = async (event: DragEndEvent) => {
       const { active, over } = event;
@@ -87,6 +88,7 @@ const Editor = React.memo(
       if (activeIndex !== -1) {
         store.frames = arrayMove(store.frames, activeIndex, overIndex);
         store.elements = arrayMove(store.elements, activeIndex, overIndex);
+        console.log('DRAGEND0', activeIndex, overIndex);
         return;
       }
       const resourceType = String(active.id).split('-')[0];
@@ -97,7 +99,10 @@ const Editor = React.memo(
       if (isCarousel) {
         const activeDraggableRect = active?.rect;
         const overDraggableRect = over?.rect;
-        if (!activeDraggableRect || !overDraggableRect) return;
+        if (!activeDraggableRect || !overDraggableRect) {
+          console.log('DRAGENDA', activeIndex, overIndex);
+          return;
+        }
         const activeCenter = {
           x:
             (activeDraggableRect.current.translated?.left || 0) +
@@ -117,6 +122,7 @@ const Editor = React.memo(
         } else {
           insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
         }
+        console.log('DRAGEND1', isDraggedToRightSideOfFirstFrame, overIndex, insertIndex);
         if (resourceType.startsWith('imageResource')) {
           const frameId = getUid();
           const newFrame = { id: frameId, src: active?.data?.current?.image };
@@ -125,6 +131,13 @@ const Editor = React.memo(
           //   store.addImage(0, active?.data?.current?.image, true, frameId);
           //   return;
           // }
+          console.log(
+            'DRAGEND',
+            isDraggedToRightSideOfFirstFrame,
+            overIndex,
+            store.frames.length,
+            insertIndex,
+          );
           if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
             store.frames.unshift(newFrame);
             store.addImage(-1, active?.data?.current?.image, true, frameId);
@@ -138,11 +151,11 @@ const Editor = React.memo(
           store.frames.splice(insertIndex, 0, newFrame);
           store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
           // make sure to upload to superbase frames bucket
-          await supabase.storage
-            .from('frames')
-            .upload(frameId, new Blob([active?.data?.current?.image], { type: 'image/png' }), {
-              upsert: true,
-            });
+          // await supabase.storage
+          //   .from('frames')
+          //   .upload(frameId, new Blob([active?.data?.current?.image], { type: 'image/png' }), {
+          //     upsert: true,
+          //   });
         } else if (resourceType.startsWith('textResource')) {
           const textElement = document.getElementById(String(active.id));
           if (!textElement) {
@@ -269,9 +282,9 @@ const Editor = React.memo(
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const setTouchAction = useStores().setTouchActionEnabled;
     const touchActionEnabled = useStores().touchActionEnabled;
+    const active = useDndContext().active;
     return (
       <DndContext
-        modifiers={[snapCenterToCursor]}
         sensors={sensors}
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
@@ -281,14 +294,24 @@ const Editor = React.memo(
       >
         <div
           className={cn([
-            'flex h-full  w-screen  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
+            'relative  flex h-full w-screen  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
             ,
           ])}
           draggable="false"
         >
-          <div className="relative hidden flex-row  md:flex md:h-screen md:flex-col">
+          {store.progress.conversion > 0 && store.progress.conversion < 100 && (
+            <>
+              {/* Progress Indicator */}
+              <div className="absolute left-1/2 top-1/2 z-[9999] ">
+                {' '}
+                <CircularProgress />
+              </div>
+              <div className="absolute z-[9999] h-full w-full bg-gray-200 opacity-35"></div>
+            </>
+          )}
+          <div className="z-1  hidden flex-row  md:flex md:h-screen md:flex-col">
             <Sidebar />
-            <div className=" top-0   ml-[90px] hidden h-full  md:flex">
+            <div className="relative ml-[90px] hidden h-full w-[400px]  md:flex">
               <Resources />
             </div>
           </div>
@@ -300,7 +323,7 @@ const Editor = React.memo(
             >
               <CustomAlertDialog />
               <div
-                className="relative flex h-full flex-col  items-start justify-start  md:mt-[50px] md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
+                className="z-1 relative  flex h-full flex-col  items-start justify-start  md:mt-[50px] md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
                 draggable="false"
               >
                 <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-full flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">

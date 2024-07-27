@@ -10,9 +10,9 @@ export const CustomProgress = observer(() => {
   return (
     <div
       style={{
-        display: progress.conversion > 0 ? 'flex' : 'none',
+        display: progress.conversion > 0 || progress.conversion < 100 ? 'flex' : 'none',
       }}
-      className="flex flex-col items-start justify-center w-full flex-start gap-y-4"
+      className="flex-start flex w-full flex-col items-start justify-center gap-y-4"
     >
       <span>We are currently converting the video into single frames</span>
       <Progress value={progress.conversion} />

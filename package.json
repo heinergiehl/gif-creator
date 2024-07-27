@@ -115,6 +115,7 @@
     "react-spring-carousel": "^2.0.19",
     "react-video-seek-slider": "^6.0.6",
     "react-virtualized-auto-sizer": "^1.0.24",
+    "react-wavify": "^1.11.1",
     "react-window": "^1.8.10",
     "react-window-infinite-loader": "^1.0.9",
     "shadcn-ui": "^0.8.0",

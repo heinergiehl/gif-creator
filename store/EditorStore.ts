@@ -211,7 +211,6 @@ export class EditorStore {
       console.error('Element not found');
       return;
     }
-    console.log('Updating Element69:', id, changes);
     const oldShadowOptions = this.elements[index].shadow || {};
     // check if changes contains shadow options
     if (changes.shadow) {
@@ -679,11 +678,6 @@ export class EditorStore {
       console.log('Selected elements:', this.selectedElements);
       return;
     }
-    console.log('Setting selected elements:', ids);
-    console.log(
-      'elements in setSelectedElements:',
-      this.elements.map((e) => e.id),
-    );
     this.selectedElements = this.elements.filter((el) => ids.includes(el.id));
     console.log(
       'Selected elements in setSelectedElements:',

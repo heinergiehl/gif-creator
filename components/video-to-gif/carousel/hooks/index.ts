@@ -154,8 +154,10 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
       if (activeDraggableIsOnLeftEdge || activeDraggableIsOnRightEdge) return 'translateX(0px)';
       else if (shiftDirection === 'right' && index >= hoverIndex) {
+        console.log('shifting right');
         return 'translateX(100%)';
       } else if (shiftDirection === 'left' && index <= hoverIndex) {
+        console.log('shifting left');
         return 'translateX(-100%)';
       } else return 'translateX(0px)';
     },

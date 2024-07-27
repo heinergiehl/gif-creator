@@ -23,9 +23,9 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
   useEffect(() => {
     loadFFMPEG(ffmpegRef, editorStore);
   }, [editorStore]);
-  useEffect(() => {
-    loadUserVideos(supabase, editorStore, setLoading);
-  }, [supabase, editorStore]);
+  // useEffect(() => {
+  //   loadUserVideos(supabase, editorStore, setLoading);
+  // }, [supabase, editorStore]);
   return (
     <ScrollArea className=" mb-[90px] h-[85vh]">
       <div className="relative flex  flex-col items-center justify-center gap-4">
@@ -81,7 +81,7 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
           />
           <CustomProgress />
           <Separator />
-          {loading ? (
+          {/* {loading ? (
             <div className="flex h-48 w-full items-center justify-center">
               <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-slate-300 dark:border-slate-800" />
             </div>
@@ -105,7 +105,7 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
                 )
               }
             />
-          )}
+          )} */}
         </div>
       </div>
     </ScrollArea>
