@@ -14,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { createPortal } from 'react-dom';
+import { Separator } from '@/components/ui/separator';
 interface ImageProps {
   id: string;
   webformatURL: string;
@@ -42,10 +43,10 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
             <Image
               id={`imageResource-${index}`}
               src={image.webformatURL}
-              width={100}
-              height={100}
+              width={80}
+              height={80}
               alt={'Draggable image resource'}
-              className=" h-full w-full cursor-pointer touch-none rounded-lg object-contain"
+              className=" h-[80px] w-[80px] cursor-pointer touch-none rounded-lg object-contain"
               crossOrigin="anonymous"
             />
           );
@@ -58,33 +59,40 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
           zIndex: 99999,
         }
       : undefined;
+    const isDragging = transform != null;
     return (
       <div
         id={'imageResource-' + index}
-        {...listeners}
-        {...attributes}
         ref={setNodeRef}
-        className="relative z-[999999]  touch-none p-2 opacity-100"
+        className="group h-[100px] w-[100px] touch-none bg-gray-100 bg-inherit text-inherit opacity-100 transition-colors duration-500 ease-in-out hover:opacity-100 dark:bg-slate-700 dark:hover:bg-slate-900"
       >
-        <Button
-          id={'imageResource-' + index}
-          ref={setActivatorNodeRef}
-          {...listeners}
-          {...attributes}
-          className="  absolute opacity-100 "
-        >
-          +
-        </Button>
-        <Image
-          src={image.webformatURL}
-          width={image.previewWidth}
-          height={image.previewHeight}
-          objectFit="cover"
-          alt={'Resource'}
-          className="rounded-lg object-fill"
-          draggable={false} // It's important to disable the native HTML drag and drop
-          crossOrigin="anonymous"
-        />
+        {/* drag handle, nice looking */}
+        <div {...attributes} {...listeners} ref={setActivatorNodeRef} className="relative">
+          <Button
+            style={{
+              cursor: isDragging ? 'grabbing' : 'grab',
+            }}
+            className={`absolute left-1/2 flex h-4 w-full translate-x-[-50%] items-center justify-center rounded-none transition-opacity duration-300 dark:bg-slate-800 ${
+              window.innerWidth < 768 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
+          >
+            {/* gray thick div symbolizing drag handle */}
+            <div className="h-1 w-6 rounded-lg bg-gray-500" />
+          </Button>
+        </div>
+        <div className="relative m-2 border-b" />
+        <div className="flex h-full w-full items-center justify-center">
+          <Image
+            src={image.webformatURL}
+            width={80}
+            height={80}
+            objectFit="cover"
+            alt={'Resource'}
+            className=" h-[80px] w-[80px] touch-none rounded-lg object-fill"
+            draggable={false} // It's important to disable the native HTML drag and drop
+            crossOrigin="anonymous"
+          />
+        </div>
       </div>
     );
   },
@@ -146,20 +154,10 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   }, [window.innerWidth, isMobile, setIsMobile]);
   const active = useDndContext().active;
   return (
-    <ScrollArea className="z-[9999999]  h-[450px] w-full">
-      <div
-        className={cn(
-          ' relative flex w-full flex-wrap items-center justify-center gap-2 overflow-x-scroll',
-        )}
-      >
+    <ScrollArea className=" h-[450px] w-full">
+      <div className={cn(' relative flex flex-wrap items-center justify-center gap-2 ')}>
         {images.map((image, index) => (
-          <div
-            style={{
-              cursor: isDragging ? 'grabbing' : 'grab',
-            }}
-            key={image.id}
-            className="z-[99999]  h-auto w-full max-w-[100px] p-2"
-          >
+          <div key={image.id} className=" h-auto w-full p-2 md:w-[100px]">
             {/* <div className="absolute left-[20%] top-[20%] translate-x-[-50%] translate-y-[-50%]">
               <Button
                 onPointerDown={() => openPopover(image)}

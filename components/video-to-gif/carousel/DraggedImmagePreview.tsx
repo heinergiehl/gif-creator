@@ -17,7 +17,7 @@ const DraggedImagePreview = observer(({ src }: { src: string }) => {
           id={'DragOverlay'}
           width={80}
           height={80}
-          className="min-h-[70px] min-w-[70px]   rounded-lg md:min-h-[100px] md:min-w-[100px]"
+          className="min-h-[70px] min-w-[70px]   rounded-lg md:min-h-[80px] md:min-w-[80px]"
         />
       </CardContent>
     </Card>

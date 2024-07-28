@@ -22,6 +22,7 @@ import { getUid } from '@/utils';
 import { throttle } from 'lodash';
 import SelectionArea from '@viselect/vanilla';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 export interface EditorCarouselProps {
   containerWidth: number;
 }
@@ -228,6 +229,15 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     }
   };
   const vListRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const currentFrameId = store.frames[store.currentKeyFrame]?.id;
+    const currentFrameElement = document.getElementById(currentFrameId);
+    if (currentFrameElement && !currentFrameElement.classList.contains('selected')) {
+      currentFrameElement.classList.add('selected');
+    } else {
+      document.getElementsByClassName('selected')[0]?.classList.remove('selected');
+    }
+  }, [store.currentKeyFrame, document.getElementsByClassName('selected')]);
   return (
     <div
       draggable="false"
@@ -254,8 +264,8 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         <VList
           style={{
             width: containerWidth,
-            height: 120,
-            padding: '22px ',
+            height: 140,
+            padding: '25px ',
           }}
           horizontal
           count={store.frames.length}
@@ -268,7 +278,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
               <Droppable
                 id={frame.id}
                 key={index}
-                className="selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 "
+                className={cn([
+                  'selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
+                  index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
+                ])}
                 style={{
                   transform: calculateTransform(index, hoverIndex!),
                   transition: 'transform 0.2s',

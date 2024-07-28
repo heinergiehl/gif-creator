@@ -118,7 +118,7 @@ const ImageResource = observer(() => {
   };
   const active = useDndContext().active;
   return (
-    <ScrollArea className={cn('h-screen ')} draggable="false">
+    <ScrollArea className={cn('h-screen w-full')} draggable="false">
       <div className="flex max-h-[550px]  w-full flex-col space-y-2 ">
         <div className="flex h-[50px] w-full items-center justify-center bg-slate-200 text-sm dark:bg-slate-900">
           Upload Images

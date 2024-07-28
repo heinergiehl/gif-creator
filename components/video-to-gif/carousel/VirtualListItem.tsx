@@ -21,7 +21,7 @@ const VirtualizedListItem = ({ index, style, data }: ListChildComponentProps) =>
     <Droppable
       id={frame.id}
       key={index}
-      className="selectable relative mx-2 h-[60px] rounded-md border-2 transition-all duration-300"
+      className="selectable relative mx-2 h-[60px] rounded-md border-2 transition-all duration-300 md:h-[70px]"
       style={{
         ...style,
         transform: calculateTransform(index, hoverIndex),

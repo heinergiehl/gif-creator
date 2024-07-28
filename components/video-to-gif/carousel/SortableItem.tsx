@@ -37,7 +37,6 @@ const SortableItem: React.FC<SortableItemProps> = observer(
     };
     const [imageLoaded, setImageLoaded] = useState(false);
     const handleImageLoad = () => {
-      console.log(`Image loaded: ${id}`);
       setImageLoaded(true);
     };
     const handleImageError = () => {
@@ -51,33 +50,33 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         {...attributes}
         {...listeners}
         className={cn([
-          'flex  w-full cursor-pointer select-none items-center justify-center p-0  transition-colors duration-200 ease-in-out',
+          'flex  w-full  cursor-pointer  select-none items-center justify-center p-0 transition-colors duration-200  ease-in-out md:h-[80px] md:w-[80px]',
         ])}
         onPointerDown={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >
-        <Card className="relative flex  items-center justify-center">
+        <Card className="relative flex  h-full w-full items-center justify-center rounded-lg">
           <div
             className={cn([
-              'absolute inset-0 rounded-lg opacity-50 transition-all duration-300 dark:hover:bg-slate-700',
-              isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-800',
+              'absolute inset-0 h-full w-full rounded-lg opacity-50 transition-all duration-300 dark:hover:bg-slate-700',
+              isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-900',
             ])}
           >
             <span
               className={cn(['absolute text-xs transition-opacity duration-500'])}
             >{`Frame ${index + 1}`}</span>
           </div>
-          <CardContent className="flex min-h-[70px] w-full  min-w-[70px] items-center justify-center  rounded-lg p-0 md:min-h-[100px] md:min-w-[100px]">
+          <CardContent className="flex h-[80px] w-[80px]   items-center justify-center  rounded-lg p-0 md:h-[80px] md:w-[80px]">
             <Suspense fallback={<SkeletonLoader />}>
               <Image
+                className="h-[70px] w-[70px] rounded-lg"
                 loading="eager"
                 src={src}
                 alt={`Frame ${index + 1}`}
                 id={id}
-                width={80}
-                height={80}
-                className={``}
+                width={70}
+                height={70}
                 style={{
                   display: imageLoaded ? 'block' : 'none',
                 }}

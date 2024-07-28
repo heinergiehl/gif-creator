@@ -127,36 +127,13 @@ const Editor = React.memo(
         if (resourceType.startsWith('imageResource')) {
           const frameId = getUid();
           const newFrame = { id: frameId, src: active?.data?.current?.image };
-          // if (store.frames.length < 2) {
-          //   store.frames.push(newFrame);
-          //   store.addImage(0, active?.data?.current?.image, true, frameId);
-          //   return;
-          // }
-          console.log(
-            'DRAGEND',
-            isDraggedToRightSideOfFirstFrame,
-            overIndex,
-            store.frames.length,
-            insertIndex,
-          );
           if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
             store.frames.unshift(newFrame);
             store.addImage(-1, active?.data?.current?.image, true, frameId);
             return;
           }
-          // if (overIndex === store.frames.length) {
-          //   store.frames.push(newFrame);
-          //   store.addImage(store.frames.length, active?.data?.current?.image, true, frameId);
-          //   return;
-          // }
           store.frames.splice(insertIndex, 0, newFrame);
           store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
-          // make sure to upload to superbase frames bucket
-          // await supabase.storage
-          //   .from('frames')
-          //   .upload(frameId, new Blob([active?.data?.current?.image], { type: 'image/png' }), {
-          //     upsert: true,
-          //   });
         } else if (resourceType.startsWith('textResource')) {
           const textElement = document.getElementById(String(active.id));
           if (!textElement) {
@@ -261,7 +238,6 @@ const Editor = React.memo(
       percentageWidthOfEditorContainer,
     ]);
     const handleDragOver = throttle((event: DragOverEvent) => {
-      console.log('NONE!"§', event.over?.id);
       if (event.over?.id === 'canvas') {
         store.imageType = 'ObjectInFrame';
       } else if (store.frames.map((fr) => fr.id).includes(event.over?.id)) {
@@ -275,11 +251,6 @@ const Editor = React.memo(
       }
     }, 200);
     const canvasRef = useCanvas().canvasRef;
-    // useInitializeCanvas(canvasRef, store);
-    // useManageFabricObjects(canvasRef, store); // Updated usage
-    // useUpdateFabricObjects(canvasRef, store);
-    // useUpdateSelectedObject(canvasRef, store);
-    // useSyncCanvasWithStore(canvasRef, store);
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const setTouchAction = useStores().setTouchActionEnabled;
     const touchActionEnabled = useStores().touchActionEnabled;
@@ -291,12 +262,11 @@ const Editor = React.memo(
         onDragStart={handleDragStart}
         onDragMove={handleDragMove}
         onDragOver={handleDragOver}
-        collisionDetection={rectIntersection}
+        collisionDetection={closestCorners}
       >
         <div
           className={cn([
             'relative  flex h-full w-screen  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
-            ,
           ])}
           draggable="false"
         >
@@ -304,7 +274,6 @@ const Editor = React.memo(
             <>
               {/* Progress Indicator */}
               <div className="absolute left-1/2 top-1/2 z-[9999] ">
-                {' '}
                 <CircularProgress />
               </div>
               <div className="absolute z-[9999] h-full w-full bg-gray-200 opacity-35"></div>
@@ -312,7 +281,7 @@ const Editor = React.memo(
           )}
           <div className="z-1  hidden flex-row  md:flex md:h-screen md:flex-col">
             <Sidebar />
-            <div className="relative ml-[90px] hidden h-full w-[400px]  md:flex">
+            <div className="relative ml-[90px] hidden h-full max-w-[450px]  md:flex">
               <Resources />
             </div>
           </div>

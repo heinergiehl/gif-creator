@@ -14,7 +14,6 @@ const EditResource = observer(() => {
   const store = useStores().editorStore;
   const canvas = useCanvas().canvasRef.current;
   const handleChange = (property: keyof fabric.ITextOptions, value: string | number | boolean) => {
-    console.log('handleChange', property, value);
     const activeObject = canvas?.getActiveObject();
     canvas?.fire('object:modified', {
       target: activeObject,
