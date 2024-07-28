@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import Image from 'next/image';
 import { useStores } from '@/store';
 import { CustomInputFile } from '@/app/components/ui/CustomFileInput';
-import { useDraggable } from '@dnd-kit/core';
+import { DragOverlay, useDndContext, useDraggable } from '@dnd-kit/core';
 import { ImageSearchSuspended } from './ImageSearch';
 import {
   Select,
@@ -26,6 +26,7 @@ import { Label } from '@/components/ui/label';
 import imageCompression from 'browser-image-compression';
 import ShinyButton from '@/components/magicui/shiny-button';
 import { DeleteIcon, LucideDelete, RemoveFormattingIcon, Trash2Icon } from 'lucide-react';
+import { createPortal } from 'react-dom';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
@@ -103,10 +104,8 @@ const ImageResource = observer(() => {
     if (magicContainerRef.current) {
       const height = magicContainerRef.current?.offsetHeight;
       if (height < 200) magicContainerRef.current.style.height = 'auto';
-      console.log('HEIGHT!!!', height);
       setFileUploadScrollAreaHeight(height);
     }
-    console.log('offsetHeight', magicContainerRef.current?.offsetHeight);
   }, [
     store.images,
     fileUploadScrollAreaHeight,
@@ -117,6 +116,7 @@ const ImageResource = observer(() => {
     store.images.splice(index, 1);
     // check if it has been added as element already, if so, remove it as well
   };
+  const active = useDndContext().active;
   return (
     <ScrollArea className={cn('h-screen ')} draggable="false">
       <div className="flex max-h-[550px]  w-full flex-col space-y-2 ">

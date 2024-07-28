@@ -34,7 +34,7 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         dragOverlay: () => {
           const style = transform
             ? {
-                transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+                transform: `translate3d(${transform?.x}px, ${transform?.y}px, 0)`,
                 zIndex: 99999,
               }
             : undefined;
@@ -45,7 +45,7 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
               width={100}
               height={100}
               alt={'Draggable image resource'}
-              className=" z-[9999999] h-full w-full cursor-pointer touch-none rounded-lg object-contain"
+              className=" h-full w-full cursor-pointer touch-none rounded-lg object-contain"
               crossOrigin="anonymous"
             />
           );
@@ -64,14 +64,14 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         {...listeners}
         {...attributes}
         ref={setNodeRef}
-        className="relative  touch-none p-2"
+        className="relative z-[999999]  touch-none p-2 opacity-100"
       >
         <Button
           id={'imageResource-' + index}
           ref={setActivatorNodeRef}
           {...listeners}
           {...attributes}
-          className="  absolute  "
+          className="  absolute opacity-100 "
         >
           +
         </Button>
@@ -146,7 +146,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   }, [window.innerWidth, isMobile, setIsMobile]);
   const active = useDndContext().active;
   return (
-    <ScrollArea className="  h-[450px] w-full">
+    <ScrollArea className="z-[9999999]  h-[450px] w-full">
       <div
         className={cn(
           ' relative flex w-full flex-wrap items-center justify-center gap-2 overflow-x-scroll',
@@ -158,7 +158,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
               cursor: isDragging ? 'grabbing' : 'grab',
             }}
             key={image.id}
-            className="  h-auto w-full max-w-[100px] p-2"
+            className="z-[99999]  h-auto w-full max-w-[100px] p-2"
           >
             {/* <div className="absolute left-[20%] top-[20%] translate-x-[-50%] translate-y-[-50%]">
               <Button
@@ -172,11 +172,14 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
           </div>
         ))}
         {createPortal(
-          <DragOverlay>
+          <DragOverlay
+            dropAnimation={null}
+            style={{
+              opacity: 1,
+            }}
+          >
             {active &&
-              (active?.data?.current?.dragOverlay
-                ? active?.data?.current?.dragOverlay()
-                : 'No overlay')}
+              (active?.data?.current?.dragOverlay ? active?.data?.current?.dragOverlay() : null)}
           </DragOverlay>,
           document.body,
         )}

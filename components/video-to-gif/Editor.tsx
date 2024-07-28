@@ -43,6 +43,7 @@ import { fabric } from 'fabric';
 import DraggableDrawer from './DraggableDrawer';
 import { cn } from '@/lib/utils';
 import CircularProgress from '@/app/components/ui/CircularProgress';
+import { createPortal } from 'react-dom';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {
