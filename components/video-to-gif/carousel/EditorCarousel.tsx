@@ -289,12 +289,6 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                 }}
                 data-id={frame.id}
               >
-                {store.insertIndex === store.frames.findIndex((fr) => fr.id === over?.id) && (
-                  <div
-                    className="absolute inset-y-0 left-0 w-1 bg-blue-500"
-                    style={{ height: '100%', zIndex: 10 }}
-                  />
-                )}
                 <div>
                   <SortableItem
                     onMouseEnter={updateHoverIndex}
