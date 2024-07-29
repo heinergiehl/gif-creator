@@ -118,7 +118,7 @@ const Editor = React.memo(
           y: (overDraggableRect.top || 0) + (overDraggableRect.height || 0),
         };
         const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
-        let insertIndex = null;
+        let insertIndex = 0;
         if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
           insertIndex = 0;
         } else {
@@ -241,7 +241,8 @@ const Editor = React.memo(
     const handleDragOver = throttle((event: DragOverEvent) => {
       if (event.over?.id === 'canvas') {
         store.imageType = 'ObjectInFrame';
-      } else if (store.frames.map((fr) => fr.id).includes(event.over?.id)) {
+        if (!event?.over.id) return;
+      } else if (store.frames.map((fr) => fr.id).includes(event?.over?.id as string)) {
         store.imageType = 'Frame';
       }
     }, 100);
@@ -250,7 +251,11 @@ const Editor = React.memo(
       if (active) {
         store.isDragging = true;
       }
-    }, 200);
+      const over = event.over;
+      if (!active || !over) return;
+      const insertIndex = store.frames.findIndex((frame) => frame.id === over.id);
+      store.setInsertIndex(insertIndex);
+    }, 5);
     const canvasRef = useCanvas().canvasRef;
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const setTouchAction = useStores().setTouchActionEnabled;

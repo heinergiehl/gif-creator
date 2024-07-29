@@ -284,25 +284,23 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                   index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
                 ])}
                 style={{
-                  transform: calculateTransform(index, hoverIndex!),
+                  transform: calculateTransform(index, store.insertIndex!),
                   transition: 'transform 0.2s',
                 }}
                 data-id={frame.id}
               >
-                <div>
-                  <SortableItem
-                    onMouseEnter={updateHoverIndex}
-                    onMouseLeave={() => updateHoverIndex(-1)}
-                    src={frame.src}
-                    key={frame.id}
-                    id={frame.id}
-                    onFrameDelete={handleDeleteFrame}
-                    onFrameSelect={() => handleSelectFrame(frame.id, true)}
-                    index={index}
-                    basisOfCardItem={''}
-                    isSelected={false}
-                  />
-                </div>
+                <SortableItem
+                  onMouseEnter={updateHoverIndex}
+                  onMouseLeave={() => updateHoverIndex(-1)}
+                  src={frame.src}
+                  key={frame.id}
+                  id={frame.id}
+                  onFrameDelete={handleDeleteFrame}
+                  onFrameSelect={() => handleSelectFrame(frame.id, true)}
+                  index={index}
+                  basisOfCardItem={''}
+                  isSelected={false}
+                />
               </Droppable>
             ))}
           </SortableContext>

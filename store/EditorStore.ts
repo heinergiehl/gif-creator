@@ -107,7 +107,7 @@ export class EditorStore {
   imageType: 'Frame' | 'None' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
   activeDraggable: DragStartEvent | null = null;
-  insertIndex = -1;
+  insertIndex = null;
   progress = {
     conversion: 0,
     rendering: 0,
@@ -148,6 +148,8 @@ export class EditorStore {
       increaseZIndexOfSelectedElements: action,
       bringToFrontSelectedElements: action,
       sendToBackSelectedElements: action,
+      insertIndex: observable,
+      setInsertIndex: action,
     });
   }
   setInsertIndex(index: number) {

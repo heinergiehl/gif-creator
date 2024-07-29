@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { XIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { observer } from 'mobx-react-lite';
+import { useStores } from '@/store';
 interface SortableItemProps {
   id: string;
   src: string;
@@ -42,6 +43,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
     const handleImageError = () => {
       console.log(`Failed to load image: ${id}`);
     };
+    const store = useStores().editorStore;
     return (
       <div
         key={id}

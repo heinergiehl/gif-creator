@@ -131,9 +131,9 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
     ],
   );
   const calculateTransform = useCallback(
-    (index: number, hoverIndex: number) => {
-      if (active?.id) {
-        return;
+    (index: number, hoverIndex: number): string => {
+      if (!active?.id) {
+        return 'translateX(0px)';
       }
       if (store.elements.find((el) => active?.id === el.id)) return 'translateX(0px)';
       if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
