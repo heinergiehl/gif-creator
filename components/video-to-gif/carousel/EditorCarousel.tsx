@@ -238,6 +238,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       document.getElementsByClassName('selected')[0]?.classList.remove('selected');
     }
   }, [store.currentKeyFrame, document.getElementsByClassName('selected')]);
+  const over = useDndContext()?.over;
   return (
     <div
       draggable="false"
@@ -288,13 +289,13 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                 }}
                 data-id={frame.id}
               >
+                {store.insertIndex === store.frames.findIndex((fr) => fr.id === over?.id) && (
+                  <div
+                    className="absolute inset-y-0 left-0 w-1 bg-blue-500"
+                    style={{ height: '100%', zIndex: 10 }}
+                  />
+                )}
                 <div>
-                  {pasteIndicatorPosition === index && (
-                    <div
-                      className="absolute inset-y-0 left-0 w-1 bg-blue-500"
-                      style={{ height: '100%', zIndex: 10 }}
-                    />
-                  )}
                   <SortableItem
                     onMouseEnter={updateHoverIndex}
                     onMouseLeave={() => updateHoverIndex(-1)}

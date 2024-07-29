@@ -107,6 +107,7 @@ export class EditorStore {
   imageType: 'Frame' | 'None' | 'ObjectInFrame' = 'Frame';
   isDragging = false;
   activeDraggable: DragStartEvent | null = null;
+  insertIndex = -1;
   progress = {
     conversion: 0,
     rendering: 0,
@@ -148,6 +149,9 @@ export class EditorStore {
       bringToFrontSelectedElements: action,
       sendToBackSelectedElements: action,
     });
+  }
+  setInsertIndex(index: number) {
+    this.insertIndex = index;
   }
   setConversionProgress(progress: number) {
     this.conversion = progress;

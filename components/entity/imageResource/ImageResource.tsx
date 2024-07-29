@@ -167,7 +167,7 @@ const ImageResource = observer(() => {
         )}
       </div>
       {store.images.length > 0 && <Separator orientation={'horizontal'} className="w-full" />}
-      <div className="flex flex-col space-y-4 p-4">
+      <div className="flex h-full w-full flex-col space-y-4 p-4">
         <Label className="flex flex-col gap-y-4">
           <div> Search for Images online</div>
           <div className="flex gap-x-4">

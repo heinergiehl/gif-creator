@@ -79,6 +79,7 @@ const Editor = React.memo(
     const keyboardSensor = useSensor(KeyboardSensor, {});
     const sensors = useSensors(mouseSensor, touchSensor, pointerSensor, keyboardSensor);
     const supabase = rootStore.supabase;
+    const insertIndex = store.insertIndex;
     const handleDragEnd = async (event: DragEndEvent) => {
       const { active, over } = event;
       store.isDragging = false;
@@ -117,11 +118,10 @@ const Editor = React.memo(
           y: (overDraggableRect.top || 0) + (overDraggableRect.height || 0),
         };
         const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
-        let insertIndex = 0;
         if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
-          insertIndex = 0;
+          store.setInsertIndex(0);
         } else {
-          insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
+          store.setInsertIndex(isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex);
         }
         console.log('DRAGEND1', isDraggedToRightSideOfFirstFrame, overIndex, insertIndex);
         if (resourceType.startsWith('imageResource')) {

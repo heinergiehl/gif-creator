@@ -154,7 +154,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   }, [window.innerWidth, isMobile, setIsMobile]);
   const active = useDndContext().active;
   return (
-    <ScrollArea className=" h-[450px] w-full">
+    <ScrollArea className=" h-[450px] w-[300px]">
       <div className={cn(' relative flex flex-wrap items-center justify-center gap-2 ')}>
         {images.map((image, index) => (
           <div key={image.id} className=" h-auto w-full p-2 md:w-[100px]">
