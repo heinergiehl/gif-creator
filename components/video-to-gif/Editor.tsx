@@ -118,10 +118,11 @@ const Editor = React.memo(
           y: (overDraggableRect.top || 0) + (overDraggableRect.height || 0),
         };
         const isDraggedToRightSideOfFirstFrame = activeCenter.x > overCenter.x;
+        let insertIndex = null;
         if (!isDraggedToRightSideOfFirstFrame && overIndex === 0) {
-          store.setInsertIndex(0);
+          insertIndex = 0;
         } else {
-          store.setInsertIndex(isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex);
+          insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
         }
         console.log('DRAGEND1', isDraggedToRightSideOfFirstFrame, overIndex, insertIndex);
         if (resourceType.startsWith('imageResource')) {
