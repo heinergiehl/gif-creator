@@ -252,16 +252,16 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         onSelectFrame={() => handleSelectFrame(store.frames[store.currentKeyFrame].id)}
         totalFrames={store.frames.length}
       />
-      {store.frames.length === 0 && <CarouselDroppable />}
       <div
         style={{
           width,
           minWidth: width,
         }}
         id="carousel-container"
-        className="flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
+        className="relative flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
         ref={carouselRef}
       >
+        {store.frames.length === 0 && <CarouselDroppable />}
         <VList
           style={{
             width: containerWidth,

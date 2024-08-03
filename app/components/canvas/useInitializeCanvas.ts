@@ -21,6 +21,7 @@ import {
 import { EditorElement } from '@/types';
 import { EditorStore } from '@/store/EditorStore';
 import { getUid } from '@/utils';
+import { usePathname } from 'next/navigation';
 export const useInitializeCanvas = () => {
   const rootStore = useStores();
   const store = useStores().editorStore;
@@ -144,7 +145,6 @@ export const useInitializeCanvas = () => {
     ) => {
       // const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
       // store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
-      console.log('handleDelete in useInitializeCanvas', transform.target?.id);
       canvasRef.current?.remove(transform.target);
       store.elements = store.elements.filter((el) => el.id !== transform.target?.id);
       store.frames = store.frames.filter((frame) => frame.id !== transform.target?.id);
@@ -301,7 +301,6 @@ export const useInitializeCanvas = () => {
       if (typeof modifiedObject.shadow === 'string') {
         shadow = stringToShadowOptions(modifiedObject.shadow);
       }
-      console.log('modifiedObject: ', modifiedObject.width, modifiedObject.height);
       // if fabricobject is text, we need to update the text property
       if (modifiedObject instanceof fabric.Textbox) {
         const textElement = store.elements.find((el) => el.id === modifiedObject.id);
@@ -416,7 +415,6 @@ export const useInitializeCanvas = () => {
       canvas.on(
         'object:rotating',
         throttle((e) => {
-          console.log('object:rotating', e.target?.angle);
           const target = e.target;
           if (!target?.angle) return;
           const angle = treatAngle(target.angle);
