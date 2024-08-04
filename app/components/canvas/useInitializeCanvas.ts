@@ -548,5 +548,6 @@ export const useInitializeCanvas = () => {
     canvasStore.height,
     canvasStore.width,
     store,
+    canvasRef.current?._objects,
   ]);
 };

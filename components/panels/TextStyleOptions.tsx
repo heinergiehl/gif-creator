@@ -7,12 +7,14 @@ import { TextEditorElement } from '@/types';
 import { observer } from 'mobx-react-lite';
 import { Toggle } from '../ui/toggle';
 import { MdFormatOverline } from 'react-icons/md';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
 const TextStyleOptions = observer(function TextStyleOptions() {
   const store = useStores().editorStore;
   const selectedElements = store.selectedElements.filter(
     (element): element is TextEditorElement => element.type === 'text',
   );
-  if (selectedElements.length === 0) return <div>No Selected Text Element</div>;
+  const canvas = useCanvas().canvasRef.current;
+  if (selectedElements.length === 0) return null;
   const areAllElementsActive = (property: keyof TextEditorElement['properties'], value: any) =>
     selectedElements.every((element) => element.properties[property] === value);
   const handleToggle = (property: keyof TextEditorElement['properties'], value: any) => {
@@ -23,14 +25,18 @@ const TextStyleOptions = observer(function TextStyleOptions() {
           [property]: value,
         },
       });
+      const fabricObject = canvas?.getObjects().find((obj) => obj.id === element.id);
+      if (!fabricObject) return;
+      canvas?.fire('object:modified', { target: fabricObject });
     });
-    store.fabricObjectUpdated = true;
+    canvas?.requestRenderAll();
   };
   return (
-    <div className="p-4">
-      <span className="mb-4">TextStyleOptions</span>
-      <Separator className="my-4" />
-      <div className="grid grid-cols-4 gap-4">
+    <div className="">
+      <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+        Text Style
+      </span>
+      <div className="my-4  flex">
         <Toggle
           aria-label="underline-icon"
           onClick={() => handleToggle('underline', !areAllElementsActive('underline', true))}

@@ -29,7 +29,6 @@ const RecordComponent = observer(() => {
   const supabase = useStores().supabase;
   const editorStore = useStores().editorStore;
   const canvasRef = useRef<fabric.Canvas | null>(null);
-  useInitializeCanvas();
   const [stoppedRecording, setStoppedRecording] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoDataRef = useRef<Blob | null>(null);
@@ -128,9 +127,9 @@ const RecordComponent = observer(() => {
     }
     if (!ffmpegRef.current.loaded) await ffmpegRef.current.load();
     setThumbnailIsProcessing(true);
-    const MAX_NUMBER_OF_IMAGES = 15;
+    const MAX_NUMBER_OF_IMAGES = 200;
     let offset = duration === MAX_NUMBER_OF_IMAGES ? 1 : duration / MAX_NUMBER_OF_IMAGES;
-    let NUMBER_OF_IMAGES = duration < MAX_NUMBER_OF_IMAGES ? duration : 15;
+    let NUMBER_OF_IMAGES = duration < MAX_NUMBER_OF_IMAGES ? duration : 200;
     if (!videoDataRef.current) return;
     let arrayOfImageURIs: string[] = [];
     // Ensure file is written correctly
@@ -154,25 +153,30 @@ const RecordComponent = observer(() => {
         const rect = canvasRef.current
           ?.getObjects()
           .find((obj) => obj.type === 'rect') as fabric.Rect;
-        if (!rect) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const videoEle = canvas.getObjects().find((obj) => obj.type === 'image') as fabric.Image;
-        if (!videoEle) return;
-        const video = videoEle.getElement() as HTMLVideoElement;
-        const scaleFactorX = video.videoWidth / canvas.width!;
-        const scaleFactorY = video.videoHeight / canvas.height!;
-        const cropWidth = rect.getScaledWidth() * scaleFactorX;
-        const cropHeight = rect.getScaledHeight() * scaleFactorY;
-        await ffmpegRef.current.exec([
-          '-ss',
-          startTimeInSecs,
-          '-i',
-          'input.mp4',
-          '-vf',
-          `crop=${cropWidth}:${cropHeight}:${rect.left! * scaleFactorX}:${rect.top! * scaleFactorY}`,
-          `img${i}.png`,
-        ]);
+        if (!rect) {
+          console.error('No crop rectangle found');
+          await ffmpegRef.current.exec(['-ss', startTimeInSecs, '-i', 'input.mp4', `img${i}.png`]);
+        } else {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const videoEle = canvas.getObjects().find((obj) => obj.type === 'image') as fabric.Image;
+          if (!videoEle) return;
+          const video = videoEle.getElement() as HTMLVideoElement;
+          const scaleFactorX = video.videoWidth / canvas.width!;
+          const scaleFactorY = video.videoHeight / canvas.height!;
+          const cropWidth = rect.getScaledWidth() * scaleFactorX;
+          const cropHeight = rect.getScaledHeight() * scaleFactorY;
+          console.log('Before ffmpeg exec');
+          await ffmpegRef.current.exec([
+            '-ss',
+            startTimeInSecs,
+            '-i',
+            'input.mp4',
+            '-vf',
+            `crop=${cropWidth}:${cropHeight}:${rect.left! * scaleFactorX}:${rect.top! * scaleFactorY},fps=${fps}`,
+            `img${i}.png`,
+          ]);
+        }
         console.log('image generated');
         const data = await ffmpegRef.current.readFile(`img${i}.png`);
         const blob = new Blob([data], { type: 'image/png' });
@@ -192,7 +196,10 @@ const RecordComponent = observer(() => {
   const handleTrim = async () => {
     if (isTrimming) return;
     setIsTrimming(true);
-    if (!videoDataRef.current || !ready) return;
+    if (!videoDataRef.current || !ready) {
+      console.log('videoDataRef.current no available', videoDataRef.current, 'ready', ready);
+      return;
+    }
     const ffmpeg = ffmpegRef.current;
     const duration = videoDuration;
     console.log('duration', duration, 'startTime', startTime, 'endTime', endTime);
@@ -202,7 +209,6 @@ const RecordComponent = observer(() => {
     const cropRect = canvasRef.current
       ?.getObjects()
       .find((obj) => obj.type === 'rect') as fabric.Rect;
-    if (!cropRect) return;
     const videoEle = canvasRef.current
       ?.getObjects()
       .find((obj) => obj.type === 'image') as fabric.Image;
@@ -212,30 +218,52 @@ const RecordComponent = observer(() => {
     const video = videoEle.getElement() as HTMLVideoElement;
     const scaleFactorX = video.videoWidth / canvas.width!;
     const scaleFactorY = video.videoHeight / canvas.height!;
-    const cropX = cropRect.left! * scaleFactorX;
-    const cropY = cropRect.top! * scaleFactorY;
-    const cropWidth = cropRect.getScaledWidth() * scaleFactorX;
-    const cropHeight = cropRect.getScaledHeight() * scaleFactorY;
     try {
       await ffmpeg.writeFile('input.mp4', await fetchFile(videoDataRef.current));
-      await ffmpeg.exec([
-        '-ss',
-        startTimeInSecs,
-        '-i',
-        'input.mp4',
-        '-to',
-        endTimeInSecs,
-        '-c:v',
-        'libx264', // Use the proper codec
-        '-preset',
-        'fast',
-        '-vf',
-        `crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}`,
-        '-crf',
-        '22',
-        // make sure its cropped correctly
-        'output.mp4',
-      ]);
+      if (cropRect) {
+        const cropX = cropRect.left! * scaleFactorX;
+        const cropY = cropRect.top! * scaleFactorY;
+        const cropWidth = cropRect.getScaledWidth() * scaleFactorX;
+        const cropHeight = cropRect.getScaledHeight() * scaleFactorY;
+        await ffmpeg.exec([
+          '-ss',
+          startTimeInSecs,
+          '-i',
+          'input.mp4',
+          '-to',
+          endTimeInSecs,
+          '-c:v',
+          'libx264', // Use the proper codec
+          '-preset',
+          'fast',
+          '-vf',
+          `crop=${cropWidth}:${cropHeight}:${cropX}:${cropY},
+          scale=${resolution.width}:${resolution.height},fps=${fps}
+          `,
+          '-crf',
+          '22',
+          // make sure its cropped correctly
+          'output.mp4',
+        ]);
+      } else {
+        await ffmpeg.exec([
+          '-ss',
+          startTimeInSecs,
+          '-i',
+          'input.mp4',
+          '-to',
+          endTimeInSecs,
+          '-c:v',
+          'libx264', // Use the proper codec
+          '-preset',
+          'fast',
+          '-vf',
+          `scale=${resolution.width}:${resolution.height},fps=${fps}`,
+          '-crf',
+          '22',
+          'output.mp4',
+        ]);
+      }
       const data = await ffmpeg.readFile('output.mp4');
       const videoBlob = new Blob([data], { type: 'video/mp4' });
       setTrimmedVideoUrl(URL.createObjectURL(videoBlob));
@@ -283,17 +311,20 @@ const RecordComponent = observer(() => {
     const videoBlob = new Blob([data], { type: 'video/mp4' });
     const videoFileName = `processed_video_${Date.now()}.mp4`;
     const videoUrl = URL.createObjectURL(videoBlob);
-    const link = document.createElement('a');
-    link.href = videoUrl;
-    link.setAttribute('download', videoFileName); // Make sure the name is valid
-    document.body.appendChild(link); // Append to the body
-    link.click();
+    // const link = document.createElement('a');
+    // link.href = videoUrl;
+    // link.setAttribute('download', videoFileName); // Make sure the name is valid
+    // document.body.appendChild(link); // Append to the body
+    // link.click();
     setThumbnailUrl(tURL);
     setThumbnailIsProcessing(false);
   };
   // once resolution or fps changes, process the video
   useEffect(() => {
-    if (stoppedRecording) processVideo(videoDuration, thumbnailUrl);
+    if (stoppedRecording) {
+      console.log('PROCESSING VIDEO again');
+      processVideo(videoDuration, thumbnailUrl);
+    }
   }, [fps, resolution.height, resolution.width]);
   const addVideoToCanvas = async () => {
     const canvas = canvasRef.current;
@@ -364,17 +395,19 @@ const RecordComponent = observer(() => {
       height: 200,
       borderColor: 'red',
       cornerColor: 'red',
-      hasRotatingPoint: false,
-      lockRotation: true,
       cornerSize: 10,
       transparentCorners: false,
       stroke: 'red',
       strokeWidth: 2,
+      hasRotatingPoint: false,
     });
+    // hide rotate control
+    rect.setControlVisible('mtr', false);
     canvas.add(rect);
     canvas.setActiveObject(rect);
     canvas.requestRenderAll();
   };
+  const [cropPreview, setCropPreview] = useState('');
   const applyCrop = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -390,12 +423,25 @@ const RecordComponent = observer(() => {
     const cropY = cropRect.top * scaleFactorY;
     const cropWidth = cropRect.getScaledWidth() * scaleFactorX;
     const cropHeight = cropRect.getScaledHeight() * scaleFactorY;
+    console.log('cropX', cropX, 'cropY', cropY, 'cropWidth', cropWidth, 'cropHeight', cropHeight);
+    // also clear the canvas and add the cropped video
+    const fabricVideo = new fabric.Image(video);
+    setCropPreview(
+      fabricVideo.toDataURL({
+        format: 'png',
+        left: cropX,
+        top: cropY,
+        width: cropWidth,
+        height: cropHeight,
+      }),
+    );
     try {
       await ffmpegRef.current.exec([
         '-i',
         'input.mp4',
         '-vf',
-        `crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}
+        `crop=${cropWidth}:${cropHeight}:${cropX}:${cropY},
+        scale=${resolution.width}:${resolution.height}
       `,
         '-c:v',
         'libx264',
@@ -488,6 +534,7 @@ const RecordComponent = observer(() => {
             onResolutionChange={setResolution}
             fps={fps}
             resolution={resolution}
+            canvas={canvasRef.current!}
           />
           <Button
             style={{
@@ -503,6 +550,8 @@ const RecordComponent = observer(() => {
             videoRef={videoRef}
             stoppedRecording={stoppedRecording}
             previewStream={previewStream}
+            cropPreviewVideo={cropPreview}
+            canvas={canvasRef.current!}
           />
           <CropButtonSection
             applyCrop={applyCrop}
@@ -564,13 +613,95 @@ interface DisplaySectionProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   stoppedRecording: boolean;
   previewStream: MediaStream | null;
+  cropPreviewVideo: string;
+  canvas: fabric.Canvas;
 }
 const DisplaySection: React.FC<DisplaySectionProps> = ({
   videoRef,
   stoppedRecording,
   previewStream,
   cropPreviewVideo,
+  canvas,
 }) => {
+  const cropRect = canvas?.getObjects().find((obj) => obj.type === 'rect') as fabric.Rect;
+  const video = canvas?.getObjects().find((obj) => obj.type === 'image') as fabric.Image;
+  const videoElement = video?.getElement() as HTMLVideoElement;
+  const cropRectWidth = cropRect?.getScaledWidth();
+  const cropRectHeight = cropRect?.getScaledHeight();
+  const cropRectLeft = cropRect?.left;
+  const cropRectTop = cropRect?.top;
+  const cropPreviewRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (cropPreviewRef.current) {
+      const ctx = cropPreviewRef.current.getContext('2d');
+      if (ctx && cropRect) {
+        const videoElement = canvas
+          .getObjects()
+          .find((obj) => obj.type === 'image') as fabric.Image;
+        if (!videoElement) return;
+        const video = videoElement.getElement() as HTMLVideoElement;
+        const scaleFactorX = video.videoWidth / canvas.width!;
+        const scaleFactorY = video.videoHeight / canvas.height!;
+        const cropWidth = cropRect.getScaledWidth() * scaleFactorX;
+        const cropHeight = cropRect.getScaledHeight() * scaleFactorY;
+        ctx.drawImage(
+          video,
+          cropRectLeft! * scaleFactorX,
+          cropRectTop! * scaleFactorY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          160,
+          90,
+        );
+      }
+    }
+  }, [cropRectWidth, cropRectHeight, cropRectLeft, cropRectTop]);
+  const fabricCanvasRef = useRef<fabric.Canvas>(null);
+  useEffect(() => {
+    if (!fabricCanvasRef.current) {
+      fabricCanvasRef.current = new fabric.Canvas('cropPreviewRef', {
+        width: 640,
+        height: 360,
+        backgroundColor: 'black',
+        preserveObjectStacking: true,
+      });
+    }
+  }, [fabricCanvasRef.current]);
+  // print the fabric.image based on the dimensions of the cropRect to the canvas with id final-canvas
+  const finalCanvasRef = useRef<fabric.Canvas>(null);
+  useEffect(() => {
+    if (!finalCanvasRef.current) {
+      const finalCanvas = new fabric.Canvas('final-canvas', {
+        width: 640,
+        height: 360,
+        backgroundColor: 'black',
+        preserveObjectStacking: true,
+      });
+      finalCanvasRef.current = finalCanvas;
+    }
+    // now add the cropped version of the image / video in the right dimensions to the final-canvas
+    const cropRect = canvas?.getObjects().find((obj) => obj.type === 'rect') as fabric.Rect;
+    const video = canvas?.getObjects().find((obj) => obj.type === 'image') as fabric.Image;
+    if (!video || !cropRect) return;
+    const videoElement = video.getElement() as HTMLVideoElement;
+    const scaleFactorX = videoElement.videoWidth / canvas.width!;
+    const scaleFactorY = videoElement.videoHeight / canvas.height!;
+    const cropWidth = cropRect.getScaledWidth() * scaleFactorX;
+    const cropHeight = cropRect.getScaledHeight() * scaleFactorY;
+    const cropX = cropRect.left! * scaleFactorX;
+    const cropY = cropRect.top! * scaleFactorY;
+    const fabricVideo = new fabric.Image(videoElement, {
+      width: cropWidth,
+      height: cropHeight,
+      cropX,
+      cropY,
+    });
+    fabricVideo.setCoords();
+    finalCanvasRef.current.clear();
+    finalCanvasRef.current.add(fabricVideo);
+  }, [cropRect, cropPreviewVideo]);
   return (
     <div className="relative">
       <video
@@ -598,6 +729,7 @@ const DisplaySection: React.FC<DisplaySectionProps> = ({
           'recordComponentCanvas absolute inset-0 transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
         ])}
       />
+      <canvas id="final-canvas" className=" " />
     </div>
   );
 };
@@ -651,50 +783,46 @@ interface ProcessingOptionsProps {
   onResolutionChange: (resolution: { width: number; height: number }) => void;
   fps: number;
   resolution: { width: number; height: number };
+  canvas: fabric.Canvas;
 }
-const ProcessingOptions: React.FC<ProcessingOptionsProps> = ({
-  onFpsChange: setFps,
-  onResolutionChange: setResolution,
-  fps,
-  resolution,
-}) => {
-  const canvas = useCanvas().canvasRef.current;
-  return (
-    canvas?.getObjects() &&
-    canvas?.getObjects().length > 0 && (
-      <div className="flex flex-col ">
-        <span className="text-sm">Processing Options</span>
-        <Separator className="my-2" />
-        <div className="flex  flex-col gap-4 md:flex-row">
-          <Label className="flex flex-col gap-y-2">
-            FPS
-            <CustomTextInput
-              name="fps"
-              inputTooltip="Enter the number of frames per second"
-              value={String(fps)}
-              onChange={(e) => setFps(Number(e))}
-            />
-          </Label>
-          <Label className="flex flex-col gap-y-2">
-            Resolution
-            <CustomTextInput
-              name="resolution"
-              inputTooltip="Enter the resolution of the video in width and height"
-              value={String(resolution.width)}
-              onChange={(e) => setResolution({ ...resolution, width: Number(e) })}
-            />
-            <CustomTextInput
-              inputTooltip="Enter the resolution of the video in width and height"
-              value={String(resolution.height)}
-              onChange={(e) => setResolution({ ...resolution, height: Number(e) })}
-              name="height"
-            />
-          </Label>
+const ProcessingOptions: React.FC<ProcessingOptionsProps> = observer(
+  ({ onFpsChange: setFps, onResolutionChange: setResolution, fps, resolution, canvas }) => {
+    return (
+      canvas?.getObjects() && (
+        <div className="flex flex-col ">
+          <span className="text-sm">Processing Options</span>
+          <Separator className="my-2" />
+          <div className="flex  flex-col gap-4 md:flex-row">
+            <Label className="flex flex-col gap-y-2">
+              FPS
+              <CustomTextInput
+                name="fps"
+                inputTooltip="Enter the number of frames per second"
+                value={String(fps)}
+                onChange={(e) => setFps(Number(e))}
+              />
+            </Label>
+            <Label className="flex flex-col gap-y-2">
+              Resolution
+              <CustomTextInput
+                name="resolution"
+                inputTooltip="Enter the resolution of the video in width and height"
+                value={String(resolution.width)}
+                onChange={(e) => setResolution({ ...resolution, width: Number(e) })}
+              />
+              <CustomTextInput
+                inputTooltip="Enter the resolution of the video in width and height"
+                value={String(resolution.height)}
+                onChange={(e) => setResolution({ ...resolution, height: Number(e) })}
+                name="height"
+              />
+            </Label>
+          </div>
         </div>
-      </div>
-    )
-  );
-};
+      )
+    );
+  },
+);
 const toTimeString = (sec: number, showMilliSeconds = true): string => {
   sec = parseFloat(sec.toFixed(3)); // Limit to three decimal places
   let hours: string | number = Math.floor(sec / 3600);

@@ -156,5 +156,6 @@ export const useManageFabricObjects = () => {
     canvasStore.backgroundColor,
     canvasStore.width,
     canvasStore.height,
+    store.selectedElements,
   ]);
 };

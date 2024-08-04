@@ -35,7 +35,7 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
     const isAtBack = selectedElements.every((element) => element.placement.zIndex === 0);
     return (
       <div className="flex flex-col items-center justify-center px-4">
-        <div className="my-4">Arrange</div>
+        {/* <div className="my-4">Arrange</div>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button
             variant="outline"
@@ -97,7 +97,7 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
               To Back
             </div>
           </Button>
-        </div>
+        </div> */}
         {selectedElements.every((el) => el.type === 'text') && (
           <div className="flex flex-col items-center justify-center gap-4">
             <Separator className="my-4" />

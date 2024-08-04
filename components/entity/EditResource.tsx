@@ -106,11 +106,11 @@ const EditResource = observer(() => {
           )}
         {selectedElements.length > 0 && (
           <>
-            <div className="flex basis-1/4 flex-row items-center justify-evenly">
+            {/* <div className="flex basis-1/4 flex-row items-center justify-evenly">
               <Button onClick={toggleEditOptionsPanel} variant="outline">
                 Position
               </Button>
-            </div>
+            </div> */}
             <div className="flex basis-1/4 flex-row items-center justify-evenly">
               <Button onClick={toggleShadowOptionsPanel} variant="outline">
                 Shadow

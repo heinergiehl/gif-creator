@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { useStores } from '@/store';
 import { Confetti } from '@/components/magicui/confetti';
@@ -19,6 +19,7 @@ import CustomTextInput from '@/app/components/ui/CustomTextInput';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
+import { throttle } from 'lodash';
 const ExportPanel = observer(() => {
   const rootStore = useStores();
   const store = rootStore.editorStore;
@@ -38,15 +39,10 @@ const ExportPanel = observer(() => {
       origin: { x: 0.2, y: 0 },
     });
   };
-  const handleCreatePreview = async () => {
+  const handleCreatePreview = throttle(async () => {
     const url = await fileStore.createGifPreview();
     setPreviewUrl(url); // Store the URL in state
-    toast({
-      title: 'Preview generated!',
-      description: 'Your gif preview is ready to view',
-      duration: 5000,
-    });
-  };
+  }, 1000);
   const { toast } = useToast();
   useEffect(() => {
     if (store.elements.length === 0) return;
@@ -78,10 +74,11 @@ const ExportPanel = observer(() => {
     rootStore.canvasOptionsStore.backgroundColor,
   ]);
   return (
-    <div className="flex h-screen  flex-col space-y-2 p-4">
-      <ScrollArea className="flex h-[90%] flex-col  gap-y-2 pr-8">
-        <span>Export Your GIF</span>
-        <Separator className="my-4" />
+    <div className="flex h-screen  flex-col ">
+      <span className="flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+        Export Your GIF
+      </span>
+      <ScrollArea className="flex h-[90%] flex-col  gap-y-2 px-4 pr-8">
         <>
           <Label className="mt-4 flex  flex-col ">
             <span className="text-xs ">Frames Per Second</span>

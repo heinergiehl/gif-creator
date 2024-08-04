@@ -299,7 +299,7 @@ const Editor = React.memo(
             >
               <CustomAlertDialog />
               <div
-                className="z-1 relative  flex h-full flex-col  items-start justify-start  md:mt-[50px] md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
+                className="z-1 relative  flex h-full flex-col  items-start justify-start   md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
                 draggable="false"
               >
                 <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-full flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">

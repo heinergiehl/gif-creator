@@ -303,6 +303,7 @@ export class EditorStore {
   }
   updateZIndex(objects: fabric.Object[], canvas: fabric.Canvas) {
     objects.forEach((object) => {
+      console.log('Object in updateZIndex:', object);
       const element = this.elements.find((el) => el.id === object.id);
       if (element) {
         const frameElements = this.elements.filter(

@@ -115,8 +115,10 @@ export const TextResourcesPanel = observer(() => {
   const [sampleText, setSampleText] = useState('Sample Text');
   return (
     <div className="flex h-screen w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
-      <div className="flex h-[50px] w-full items-center justify-center  bg-slate-200 text-sm dark:bg-slate-900">
-        Add Text
+      <div>
+        <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+          Add Text
+        </span>
       </div>
       <div className="flex h-full flex-col p-8">
         <div className="flex w-full   flex-wrap">
