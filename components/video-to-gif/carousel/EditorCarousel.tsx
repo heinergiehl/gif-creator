@@ -262,18 +262,18 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         ref={carouselRef}
       >
         {store.frames.length === 0 && <CarouselDroppable />}
-        <VList
-          style={{
-            width: containerWidth,
-            height: 140,
-            padding: '25px ',
-          }}
-          horizontal
-          count={store.frames.length}
+        <SortableContext
+          items={store.frames.map((frame) => frame.id)}
+          strategy={horizontalListSortingStrategy}
         >
-          <SortableContext
-            items={store.frames.map((frame) => frame.id)}
-            strategy={horizontalListSortingStrategy}
+          <VList
+            style={{
+              width: containerWidth,
+              height: 140,
+              padding: '25px ',
+            }}
+            horizontal
+            count={store.frames.length}
           >
             {store.frames.map((frame, index) => (
               <Droppable
@@ -303,8 +303,8 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                 />
               </Droppable>
             ))}
-          </SortableContext>
-        </VList>
+          </VList>
+        </SortableContext>
       </div>
     </div>
   );
