@@ -80,6 +80,9 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
         ])}
       >
         <Label
+          onClick={(e) => {
+            e.preventDefault();
+          }}
           className={cn([
             'flex h-full w-full cursor-pointer flex-col items-start justify-evenly gap-y-2  transition-colors duration-300',
           ])}
