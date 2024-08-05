@@ -35,7 +35,6 @@ const rejectStyle = {
   borderColor: '#ff1744',
 };
 export function CustomInputFile({ type, onChange }: InputFileProps) {
-  console.log('CustomInputFile');
   const acceptableTypes = {
     video: 'video/*',
     image: 'image/*',

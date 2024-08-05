@@ -284,7 +284,8 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
                   index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
                 ])}
                 style={{
-                  transform: calculateTransform(index, store.insertIndex!),
+                  // calculate transform
+                  transform: '',
                   transition: 'transform 0.2s',
                 }}
                 data-id={frame.id}

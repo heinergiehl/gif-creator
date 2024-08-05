@@ -56,7 +56,6 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
         ease: 'sine.inOut',
       });
     }
-    console.log('scrolling to', scrollPosition);
   }, [carouselRef, currentlySelectedFrame, cardWidth]);
   useEffect(() => {
     if (store.currentKeyFrame !== currentlySelectedFrame) {
@@ -130,46 +129,34 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       store.currentKeyFrame,
     ],
   );
-  const calculateTransform = useCallback(
-    (index: number, hoverIndex: number): string => {
-      if (!active?.id) {
-        return 'translateX(0px)';
-      }
-      if (store.elements.find((el) => active?.id === el.id)) return 'translateX(0px)';
-      if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
-      const activeRect = active?.rect.current.translated;
-      const overRect = ctx.over?.rect.left;
-      if (!activeRect || !overRect) return 'translateX(0px)';
-      if (activeRect.left === overRect) return 'translateX(0px)';
-      const activeDraggable = document.getElementById(active?.id as string);
-      if (!activeDraggable) return 'translateX(0px)';
-      const carouselContent = document.getElementById('carousel-container');
-      if (!carouselContent) return 'translateX(0px)';
-      const carouselContentRect = carouselContent.getBoundingClientRect();
-      const activeDraggableLeft = activeRect.left;
-      const activeDraggableRight = activeRect.right;
-      const carouselContentLeft = carouselContentRect.left;
-      const carouselContentRight = carouselContentRect.right;
-      const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
-      const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
-      if (activeDraggableIsOnLeftEdge || activeDraggableIsOnRightEdge) return 'translateX(0px)';
-      else if (shiftDirection === 'right' && index >= hoverIndex) {
-        console.log('shifting right');
-        return 'translateX(100%)';
-      } else if (shiftDirection === 'left' && index <= hoverIndex) {
-        console.log('shifting left');
-        return 'translateX(-100%)';
-      } else return 'translateX(0px)';
-    },
-    [
-      store.isDragging,
-      ctx.over?.id,
-      shiftDirection,
-      hoverIndex,
-      store.frames.length,
-      store.activeDraggable,
-    ],
-  );
+  const calculateTransform = (index: number, hoverIndex: number): string => {
+    if (!active?.id) {
+      return 'translateX(0px)';
+    }
+    if (store.elements.find((el) => active?.id === el.id)) return 'translateX(0px)';
+    if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
+    const activeRect = active?.rect.current.translated;
+    const overRect = ctx.over?.rect.left;
+    if (!activeRect || !overRect) return 'translateX(0px)';
+    if (activeRect.left === overRect) return 'translateX(0px)';
+    const activeDraggable = document.getElementById(active?.id as string);
+    if (!activeDraggable) return 'translateX(0px)';
+    const carouselContent = document.getElementById('carousel-container');
+    if (!carouselContent) return 'translateX(0px)';
+    const carouselContentRect = carouselContent.getBoundingClientRect();
+    const activeDraggableLeft = activeRect.left;
+    const activeDraggableRight = activeRect.right;
+    const carouselContentLeft = carouselContentRect.left;
+    const carouselContentRight = carouselContentRect.right;
+    const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
+    const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
+    if (activeDraggableIsOnLeftEdge || activeDraggableIsOnRightEdge) return 'translateX(0px)';
+    else if (shiftDirection === 'right' && index >= hoverIndex) {
+      return 'translateX(100%)';
+    } else if (shiftDirection === 'left' && index <= hoverIndex) {
+      return 'translateX(-100%)';
+    } else return 'translateX(0px)';
+  };
   const handleAutoScroll = useCallback(
     (event) => {
       const carouselContainer = document.getElementById('carousel-container');
@@ -187,7 +174,7 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
         }
       }
     },
-    [mousePosition],
+    [mousePosition, store.isDragging],
   );
   useEffect(() => {
     if (active) {
@@ -208,7 +195,6 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       store.setSelectedElements([id]);
     }
     store.currentKeyFrame = selectedFrameIdx;
-    console.log('CURRENTKEYFRAME', store.currentKeyFrame);
   };
   const handleDeleteFrame = useCallback(
     (index: number): void => {
