@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DndContext, DragOverlay, useDndContext } from '@dnd-kit/core';
 import {
@@ -23,6 +23,7 @@ import { throttle } from 'lodash';
 import SelectionArea from '@viselect/vanilla';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { createPortal } from 'react-dom';
 export interface EditorCarouselProps {
   containerWidth: number;
 }
@@ -36,9 +37,9 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     handleMouseMove,
     hoverIndex,
     handleSelectFrame,
-    active,
     updateHoverIndex,
     setMousePosition,
+    updateTransform,
   } = useDragAndDropAndCarousel();
   const store = useStores().editorStore;
   const { clipboard, setClipboard } = useClipboard();
@@ -157,8 +158,9 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     setMousePositionState({ x: e.clientX, y: e.clientY });
   };
   const selectionRef = useRef<SelectionArea>();
+  const active = useDndContext()?.active;
   useEffect(() => {
-    if (active?.id) {
+    if (active?.id || over?.id) {
       selectionRef.current?.cancel();
       return;
     }
@@ -175,9 +177,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       })
         .on('beforedrag', (e) => {
           selectionRef.current?.clearSelection();
+          if (active?.id || over?.id) return;
         })
         .on('start', ({ event, selection }) => {
-          if (active?.id) return;
+          if (active?.id || over?.id) return;
           // check if clicked on item with id timeline, if so, return
           selectionRef.current?.clearSelection();
           // remove all selected elements, meaning  selectedElements = [] and classList.remove('selected')
@@ -192,6 +195,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
               stored,
             },
           }) => {
+            if (active?.id || over?.id) {
+              selectionRef.current?.cancel();
+              return;
+            }
             const changed = { added, removed };
             changed.added.forEach((el) => {
               el.classList.add('selected');
@@ -210,14 +217,14 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           // selected.forEach((el) => {
           //   el.classList.remove('selected');
           // });
-          console.log('SELECTED IDS', selectedIds), store.selectedElements;
           store.setSelectedElements([...selectedIds]);
+          store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === selectedIds[0]);
         });
       return () => {
         selectionRef.current?.clearSelection();
       };
     }
-  }, [store.selectedElements]);
+  }, [store.selectedElements, store.elements, active]);
   const handleDeleteFrame = (index: number): void => {
     const frameToDelete = store.frames[index];
     // get the corresponding element to the frame
@@ -239,8 +246,49 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     }
   }, [store.currentKeyFrame, document.getElementsByClassName('selected')]);
   const over = useDndContext()?.over;
+  const frames = useMemo(() => {
+    return store.frames.map((frame, index) => {
+      return (
+        <Droppable
+          id={frame.id}
+          key={index}
+          className={cn([
+            'selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
+            index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
+          ])}
+          style={{
+            transform: calculateTransform(index, hoverIndex!),
+            transition: 'transform 0.2s',
+          }}
+          data-id={frame.id}
+        >
+          <SortableItem
+            onMouseEnter={updateHoverIndex}
+            onMouseLeave={() => updateHoverIndex(-1)}
+            src={frame.src}
+            key={frame.id}
+            id={frame.id}
+            onFrameDelete={handleDeleteFrame}
+            onFrameSelect={() => handleSelectFrame(frame.id, true)}
+            index={index}
+            basisOfCardItem={''}
+            isSelected={false}
+          />
+        </Droppable>
+      );
+    });
+  }, [
+    store.frames,
+    store.currentKeyFrame,
+    calculateTransform,
+    hoverIndex,
+    updateTransform,
+    updateHoverIndex,
+  ]);
+  console.log('ACTIVE', active?.data?.current?.image);
   return (
     <div
+      onPointerDown={() => selectionRef.current?.clearSelection()}
       draggable="false"
       className="flex w-screen select-none  flex-col  items-center justify-center gap-y-4 md:w-full md:max-w-[900px] md:items-start"
       onMouseMove={debouncedHandleMouseMove}
@@ -273,39 +321,18 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
               padding: '25px ',
             }}
             horizontal
-            count={store.frames.length}
           >
-            {store.frames.map((frame, index) => (
-              <Droppable
-                id={frame.id}
-                key={index}
-                className={cn([
-                  'selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
-                  index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
-                ])}
-                style={{
-                  // calculate transform
-                  transform: '',
-                  transition: 'transform 0.2s',
-                }}
-                data-id={frame.id}
-              >
-                <SortableItem
-                  onMouseEnter={updateHoverIndex}
-                  onMouseLeave={() => updateHoverIndex(-1)}
-                  src={frame.src}
-                  key={frame.id}
-                  id={frame.id}
-                  onFrameDelete={handleDeleteFrame}
-                  onFrameSelect={() => handleSelectFrame(frame.id, true)}
-                  index={index}
-                  basisOfCardItem={''}
-                  isSelected={false}
-                />
-              </Droppable>
-            ))}
+            {frames}
           </VList>
         </SortableContext>
+        {createPortal(
+          <DragOverlay>
+            {active && !(active?.id as String)?.includes('Resource') && (
+              <DraggedImagePreview src={store.frames.find((fr) => fr.id === active?.id)?.src!} />
+            )}
+          </DragOverlay>,
+          document.body,
+        )}
       </div>
     </div>
   );

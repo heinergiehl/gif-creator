@@ -73,9 +73,24 @@ const Editor = React.memo(
     const animationStore = rootStore.animationStore;
     const timelineStore = rootStore.timelineStore;
     const [isMobile, setIsMobile] = useState(false);
-    const mouseSensor = useSensor(MouseSensor, {});
-    const touchSensor = useSensor(TouchSensor, {});
-    const pointerSensor = useSensor(PointerSensor, {});
+    const mouseSensor = useSensor(MouseSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 100,
+      },
+    });
+    const touchSensor = useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 100,
+      },
+    });
+    const pointerSensor = useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 100,
+      },
+    });
     const keyboardSensor = useSensor(KeyboardSensor, {});
     const sensors = useSensors(mouseSensor, touchSensor, pointerSensor, keyboardSensor);
     const supabase = rootStore.supabase;
@@ -269,6 +284,7 @@ const Editor = React.memo(
         onDragMove={handleDragMove}
         onDragOver={handleDragOver}
         collisionDetection={closestCorners}
+        modifiers={[snapCenterToCursor]}
       >
         <div
           className={cn([

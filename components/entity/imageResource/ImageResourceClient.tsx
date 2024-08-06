@@ -33,32 +33,20 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         image: image.webformatURL,
         index,
         dragOverlay: () => {
-          const style = transform
-            ? {
-                transform: `translate3d(${transform?.x}px, ${transform?.y}px, 0)`,
-                zIndex: 99999,
-              }
-            : undefined;
           return (
             <Image
               id={`imageResource-${index}`}
               src={image.webformatURL}
-              width={80}
-              height={80}
+              width={70}
+              height={70}
               alt={'Draggable image resource'}
-              className=" h-[80px] w-[80px] cursor-pointer touch-none rounded-lg object-contain"
+              className="  cursor-pointer touch-none rounded-lg object-contain"
               crossOrigin="anonymous"
             />
           );
         },
       },
     });
-    const style = transform
-      ? {
-          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-          zIndex: 99999,
-        }
-      : undefined;
     const isDragging = transform != null;
     return (
       <div
@@ -84,11 +72,11 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         <div className="flex h-full w-full items-center justify-center">
           <Image
             src={image.webformatURL}
-            width={80}
-            height={80}
+            width={70}
+            height={70}
             objectFit="cover"
             alt={'Resource'}
-            className=" h-[80px] w-[80px] touch-none rounded-lg object-fill"
+            className=" touch-none rounded-lg object-fill"
             draggable={false} // It's important to disable the native HTML drag and drop
             crossOrigin="anonymous"
           />
@@ -177,6 +165,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
             }}
           >
             {active &&
+              (active.id as String).includes('Resource') &&
               (active?.data?.current?.dragOverlay ? active?.data?.current?.dragOverlay() : null)}
           </DragOverlay>,
           document.body,

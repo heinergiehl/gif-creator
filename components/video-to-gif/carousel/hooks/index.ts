@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useDndMonitor, useDndContext } from '@dnd-kit/core';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -18,6 +18,7 @@ interface UseDragAndDropAndCarouselReturn {
   active: any;
   updateHoverIndex: (newIndex: number) => void;
   setMousePosition: React.Dispatch<React.SetStateAction<{ x: number; y: number } | null>>;
+  updateTransform: (index: number, hoverIndex: number) => void;
 }
 const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCarouselReturn => {
   const store = useStores().editorStore;
@@ -72,45 +73,39 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       store.isDragging = false;
     },
     onDragMove: (event) => {
-      handleAutoScroll(event);
-      const carouselContent = document.getElementById('carousel-container');
-      if (!carouselContent) return;
+      handleAutoScroll();
+      const carouselContent = carouselRef.current;
+      if (!carouselContent || !event.active || !event.active.rect.current.translated) return;
       const carouselContentRect = carouselContent.getBoundingClientRect();
-      if (!event.active) return;
-      if (!event.active.rect.current.translated) return;
-      const draggedItemIsOnEdge =
-        event.active?.rect.current.translated?.left < carouselContentRect.left ||
-        event.active?.rect.current.translated?.right > carouselContentRect.right;
-      if (draggedItemIsOnEdge) return;
+      const { left: carouselLeft, right: carouselRight } = carouselContentRect;
+      const { left: translatedLeft, right: translatedRight } = event.active.rect.current.translated;
+      if (translatedLeft < carouselLeft || translatedRight > carouselRight) return;
       const sortableItems = document.querySelectorAll('.selectable');
       if (sortableItems.length === 0) return;
-      const activeDraggable = document.getElementById(event.active?.id as string);
-      if (!activeDraggable) return;
+      const activeDraggable = document.getElementById(event.active.id as string);
+      if (!activeDraggable || !event.over) return;
       const activeDraggableRect = activeDraggable.getBoundingClientRect();
-      if (!event.over) return;
-      const overElement = Array.from(sortableItems).reduce((prev, curr) => {
-        const currRect = curr.getBoundingClientRect();
-        const prevRect = prev.getBoundingClientRect();
-        const prevDistance = Math.abs(
-          activeDraggableRect.left - prevRect.left + prevRect.width / 2,
-        );
-        const currDistance = Math.abs(
-          activeDraggableRect.left - currRect.left + currRect.width / 2,
-        );
-        return prevDistance > currDistance ? prev : curr;
+      const activeDraggableLeft = activeDraggableRect.left;
+      let closestElement = null;
+      let closestDistance = Infinity;
+      sortableItems.forEach((item) => {
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.left + itemRect.width / 2;
+        const distance = Math.abs(activeDraggableLeft - itemCenter);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestElement = item;
+        }
       });
-      const overElementRect = overElement.getBoundingClientRect();
-      const overElementLeft = overElementRect.left;
-      const overElementRight = overElementRect.right;
-      const overElementWidth = overElementRect.width;
-      const overElementCenter = overElementLeft + overElementWidth / 2;
-      const mousePosition = event.active.rect.current.translated?.left;
-      if (!mousePosition) return;
-      const mousePositionRelativeToCarousel = mousePosition - carouselContentRect.left;
-      const shiftThreshold = overElementWidth / 2;
-      if (mousePositionRelativeToCarousel < overElementCenter - shiftThreshold) {
+      if (!closestElement) return;
+      const closestElementRect = closestElement.getBoundingClientRect();
+      const closestElementCenter = closestElementRect.left + closestElementRect.width / 2;
+      const mousePosition = translatedLeft;
+      const mousePositionRelativeToCarousel = mousePosition - carouselLeft;
+      const shiftThreshold = closestElementRect.width / 2;
+      if (mousePositionRelativeToCarousel < closestElementCenter - shiftThreshold) {
         setShiftDirection('left');
-      } else if (mousePositionRelativeToCarousel > overElementCenter + shiftThreshold) {
+      } else if (mousePositionRelativeToCarousel > closestElementCenter + shiftThreshold) {
         setShiftDirection('right');
       } else {
         setShiftDirection(null);
@@ -121,67 +116,55 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
     (newIndex: number) => {
       setHoverIndex(newIndex);
     },
-    [
-      store.isDragging,
-      ctx.active,
-      store.frames.length,
-      store.activeDraggable,
-      store.currentKeyFrame,
-    ],
+    [ctx.active, ctx.over],
   );
-  const calculateTransform = (index: number, hoverIndex: number): string => {
-    if (!active?.id) {
-      return 'translateX(0px)';
-    }
-    if (store.elements.find((el) => active?.id === el.id)) return 'translateX(0px)';
-    if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
-    const activeRect = active?.rect.current.translated;
-    const overRect = ctx.over?.rect.left;
-    if (!activeRect || !overRect) return 'translateX(0px)';
-    if (activeRect.left === overRect) return 'translateX(0px)';
-    const activeDraggable = document.getElementById(active?.id as string);
-    if (!activeDraggable) return 'translateX(0px)';
-    const carouselContent = document.getElementById('carousel-container');
-    if (!carouselContent) return 'translateX(0px)';
-    const carouselContentRect = carouselContent.getBoundingClientRect();
-    const activeDraggableLeft = activeRect.left;
-    const activeDraggableRight = activeRect.right;
-    const carouselContentLeft = carouselContentRect.left;
-    const carouselContentRight = carouselContentRect.right;
-    const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
-    const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
-    if (activeDraggableIsOnLeftEdge || activeDraggableIsOnRightEdge) return 'translateX(0px)';
-    else if (shiftDirection === 'right' && index >= hoverIndex) {
-      return 'translateX(100%)';
-    } else if (shiftDirection === 'left' && index <= hoverIndex) {
-      return 'translateX(-100%)';
-    } else return 'translateX(0px)';
-  };
-  const handleAutoScroll = useCallback(
-    (event) => {
-      const carouselContainer = document.getElementById('carousel-container');
-      if (!carouselContainer) return;
-      const { left, right } = carouselContainer.getBoundingClientRect();
-      const buffer = 50; // buffer distance from edge to start scrolling
-      const mouseX = event ? event.clientX : mousePosition ? mousePosition.x : 0;
-      if (mouseX) {
-        if (mouseX < left + buffer) {
-          // Scroll left
-          carouselContainer.scrollBy({ left: -10, behavior: 'smooth' });
-        } else if (mouseX > right - buffer) {
-          // Scroll right
-          carouselContainer.scrollBy({ left: 10, behavior: 'smooth' });
+  // Optimization: Use useMemo to memoize the calculation
+  const calculateTransform = useMemo(
+    () =>
+      (index: number, hoverIndex: number): string => {
+        if (!active?.id || !ctx.over?.id) {
+          return 'translateX(0px)';
         }
-      }
-    },
-    [mousePosition, store.isDragging],
+        const carouselContent = carouselRef.current;
+        if (!carouselContent) return 'translateX(0px)';
+        const carouselContentRect = carouselContent.getBoundingClientRect();
+        const activeRect = active?.rect.current.translated;
+        const overRect = ctx.over?.rect.left;
+        if (!activeRect || !overRect) return 'translateX(0px)';
+        const activeDraggableLeft = activeRect.left;
+        const activeDraggableRight = activeRect.right;
+        const carouselContentLeft = carouselContentRect.left;
+        const carouselContentRight = carouselContentRect.right;
+        const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
+        const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
+        if (activeDraggableIsOnLeftEdge || activeDraggableIsOnRightEdge) return 'translateX(0px)';
+        if (!(active.id as String).includes('Resource')) return 'translateX(0px)';
+        if (!store.isDragging || !ctx.over?.id) return 'translateX(0px)';
+        if (activeRect.left === overRect) return 'translateX(0px)';
+        if (shiftDirection === 'right' && index >= hoverIndex) {
+          return 'translateX(100%)';
+        } else if (shiftDirection === 'left' && index <= hoverIndex) {
+          return 'translateX(-100%)';
+        } else {
+          return 'translateX(0px)';
+        }
+      },
+    [hoverIndex, active, ctx.over, store.isDragging, shiftDirection],
   );
-  useEffect(() => {
-    if (active) {
-      const interval = setInterval(handleAutoScroll, 100);
-      return () => clearInterval(interval);
-    }
-  }, [active, handleAutoScroll]);
+  const handleAutoScroll = useCallback(() => {
+    // const carouselContainer = document.getElementById('carousel-container');
+    // if (!carouselContainer) return;
+    // const { left, right } = carouselContainer.getBoundingClientRect();
+    // const buffer = -50; // buffer distance from edge to start scrolling
+    // const mouseX = mousePosition ? mousePosition.x : 0;
+    // if (mouseX < left + buffer) {
+    //   // Scroll left
+    //   carouselContainer.scrollBy({ left: -10, behavior: 'smooth' });
+    // } else if (mouseX > right - buffer) {
+    //   // Scroll right
+    //   carouselContainer.scrollBy({ left: 10, behavior: 'smooth' });
+    // }
+  }, [mousePosition]);
   const handleSelectFrame = (id: string, multiSelect = false) => {
     const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
     if (multiSelect) {

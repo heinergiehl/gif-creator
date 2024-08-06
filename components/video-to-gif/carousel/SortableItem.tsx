@@ -52,7 +52,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         {...attributes}
         {...listeners}
         className={cn([
-          'flex  w-full  cursor-pointer  select-none items-center justify-center p-0 transition-colors duration-200  ease-in-out md:h-[80px] md:w-[80px]',
+          'flex  w-full  cursor-pointer  select-none items-center justify-center p-0 transition-colors duration-200  ease-in-out ',
         ])}
         onPointerDown={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
@@ -61,15 +61,17 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         <Card className="relative flex  h-full w-full items-center justify-center rounded-lg">
           <div
             className={cn([
-              'absolute inset-0 h-full w-full rounded-lg opacity-50 transition-all duration-300 dark:hover:bg-slate-700',
+              'group absolute inset-0 h-full w-full  rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-slate-700',
               isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-900',
             ])}
           >
             <span
-              className={cn(['absolute text-xs transition-opacity duration-500'])}
-            >{`Frame ${index + 1}`}</span>
+              className={cn([
+                'absolute text-xs opacity-0 transition-opacity duration-500 group-hover:opacity-100',
+              ])}
+            >{`${index + 1}`}</span>
           </div>
-          <CardContent className="flex h-[80px] w-[80px]   items-center justify-center  rounded-lg p-0 md:h-[80px] md:w-[80px]">
+          <CardContent className="flex   items-center justify-center  rounded-lg p-0  ">
             <Suspense fallback={<SkeletonLoader />}>
               <Image
                 className="h-[70px] w-[70px] rounded-lg"
@@ -95,10 +97,10 @@ const SortableItem: React.FC<SortableItemProps> = observer(
                   onFrameDelete(index);
                 }}
                 className={cn([
-                  'absolute right-2 top-2 z-20 m-0 h-5 w-5 rounded-full p-0 transition duration-500',
+                  'absolute right-1 top-1 z-20 m-0 h-5 w-5 rounded-full p-0 transition duration-500',
                 ])}
               >
-                <XIcon />
+                <XIcon size={10} />
               </Button>
             </Suspense>
           </CardContent>
