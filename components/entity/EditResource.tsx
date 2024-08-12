@@ -13,12 +13,16 @@ import { useCanvas } from '@/app/components/canvas/canvasContext';
 const EditResource = observer(() => {
   const store = useStores().editorStore;
   const canvas = useCanvas().canvasRef.current;
+  const rootStore = useStores();
   const handleChange = (property: keyof fabric.ITextOptions, value: string | number | boolean) => {
     const activeObject = canvas?.getActiveObject();
-    canvas?.fire('object:modified', {
-      target: activeObject,
+    store.updateElement(activeObject?.id, {
+      properties: {
+        ...activeObject,
+        [property]: value,
+      },
     });
-    store.updateTextProperties(property, value);
+    store.setTextOptionsUpdated(true);
   };
   const selectedElements = store.selectedElements;
   const toggleEditOptionsPanel = () => {
@@ -104,13 +108,13 @@ const EditResource = observer(() => {
               </div>
             </>
           )}
-        {selectedElements.length > 0 && (
+        {selectedElements.length > 0 && selectedElements.every((el) => el.type === 'text') && (
           <>
-            {/* <div className="flex basis-1/4 flex-row items-center justify-evenly">
+            <div className="flex basis-1/4 flex-row items-center justify-evenly">
               <Button onClick={toggleEditOptionsPanel} variant="outline">
                 Position
               </Button>
-            </div> */}
+            </div>
             <div className="flex basis-1/4 flex-row items-center justify-evenly">
               <Button onClick={toggleShadowOptionsPanel} variant="outline">
                 Shadow

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { TextResource } from '../entity/TextResource';
 import { useStores } from '@/store';
-import { useDraggable } from '@dnd-kit/core';
+import { DragOverlay, useDndContext, useDraggable } from '@dnd-kit/core';
 import { set } from 'animejs';
 import { Label } from '../ui/label';
 import { CustomSelect } from '@/app/components/ui/CustomSelect';
@@ -11,6 +11,9 @@ import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import CustomTextInput from '@/app/components/ui/CustomTextInput';
 import { ScrollArea } from '../ui/scroll-area';
+import { Card, CardContent } from '../ui/card';
+import { cn } from '@/lib/utils';
+import { createPortal } from 'react-dom';
 const TEXT_RESOURCES = [
   {
     name: 'Title',
@@ -42,17 +45,36 @@ const DraggableText = observer(
       id: `textResource-${index}`,
       data: {
         dragOverlay: () => (
-          <TextResource fontSize={fontSize} fontWeight={fontWeight} sampleText={sampleText} />
+          <Card
+            draggable="false"
+            className="relative flex h-[80px]  w-[80px] items-center justify-center rounded-lg shadow-xl shadow-black drop-shadow-xl"
+          >
+            <div
+              className={cn([
+                'group absolute inset-0 z-0 rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-blue-500',
+              ])}
+            ></div>
+            <CardContent className="z-1  flex h-[70px] w-[70px]  items-center justify-center  rounded-lg p-0">
+              <div
+                className="leading-1  flex overflow-hidden text-ellipsis break-all rounded-md p-1"
+                id={`textResource-${index}`}
+                style={{
+                  fontSize: `15px`,
+                  fontWeight: `${fontWeight}`,
+                  color: fill,
+                  fontFamily: fontFamily,
+                  fontStyle: fontStyle,
+                  backgroundColor: textBackground,
+                  fill,
+                }}
+              >
+                {sampleText}
+              </div>
+            </CardContent>
+          </Card>
         ),
       },
     });
-    const style = transform
-      ? {
-          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-          zIndex: 999,
-          cursor: 'grab',
-        }
-      : { cursor: 'grab' };
     const store = useStores().editorStore;
     return (
       <div ref={setNodeRef} {...listeners} {...attributes}>
@@ -113,6 +135,7 @@ export const TextResourcesPanel = observer(() => {
     store.fontSize = fontSize;
   }, [fill, fontSize]);
   const [sampleText, setSampleText] = useState('Sample Text');
+  const active = useDndContext().active;
   return (
     <div className="flex h-screen w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
       <div>
@@ -165,6 +188,14 @@ export const TextResourcesPanel = observer(() => {
               />
             ))}
           </Label>
+          {createPortal(
+            <DragOverlay>
+              {active && (active.id as String).includes('textResource')
+                ? active?.data?.current?.dragOverlay()
+                : null}
+            </DragOverlay>,
+            document.body,
+          )}
         </div>
       </div>
     </div>

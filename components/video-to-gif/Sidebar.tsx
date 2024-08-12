@@ -21,7 +21,7 @@ export const Sidebar = observer(() => {
   const editorStore = useStores().editorStore;
   const progress = editorStore.progress;
   return (
-    <div className="absolute bottom-0 left-0 flex w-screen items-center justify-start dark:bg-gray-800  md:top-0 md:h-screen  md:w-[90px]   md:flex-col md:pt-[50px]">
+    <div className="absolute bottom-0 left-0 flex w-screen items-center justify-between  dark:bg-gray-800 md:top-0  md:h-screen md:w-[90px]  md:flex-col   md:justify-start md:pt-[50px]">
       {MENU_OPTIONS.map((option) => {
         const isSelected = store.selectedMenuOption === option.name;
         return (

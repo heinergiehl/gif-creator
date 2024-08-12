@@ -34,7 +34,7 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
     const isAtFront = selectedElements.every((element) => element.placement.zIndex === maxZIndex);
     const isAtBack = selectedElements.every((element) => element.placement.zIndex === 0);
     return (
-      <div className="flex flex-col items-center justify-center px-4">
+      <div className="flex flex-col items-center justify-start ">
         {/* <div className="my-4">Arrange</div>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button
@@ -100,10 +100,11 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
         </div> */}
         {selectedElements.every((el) => el.type === 'text') && (
           <div className="flex flex-col items-center justify-center gap-4">
-            <Separator className="my-4" />
-            <span>Align Object To Canvas</span>
+            {/* <Separator className="my-4" /> */}
+            <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+              Align Object To Canvas
+            </span>
             <div className="flex flex-col items-center justify-center">
-              <Separator className="my-4" />
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <ToggleGroup type="multiple" className="flex flex-wrap items-center justify-center">
                   <ToggleGroupItem
@@ -191,24 +192,25 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
                 </ToggleGroup>
               </div>
             </div>
-            <Separator className="my-4" />
+            <Separator className="" />
             <span>Distribute Objects</span>
+            <Separator className="w-full" />
             <div className="flex flex-col items-center justify-center gap-4">
-              <Separator className="my-4" />
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex w-full items-center justify-center gap-2">
                 <Button
+                  className="p-1"
                   variant="outline"
                   onClick={() => store.distributeElements('horizontal', canvas)}
                 >
-                  <AlignHorizontalDistributeEnd size={20} />
-                  Horizontal
+                  <AlignHorizontalDistributeEnd size={15} />
+                  <span className="text-xs"> Horizontal</span>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => store.distributeElements('vertical', canvas)}
                 >
-                  <AlignVerticalDistributeEnd size={20} />
-                  Vertical
+                  <AlignVerticalDistributeEnd size={15} />
+                  <span className="text-xs"> Vertical</span>
                 </Button>
               </div>
             </div>

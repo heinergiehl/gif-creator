@@ -10,11 +10,10 @@ import { MdFormatOverline } from 'react-icons/md';
 import { useCanvas } from '@/app/components/canvas/canvasContext';
 const TextStyleOptions = observer(function TextStyleOptions() {
   const store = useStores().editorStore;
+  const rootStore = useStores();
   const selectedElements = store.selectedElements.filter(
     (element): element is TextEditorElement => element.type === 'text',
   );
-  const canvas = useCanvas().canvasRef.current;
-  if (selectedElements.length === 0) return null;
   const areAllElementsActive = (property: keyof TextEditorElement['properties'], value: any) =>
     selectedElements.every((element) => element.properties[property] === value);
   const handleToggle = (property: keyof TextEditorElement['properties'], value: any) => {
@@ -25,18 +24,16 @@ const TextStyleOptions = observer(function TextStyleOptions() {
           [property]: value,
         },
       });
-      const fabricObject = canvas?.getObjects().find((obj) => obj.id === element.id);
-      if (!fabricObject) return;
-      canvas?.fire('object:modified', { target: fabricObject });
     });
-    canvas?.requestRenderAll();
+    store.setTextOptionsUpdated(true);
   };
+  if (selectedElements.length === 0) return null;
   return (
     <div className="">
       <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
         Text Style
       </span>
-      <div className="my-4  flex">
+      <div className="my-4 flex p-4">
         <Toggle
           aria-label="underline-icon"
           onClick={() => handleToggle('underline', !areAllElementsActive('underline', true))}

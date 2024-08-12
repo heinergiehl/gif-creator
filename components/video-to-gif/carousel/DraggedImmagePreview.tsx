@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/store';
 import Image from 'next/image';
@@ -26,4 +26,4 @@ const DraggedImagePreview = observer(({ src }: { src: string }) => {
     </Card>
   );
 });
-export default DraggedImagePreview;
+export default memo(DraggedImagePreview);

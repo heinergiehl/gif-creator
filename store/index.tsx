@@ -24,6 +24,7 @@ export class RootStore {
   canvasRef: MutableRefObject<Canvas | null>;
   supabase: SupabaseClient;
   touchActionEnabled = false;
+  rerunUseManageFabricObjects = false;
   constructor(canvasRef: MutableRefObject<Canvas | null>) {
     this.canvasRef = canvasRef;
     this.supabase = createClient();
@@ -31,6 +32,9 @@ export class RootStore {
   }
   setTouchActionEnabled = (value: boolean) => {
     this.touchActionEnabled = value;
+  };
+  setRerunUseManageFabricObjects = (value: boolean) => {
+    this.rerunUseManageFabricObjects = value;
   };
   editorStore = new EditorStore(this);
   animationStore = new AnimationStore(this);

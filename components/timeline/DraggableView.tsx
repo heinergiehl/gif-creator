@@ -1,6 +1,7 @@
 import { useStores } from '@/store';
 import React, { MouseEventHandler, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react';
+import { useCanvas } from '@/app/components/canvas/canvasContext';
 const DragableView = observer(function DragableView(props: {
   children?: React.ReactNode;
   disabled?: boolean;
@@ -10,6 +11,7 @@ const DragableView = observer(function DragableView(props: {
   total: number;
   onChange: (value: number) => void;
 }) {
+  console.log('DRAGGABLE VIEW');
   const ref = useRef<{
     div: HTMLDivElement | null;
     isDragging: boolean;
@@ -23,6 +25,7 @@ const DragableView = observer(function DragableView(props: {
   });
   const { current: data } = ref;
   function calculateNewValue(mouseX: number): number {
+    console.log('CALCULATE NEW VALUE');
     if (!data.div || !data.div.parentElement) return 0;
     const deltaX = mouseX - data.initialMouseX;
     const parentWidth = data.div.parentElement.clientWidth;
@@ -46,17 +49,17 @@ const DragableView = observer(function DragableView(props: {
     } else {
       newValue = calculateNewValue((event as TouchEvent).changedTouches[0].clientX);
     }
+    if (window.innerWidth > 768) {
+      props.onChange(calculateNewValue((event as MouseEvent).clientX));
+    } else {
+      props.onChange(calculateNewValue((event as TouchEvent).changedTouches[0].clientX));
+    }
     data.div.style.left = `${(newValue / props.total) * 100}%`;
     event.preventDefault();
   };
   const handleMouseUp = (event: MouseEvent | TouchEvent) => {
     if (!data.div || !data.isDragging) return;
     data.isDragging = false;
-    if (window.innerWidth > 768) {
-      props.onChange(calculateNewValue((event as MouseEvent).clientX));
-    } else {
-      props.onChange(calculateNewValue((event as TouchEvent).changedTouches[0].clientX));
-    }
     document.body.style.userSelect = 'auto';
     event.preventDefault();
   };

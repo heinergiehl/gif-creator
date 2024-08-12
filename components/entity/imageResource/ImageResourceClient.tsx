@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { createPortal } from 'react-dom';
 import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 interface ImageProps {
   id: string;
   webformatURL: string;
@@ -34,15 +35,35 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
         index,
         dragOverlay: () => {
           return (
-            <Image
-              id={`imageResource-${index}`}
-              src={image.webformatURL}
-              width={70}
-              height={70}
-              alt={'Draggable image resource'}
-              className="  cursor-pointer touch-none rounded-lg object-contain"
-              crossOrigin="anonymous"
-            />
+            // <Image
+            //   id={`imageResource-${index}`}
+            //   src={image.webformatURL}
+            //   width={70}
+            //   height={70}
+            //   alt={'Draggable image resource'}
+            //   className="  cursor-pointer touch-none rounded-lg object-contain"
+            //   crossOrigin="anonymous"
+            // />
+            <Card className="relative flex h-[80px]  w-[80px] items-center justify-center rounded-lg shadow-xl shadow-black drop-shadow-xl">
+              <div
+                className={cn([
+                  'group absolute inset-0 z-0 rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-blue-500',
+                ])}
+              ></div>
+              <CardContent className="z-1  flex items-center justify-center  rounded-lg p-0  ">
+                <Image
+                  id={`imageResource-${index}`}
+                  src={image.webformatURL}
+                  width={70}
+                  height={70}
+                  alt={'Draggable image resource'}
+                  className="  h-[70px] w-[70px] cursor-pointer touch-none
+                    rounded-lg object-contain
+                  "
+                  crossOrigin="anonymous"
+                />
+              </CardContent>
+            </Card>
           );
         },
       },
@@ -76,7 +97,7 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
             height={70}
             objectFit="cover"
             alt={'Resource'}
-            className=" touch-none rounded-lg object-fill"
+            className=" h-[70px] w-[70px] touch-none rounded-lg object-fill "
             draggable={false} // It's important to disable the native HTML drag and drop
             crossOrigin="anonymous"
           />
@@ -142,10 +163,10 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   }, [window.innerWidth, isMobile, setIsMobile]);
   const active = useDndContext().active;
   return (
-    <ScrollArea className=" h-[450px] w-[300px]">
-      <div className={cn(' relative flex flex-wrap items-center justify-center gap-2 ')}>
+    <ScrollArea className=" h-[450px] w-screen  md:w-[300px]">
+      <div className={cn('relative flex w-full flex-wrap items-center justify-center gap-2 ')}>
         {images.map((image, index) => (
-          <div key={image.id} className=" h-auto w-full p-2 md:w-[100px]">
+          <div key={image.id} className=" h-auto  p-2 ">
             {/* <div className="absolute left-[20%] top-[20%] translate-x-[-50%] translate-y-[-50%]">
               <Button
                 onPointerDown={() => openPopover(image)}

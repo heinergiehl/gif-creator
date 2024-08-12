@@ -79,7 +79,8 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
             quality={quality}
             setQuality={setQuality}
           />
-          <CustomProgress />
+          {useStores().editorStore.progress.conversion > 0 &&
+            useStores().editorStore.progress.conversion !== 100 && <CustomProgress />}
           <Separator />
           {/* {loading ? (
             <div className="flex h-48 w-full items-center justify-center">

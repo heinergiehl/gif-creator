@@ -12,6 +12,7 @@ export type EditorElementBase<T extends string, P> = {
   name: string;
   readonly type: T;
   isFrame?: boolean;
+  renderOrder?: string[];
   placement: Placement;
   timeFrame: TimeFrame;
   shadow?: fabric.IShadowOptions;

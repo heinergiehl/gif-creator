@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import CustomTextInput from '@/app/components/ui/CustomTextInput';
-import CardSkeleton from '@/components/video-to-gif/carousel/CardSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MagicCard, MagicContainer } from '@/components/magicui/magic-card';
@@ -26,7 +25,6 @@ import { Label } from '@/components/ui/label';
 import imageCompression from 'browser-image-compression';
 import ShinyButton from '@/components/magicui/shiny-button';
 import { DeleteIcon, LucideDelete, RemoveFormattingIcon, Trash2Icon } from 'lucide-react';
-import { createPortal } from 'react-dom';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,

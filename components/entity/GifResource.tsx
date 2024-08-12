@@ -54,7 +54,7 @@ const GifResource = observer(() => {
     }
   };
   return (
-    <div className="relative z-[100] h-full">
+    <div className="relative  h-full w-screen md:w-full">
       <CustomDialog
         header="Add more frames from another GIF"
         open={openModal}
@@ -73,7 +73,7 @@ const GifResource = observer(() => {
             className=""
           />
         </Label>
-        <Label className="w-full max-w-xs space-y-4">
+        <Label className="w-full space-y-4 md:max-w-xs">
           <div className="label flex flex-col items-start space-y-4">
             <span className=""> Resolution scale (1 for full, 0.5 for half, etc.):</span>
             <span className="font-semibold ">{quality}</span>

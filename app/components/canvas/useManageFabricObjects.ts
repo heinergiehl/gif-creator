@@ -9,11 +9,12 @@ export const useManageFabricObjects = () => {
   const store = useStores().editorStore;
   const canvasRef = useCanvas().canvasRef;
   const canvasStore = useStores().canvasOptionsStore;
+  const rootStore = useStores();
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const manageFabricObjects = async () => {
-      console.log('useManageFabricObjects called');
+      console.log('manageFabricObject');
       if (canvas) {
         FabricObjectFactory.setCanvas(canvas);
         let frame: EditorElement | null;
@@ -34,10 +35,8 @@ export const useManageFabricObjects = () => {
           if (!frame) {
             return;
           }
-          const elementsInFrame = store.elementsInCurrentFrame;
+          // sort elementsIncurrentFrame by the order of canvas.getObjects()
           const frameFabricObject = await FabricObjectFactory.manageFabricObject(frame);
-          frameFabricObject?.setCoords();
-          canvas.requestRenderAll();
           // store.updateElement(frame?.id, {
           //   placement: {
           //     ...frame.placement,
@@ -65,6 +64,10 @@ export const useManageFabricObjects = () => {
           const fabObjs: fabric.Object[] = [];
           fabObjs.push(frameFabricObject);
           store.updateElement(frame?.id, {
+            renderOrder: canvas
+              .getObjects()
+              .map((obj) => obj.id)
+              .filter((id) => id !== undefined),
             placement: {
               ...frame.placement,
               scaleX: frameFabricObject.scaleX || frame.placement.scaleX || 1,
@@ -126,6 +129,10 @@ export const useManageFabricObjects = () => {
             )
           ) {
             canvas.add(...fabObjs);
+            canvas.requestRenderAll();
+            rootStore.setRerunUseManageFabricObjects(false);
+            store.setShadowUpdated(false);
+            store.setTextOptionsUpdated(false);
           }
         } catch (error) {
           console.error('Failed to load image', error);
@@ -134,6 +141,7 @@ export const useManageFabricObjects = () => {
     };
     // check if  the objectsInCurrentFrame and the frame  are  the ones that are on the canvas, if not, update the canvas
     const canvasObjects = canvas?.getObjects();
+    console.log('canvasObjects', canvasObjects);
     const elementsInFrame = store.elementsInCurrentFrame;
     const frame = store.frames[store.currentKeyFrame];
     const frameFabricObject = canvasObjects?.find((obj) => obj.id === frame?.id);
@@ -142,20 +150,26 @@ export const useManageFabricObjects = () => {
       !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
     ) {
       console.log('Updating canvas objects', canvasObjects, elementsInFrame, frameFabricObject);
-      canvas?.clear();
+      // canvas?.clear();
     }
     canvas?.setBackgroundColor(canvasStore.backgroundColor, () => {
+      const cvsObjs = canvas?.getObjects();
+      // make sure to remove the objects from the canvas that are not in the elementsinFrame array
+      cvsObjs?.forEach((obj) => {
+        if (
+          !elementsInFrame.find((element) => element.id === obj.id) &&
+          rootStore.rerunUseManageFabricObjects
+        ) {
+          canvas?.remove(obj);
+        }
+      });
       manageFabricObjects();
     });
   }, [
     store.currentKeyFrame,
     store.elements,
-    store.frames,
-    canvasRef.current?.width,
-    canvasRef.current?.height,
-    canvasStore.backgroundColor,
-    canvasStore.width,
-    canvasStore.height,
-    store.selectedElements,
+    rootStore.rerunUseManageFabricObjects,
+    store.shadowUpdated,
+    store.textOptionsUpdated,
   ]);
 };

@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DndContext, DragOverlay, useDndContext } from '@dnd-kit/core';
 import {
@@ -39,7 +39,6 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     handleSelectFrame,
     updateHoverIndex,
     setMousePosition,
-    updateTransform,
   } = useDragAndDropAndCarousel();
   const store = useStores().editorStore;
   const { clipboard, setClipboard } = useClipboard();
@@ -277,14 +276,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         </Droppable>
       );
     });
-  }, [
-    store.frames,
-    store.currentKeyFrame,
-    calculateTransform,
-    hoverIndex,
-    updateTransform,
-    updateHoverIndex,
-  ]);
+  }, [store.frames, store.currentKeyFrame, calculateTransform, hoverIndex, updateHoverIndex]);
   console.log('ACTIVE', active?.data?.current?.image);
   return (
     <div
@@ -305,6 +297,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           width,
           minWidth: width,
         }}
+        draggable="false"
         id="carousel-container"
         className="relative flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
         ref={carouselRef}
@@ -337,4 +330,4 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     </div>
   );
 });
-export default EditorCarousel;
+export default memo(EditorCarousel);

@@ -18,7 +18,6 @@ interface UseDragAndDropAndCarouselReturn {
   active: any;
   updateHoverIndex: (newIndex: number) => void;
   setMousePosition: React.Dispatch<React.SetStateAction<{ x: number; y: number } | null>>;
-  updateTransform: (index: number, hoverIndex: number) => void;
 }
 const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCarouselReturn => {
   const store = useStores().editorStore;
@@ -65,6 +64,7 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
   }, [store.currentKeyFrame, currentlySelectedFrame, setCurrentlySelectedFrame]);
   useDndMonitor({
     onDragOver: (event) => {
+      console.log('event in onDragOver: ', event);
       const newIndex = store.frames.findIndex((frame) => frame.id === event.over?.id);
       updateHoverIndex(newIndex);
     },
@@ -73,6 +73,7 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       store.isDragging = false;
     },
     onDragMove: (event) => {
+      console.log('event in onDragMove: ', event);
       handleAutoScroll();
       const carouselContent = carouselRef.current;
       if (!carouselContent || !event.active || !event.active.rect.current.translated) return;
@@ -165,20 +166,23 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
     //   carouselContainer.scrollBy({ left: 10, behavior: 'smooth' });
     // }
   }, [mousePosition]);
-  const handleSelectFrame = (id: string, multiSelect = false) => {
-    const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
-    if (multiSelect) {
-      const currentSelection = store.selectedElements.map((el) => el.id);
-      if (currentSelection.includes(id)) {
-        store.setSelectedElements(currentSelection.filter((selectedId) => selectedId !== id));
+  const handleSelectFrame = useCallback(
+    (id: string, multiSelect = false) => {
+      const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
+      if (multiSelect) {
+        const currentSelection = store.selectedElements.map((el) => el.id);
+        if (currentSelection.includes(id)) {
+          store.setSelectedElements(currentSelection.filter((selectedId) => selectedId !== id));
+        } else {
+          store.setSelectedElements([...currentSelection, id]);
+        }
       } else {
-        store.setSelectedElements([...currentSelection, id]);
+        store.setSelectedElements([id]);
       }
-    } else {
-      store.setSelectedElements([id]);
-    }
-    store.currentKeyFrame = selectedFrameIdx;
-  };
+      store.currentKeyFrame = selectedFrameIdx;
+    },
+    [store],
+  );
   const handleDeleteFrame = useCallback(
     (index: number): void => {
       const frameToDelete = store.frames[index];

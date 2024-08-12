@@ -5,6 +5,7 @@ import { getUid, isHtmlImageElement } from '@/utils';
 import { AnimationStore } from './AnimationStore';
 import { DragStartEvent } from '@dnd-kit/core';
 import { RootStore } from '.';
+import { Store } from 'lucide-react';
 export interface Video {
   id: string;
   user_id: string;
@@ -112,6 +113,8 @@ export class EditorStore {
     conversion: 0,
     rendering: 0,
   };
+  textOptionsUpdated = false;
+  renderOrder: string[] = [];
   conversion = 0;
   rendering = 0;
   fabricObjectUpdated: boolean = false;
@@ -119,6 +122,7 @@ export class EditorStore {
     header: '',
     content: '',
   };
+  shadowUpdated: boolean = false;
   showAlertDialog: boolean = false;
   toggleOptions = new Map<string, boolean>([
     ['showShadowOptions', false],
@@ -150,10 +154,21 @@ export class EditorStore {
       sendToBackSelectedElements: action,
       insertIndex: observable,
       setInsertIndex: action,
+      renderOrder: observable,
+      setRenderOrder: action,
     });
+  }
+  setShadowUpdated(value: boolean) {
+    this.shadowUpdated = value;
+  }
+  setTextOptionsUpdated(value: boolean) {
+    this.textOptionsUpdated = value;
   }
   setInsertIndex(index: number) {
     this.insertIndex = index;
+  }
+  setRenderOrder(order: number[]) {
+    this.renderOrder = order;
   }
   setConversionProgress(progress: number) {
     this.conversion = progress;
@@ -208,11 +223,6 @@ export class EditorStore {
   }
   updateElement(id: string, changes: Partial<EditorElement>): void {
     const index = this.elements.findIndex((el) => el.id === id);
-    console.log(
-      'ids in updateElement: ',
-      id,
-      this.elements.map((e) => e.id),
-    );
     if (index === -1) {
       console.error('Element not found');
       return;
@@ -229,6 +239,7 @@ export class EditorStore {
       this.elements[index] = {
         ...this.elements[index],
         dataUrl: changes.dataUrl,
+        renderOrder: [...(changes.renderOrder ?? [])],
         placement: {
           ...this.elements[index].placement,
           ...changes.placement,
@@ -243,7 +254,6 @@ export class EditorStore {
         },
         copied: changes.copied ?? this.elements[index].copied,
       };
-      console.log('Updated Element in EditorStore: ', this.elements[index]);
       this.selectedElements.map((el) => {
         //update all the selected elements, same as above
         if (el.id === id) {
@@ -443,51 +453,95 @@ export class EditorStore {
     });
     this.fabricObjectUpdated = false;
   }
+  elementsInCurrentFrameHelper(currentFrame: number) {
+    const objectsInCurrentFrame = this.elements.slice().filter((element) => {
+      // if (element.isFrame) {
+      return (
+        element.timeFrame.start <= currentFrame * this.animationStore!.timePerFrameInMs &&
+        element.timeFrame.end >= currentFrame * this.animationStore!.timePerFrameInMs
+      );
+    });
+    return objectsInCurrentFrame;
+  }
   increaseZIndexOfSelectedElements(canvas: fabric.Canvas) {
-    this.selectedElements.forEach((element) => {
-      const fabricObject = canvas.getObjects().find((obj) => obj.id === element.id);
-      if (fabricObject) {
-        fabricObject.bringForward(true);
+    canvas.getActiveObjects().forEach((obj) => {
+      canvas.bringForward(obj);
+    });
+    canvas.requestRenderAll();
+    const renderOrder = canvas
+      .getObjects()
+      .map((obj) => obj.id)
+      .filter((id) => id !== undefined);
+    this.frames.forEach((frame, index) => {
+      const elesInFrame = this.elementsInCurrentFrameHelper(index);
+      const eleFrame = this.elements.find((el) => el.id === frame.id);
+      // check if eleFrame in elesInFrame, if so update the renderOrder
+      if (eleFrame && elesInFrame.includes(eleFrame)) {
+        this.updateElement(eleFrame.id, {
+          renderOrder,
+        });
       }
     });
-    this.updateZIndex(
-      this.selectedElements.map((el) => canvas.getObjects().find((obj) => obj.id === el.id)!),
-      canvas,
-    );
-    this.fabricObjectUpdated = true;
   }
   decreaseZIndexOfSelectedElements(canvas: fabric.Canvas) {
-    const activeObject = canvas.getActiveObject();
-    if (activeObject) {
-      activeObject.sendBackwards(true);
-    }
-    this.updateZIndex(
-      this.selectedElements.map((el) => canvas.getActiveObjects().find((obj) => obj.id === el.id)!),
-      canvas,
-    );
-    this.fabricObjectUpdated = true;
+    const currentFrameId = this.frames[this.currentKeyFrame].id;
+    const currentFrameElement = this.elements.find((el) => el.isFrame && el.id === currentFrameId);
+    canvas.getActiveObjects().forEach((obj) => {
+      canvas.sendBackwards(obj);
+    });
+    canvas.requestRenderAll();
+    this.updateElement(currentFrameElement!.id, {
+      renderOrder: [
+        ...canvas
+          .getObjects()
+          .map((obj) => obj.id)
+          .filter((id) => id !== undefined),
+      ],
+    });
+    this.renderOrder = [
+      ...canvas
+        .getObjects()
+        .map((obj) => obj.id)
+        .filter((id) => id !== undefined),
+    ];
   }
   bringToFrontSelectedElements(canvas: fabric.Canvas) {
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
       activeObject.bringToFront();
     }
-    this.updateZIndex(
-      this.selectedElements.map((el) => canvas.getActiveObjects().find((obj) => obj.id === el.id)!),
-      canvas,
-    );
-    this.fabricObjectUpdated = true;
+    const frameId = this.frames[this.currentKeyFrame].id;
+    const frameElement = this.elements.find((el) => el.id === frameId);
+    this.updateElement(frameElement!.id, {
+      renderOrder: [
+        ...canvas
+          .getObjects()
+          .map((obj) => obj.id)
+          .filter((id) => id !== undefined),
+      ],
+    });
+    this.renderOrder = [
+      ...canvas
+        .getObjects()
+        .map((obj) => obj.id)
+        .filter((id) => id !== undefined),
+    ];
   }
   sendToBackSelectedElements(canvas: fabric.Canvas) {
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
       activeObject.sendToBack();
     }
-    this.updateZIndex(
-      this.selectedElements.map((el) => canvas.getActiveObjects().find((obj) => obj.id === el.id)!),
-      canvas,
-    );
-    this.fabricObjectUpdated = true;
+    const frameId = this.frames[this.currentKeyFrame].id;
+    const frameElement = this.elements.find((el) => el.id === frameId);
+    this.updateElement(frameElement!.id, {
+      renderOrder: [
+        ...canvas
+          .getObjects()
+          .map((obj) => obj.id)
+          .filter((id) => id !== undefined),
+      ],
+    });
   }
   alignSelectedElements(
     alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom',
@@ -1003,6 +1057,7 @@ export class EditorStore {
       id: frameId ? frameId : id,
       type: 'image',
       isFrame: isFrame,
+      renderOrder: isFrame ? [frameId] : [],
       src: blobUrl,
       order: index,
       opacity: 1,

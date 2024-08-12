@@ -23,6 +23,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FabricObjectFactory } from '@/utils/fabric-utils';
 interface CanvasProps {
   containerWidth: number;
+  children?: React.ReactNode;
 }
 const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent({
   containerWidth,
@@ -128,6 +129,7 @@ export const CanvasSettings = observer(() => {
   const [backgroundColor, setBackgroundColor] = useState(canvasStore.backgroundColor);
   const [close, setClose] = useState(true);
   const canvasRef = useCanvas().canvasRef;
+  const rootStore = useStores();
   const applyChanges = () => {
     canvasRef.current?.setWidth(canvasStore.width);
     canvasRef.current?.setHeight(canvasStore.height);

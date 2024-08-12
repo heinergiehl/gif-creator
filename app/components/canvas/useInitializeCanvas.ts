@@ -307,6 +307,10 @@ export const useInitializeCanvas = () => {
         if (textElement) {
           store.updateElement(modifiedObject.id, {
             dataUrl,
+            renderOrder: canvasRef.current
+              ?.getObjects()
+              .map((obj) => obj.id)
+              .filter((id) => id !== undefined),
             text: modifiedObject.text || '',
             properties: {
               ...textElement.properties,
@@ -329,6 +333,10 @@ export const useInitializeCanvas = () => {
       }
       store.updateElement(modifiedObject.id, {
         dataUrl,
+        renderOrder: canvasRef.current
+          ?.getObjects()
+          .map((obj) => obj.id)
+          .filter((id) => id !== undefined),
         placement: {
           zIndex: modifiedObject.zIndex || 0,
           x: modifiedObject.left || 0,
@@ -482,6 +490,11 @@ export const useInitializeCanvas = () => {
       });
     };
     if (canvasRef.current === null) {
+      const isMobile = window.innerWidth < 768;
+      console.log('isMobile', isMobile, window.innerWidth);
+      const width = isMobile ? window.innerWidth : canvasStore.width;
+      const height = isMobile ? window.innerHeight / 2.5 : canvasStore.height;
+      console.log('Canvas width and height:', width, height);
       const c = new fabric.Canvas('canvas', {
         backgroundColor: canvasStore.backgroundColor,
         hoverCursor: 'pointer',
@@ -489,8 +502,8 @@ export const useInitializeCanvas = () => {
         selection: true,
         selectionBorderColor: 'blue',
         selectionDashArray: [5, 5],
-        width: canvasStore.width,
-        height: canvasStore.height,
+        width,
+        height,
         enableRetinaScaling: true,
         imageSmoothingEnabled: true,
         stateful: true,
@@ -500,6 +513,8 @@ export const useInitializeCanvas = () => {
       });
       canvasRef.current = c;
       rootStore.canvasRef.current = c;
+      canvasStore.height = height;
+      canvasStore.width = width;
     }
     const canvas = canvasRef.current;
     if (canvas) {
@@ -542,12 +557,5 @@ export const useInitializeCanvas = () => {
       canvas.off('object:moving');
       canvas.off('object:removed');
     };
-  }, [
-    canvasRef.current,
-    canvasStore.backgroundColor,
-    canvasStore.height,
-    canvasStore.width,
-    store,
-    canvasRef.current?._objects,
-  ]);
+  }, [canvasRef.current, store]);
 };

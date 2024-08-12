@@ -99,6 +99,7 @@ const Editor = React.memo(
       const { active, over } = event;
       store.isDragging = false;
       const overId = over?.id;
+      console.log('HANDLEDRAGENED!');
       const activeIndex = store.frames.findIndex((element) => element.id === active.id);
       const overIndex = store.frames.findIndex((frame) => frame.id === overId);
       // Move within frames if the active item is found in frames
@@ -108,18 +109,22 @@ const Editor = React.memo(
         console.log('DRAGEND0', activeIndex, overIndex);
         return;
       }
+      console.log('HANDLEDRAGENED!2');
       const resourceType = String(active.id).split('-')[0];
-      const isCarousel = over?.data?.current?.type === 'Frame';
-      const isCanvas = over?.data?.current?.type === 'ObjectInFrame';
+      const isCarousel = store.imageType === 'Frame';
+      const isCanvas = store.imageType === 'ObjectInFrame';
       store.updateMaxTime();
       store.updateEditorElementsForFrames();
+      console.log('HANDLEDRAGENED!2A', over?.data);
       if (isCarousel) {
+        console.log('HANDLEDRAGENED!2B');
         const activeDraggableRect = active?.rect;
         const overDraggableRect = over?.rect;
         if (!activeDraggableRect || !overDraggableRect) {
           console.log('DRAGENDA', activeIndex, overIndex);
           return;
         }
+        console.log('HANDLEDRAGENED3');
         const activeCenter = {
           x:
             (activeDraggableRect.current.translated?.left || 0) +
@@ -140,6 +145,7 @@ const Editor = React.memo(
           insertIndex = isDraggedToRightSideOfFirstFrame ? overIndex + 1 : overIndex;
         }
         console.log('DRAGEND1', isDraggedToRightSideOfFirstFrame, overIndex, insertIndex);
+        console.log('HANDLEDRAGENED!4');
         if (resourceType.startsWith('imageResource')) {
           const frameId = getUid();
           const newFrame = { id: frameId, src: active?.data?.current?.image };
@@ -253,15 +259,17 @@ const Editor = React.memo(
       containerWidth,
       percentageWidthOfEditorContainer,
     ]);
-    const handleDragOver = throttle((event: DragOverEvent) => {
+    const handleDragOver = (event: DragOverEvent) => {
+      console.log('DRAGOVER', event.active?.id, event.over?.id);
       if (event.over?.id === 'canvas') {
         store.imageType = 'ObjectInFrame';
         if (!event?.over.id) return;
       } else if (store.frames.map((fr) => fr.id).includes(event?.over?.id as string)) {
         store.imageType = 'Frame';
       }
-    }, 100);
+    };
     const handleDragMove = throttle((event: DragMoveEvent) => {
+      console.log('DRAGMOVE');
       const { active } = event;
       if (active) {
         store.isDragging = true;
@@ -301,7 +309,7 @@ const Editor = React.memo(
               <div className="absolute z-[9999] h-full w-full bg-gray-200 opacity-35"></div>
             </>
           )}
-          <div className="z-1  hidden flex-row  md:flex md:h-screen md:flex-col">
+          <div className="z-1 hidden flex-row  md:flex md:h-screen md:flex-col">
             <Sidebar />
             <div className="relative ml-[90px] hidden h-full max-w-[450px]  md:flex">
               <Resources />
@@ -310,15 +318,15 @@ const Editor = React.memo(
           <div className="flex h-full w-screen flex-col  items-center justify-center md:w-full">
             <EditResource />
             <div
-              className="flex h-[calc(100svh-50px)]   flex-col items-center justify-center md:w-full md:max-w-[900px]"
+              className="flex h-[calc(100svh-50px)]  flex-col items-center justify-center md:w-full md:max-w-[900px]"
               id="editor-container"
             >
               <CustomAlertDialog />
               <div
-                className="z-1 relative  flex h-full flex-col  items-start justify-start   md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
+                className="z-1 relative  flex h-full   flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
                 draggable="false"
               >
-                <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-full flex-col items-center justify-center  gap-y-2 rounded-none md:h-full md:flex-row">
+                <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-screen flex-col items-center justify-center gap-y-2  rounded-none md:h-full md:w-full md:flex-row">
                   <div className="flex w-full flex-col items-center justify-center gap-4  md:flex-row md:justify-start">
                     <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
                       <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
@@ -364,7 +372,7 @@ const Editor = React.memo(
                     <Resources />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
-                  <div className="md:hidden">
+                  <div className="z-999999  relative w-screen md:hidden">
                     <Sidebar />
                   </div>
                   <ScrollBar orientation="vertical" />

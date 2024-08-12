@@ -9,6 +9,7 @@ import CustomColorPicker from '@/app/components/ui/CustomColorPicker';
 import { observer } from 'mobx-react-lite';
 const ShadowOptionsPanel = observer(function ShadowOptionsPanel() {
   const store = useStores().editorStore;
+  const rootStore = useStores();
   const selectedElements = store.selectedElements;
   if (selectedElements.length === 0) return <div>No Selected Element</div>;
   const handleChange = (
@@ -17,6 +18,7 @@ const ShadowOptionsPanel = observer(function ShadowOptionsPanel() {
   ) => {
     console.log('handleChange', property, value);
     store.updateSelectedElementsShadow(property, value);
+    store.setShadowUpdated(true);
   };
   // Calculate average or default values for the selected elements' shadows
   const averageShadow = (property: keyof fabric.IShadowOptions) => {

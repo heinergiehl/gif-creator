@@ -26,13 +26,6 @@ export class TimelineStore {
       ...editorElement,
       timeFrame: { ...editorElement.timeFrame, ...timeFrame },
     };
-    console.log(
-      'updateEditorElementTimeFrame:',
-      'from',
-      editorElement.timeFrame,
-      'to',
-      updatedElement.timeFrame,
-    );
     this.editorStore?.updateElement(updatedElement.id, updatedElement);
     // this.animationStore?.refreshAnimations();
   }

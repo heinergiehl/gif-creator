@@ -114,7 +114,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           }}
         >
           <div
-            className="flex flex-col overflow-visible p-4 "
+            className="flex w-full flex-col overflow-visible p-4"
             style={{
               minWidth: width,
               width,
