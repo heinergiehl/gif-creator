@@ -3,7 +3,6 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { fetchUserVideos } from '@/utils/supabase/fetchUserVideos';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { EditorStore } from '@/store/EditorStore';
-import { Video, Frame } from '@/types';
 import { getUid } from '@/utils';
 export const loadFFMPEG = async (ffmpegRef: React.MutableRefObject<FFmpeg>, store: any) => {
   const ffmpeg = ffmpegRef.current;

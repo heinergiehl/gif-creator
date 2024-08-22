@@ -45,7 +45,7 @@ const DraggableText = observer(
       id: `textResource-${index}`,
       data: {
         dragOverlay: () => (
-          <Card
+          <div
             draggable="false"
             className="relative flex h-[80px]  w-[80px] items-center justify-center rounded-lg shadow-xl shadow-black drop-shadow-xl"
           >
@@ -54,9 +54,9 @@ const DraggableText = observer(
                 'group absolute inset-0 z-0 rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-blue-500',
               ])}
             ></div>
-            <CardContent className="z-1  flex h-[70px] w-[70px]  items-center justify-center  rounded-lg p-0">
+            <div className="z-1  flex h-[70px] w-[70px]  items-center justify-center  rounded-lg p-0">
               <div
-                className="leading-1  flex overflow-hidden text-ellipsis break-all rounded-md p-1"
+                className="leading-1  flex overflow-hidden text-ellipsis break-all  rounded-md p-1"
                 id={`textResource-${index}`}
                 style={{
                   fontSize: `15px`,
@@ -70,14 +70,14 @@ const DraggableText = observer(
               >
                 {sampleText}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ),
       },
     });
     const store = useStores().editorStore;
     return (
-      <div ref={setNodeRef} {...listeners} {...attributes}>
+      <div className="touch-none" ref={setNodeRef} {...listeners} {...attributes}>
         <div
           className="flex  overflow-hidden break-all rounded-md bg-slate-200 p-1 leading-10 dark:bg-slate-800"
           id={`textResource-${index}`}
@@ -137,9 +137,12 @@ export const TextResourcesPanel = observer(() => {
   const [sampleText, setSampleText] = useState('Sample Text');
   const active = useDndContext().active;
   return (
-    <div className="flex h-screen w-full flex-col  bg-slate-100  text-foreground dark:bg-inherit ">
+    <div
+      draggable="false"
+      className=" flex h-[70dvh] w-full flex-col bg-slate-300  text-foreground dark:bg-inherit  dark:bg-slate-900 md:h-screen "
+    >
       <div>
-        <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+        <span className="my-auto flex h-[50px] w-full items-center  justify-center  text-sm ">
           Add Text
         </span>
       </div>
@@ -181,7 +184,7 @@ export const TextResourcesPanel = observer(() => {
                 fontFamily={store.fontFamily}
                 fill={store.fill}
                 fontStyle="normal"
-                textBackground="dark:bg-slate-800"
+                textBackground="dark:bg-slate-800 "
                 fontWeight={resource.fontWeight}
                 sampleText={sampleText}
                 index={store.frames.length - 1}
@@ -189,7 +192,7 @@ export const TextResourcesPanel = observer(() => {
             ))}
           </Label>
           {createPortal(
-            <DragOverlay>
+            <DragOverlay dropAnimation={null}>
               {active && (active.id as String).includes('textResource')
                 ? active?.data?.current?.dragOverlay()
                 : null}

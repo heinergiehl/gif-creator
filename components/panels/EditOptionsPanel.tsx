@@ -34,7 +34,7 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
     const isAtFront = selectedElements.every((element) => element.placement.zIndex === maxZIndex);
     const isAtBack = selectedElements.every((element) => element.placement.zIndex === 0);
     return (
-      <div className="flex flex-col items-center justify-start ">
+      <div className="flex w-full flex-col items-center justify-start">
         {/* <div className="my-4">Arrange</div>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button
@@ -99,9 +99,9 @@ export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
           </Button>
         </div> */}
         {selectedElements.every((el) => el.type === 'text') && (
-          <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex w-full flex-col items-center justify-center gap-4">
             {/* <Separator className="my-4" /> */}
-            <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+            <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-300 text-sm font-medium dark:bg-slate-900">
               Align Object To Canvas
             </span>
             <div className="flex flex-col items-center justify-center">

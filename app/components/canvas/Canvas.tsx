@@ -53,6 +53,31 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
     };
   };
   const activeObject = canvasRef.current?.getActiveObject();
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      canvasRef.current?.setWidth(window.innerWidth);
+      // make sure to set hight to auto
+      const objs = canvasRef.current?.getObjects();
+      if (!objs) return;
+      objs.forEach((obj) => {
+        obj.scaleToWidth(canvasRef.current?.getWidth() ?? 0);
+        obj.scaleToHeight(canvasRef.current?.getHeight() ?? 0);
+        obj.setCoords();
+      });
+    } else {
+      canvasRef.current?.setWidth(canvasStore.width);
+      const objs = canvasRef.current?.getObjects();
+      if (!objs) return;
+      objs.forEach((obj) => {
+        const element = store.elements.find((el) => el.id === obj.id);
+        if (element?.isFrame) {
+          obj.scaleToWidth(canvasRef.current?.getWidth() ?? 0);
+          obj.scaleToHeight(canvasRef.current?.getHeight() ?? 0);
+          obj.setCoords();
+        }
+      });
+    }
+  }, [window.innerWidth, window.innerHeight, store.currentKeyFrame]);
   return (
     <div id="grid-canvas-container" className="relative  flex items-center justify-center">
       <canvas

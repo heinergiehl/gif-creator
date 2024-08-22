@@ -19,7 +19,9 @@ import CustomTextInput from '@/app/components/ui/CustomTextInput';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
-import { throttle } from 'lodash';
+import { set, throttle } from 'lodash';
+import CircularProgress from '@/app/components/ui/CircularProgress';
+import { ffmpegStore } from '@/store/FFmpegStore';
 const ExportPanel = observer(() => {
   const rootStore = useStores();
   const store = rootStore.editorStore;
@@ -28,6 +30,7 @@ const ExportPanel = observer(() => {
   const [gifUrl, setGifUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const handleCreateGif = async () => {
+    setIsHandleCreateGif(true);
     const url = await fileStore.handleSaveAsGif();
     setGifUrl(url); // Store the URL in state
     toast({
@@ -38,26 +41,10 @@ const ExportPanel = observer(() => {
     Confetti({
       origin: { x: 0.2, y: 0 },
     });
+    setIsHandleCreateGif(false);
+    store.progress.conversion = 0;
   };
-  const handleCreatePreview = throttle(async () => {
-    const url = await fileStore.createGifPreview();
-    setPreviewUrl(url); // Store the URL in state
-  }, 1000);
   const { toast } = useToast();
-  useEffect(() => {
-    if (store.elements.length === 0) return;
-    if (store.frames.length === 0) return;
-    handleCreatePreview();
-  }, [
-    animtionStore.fps,
-    store.frames,
-    fileStore.gifQuality,
-    store.elements,
-    rootStore.canvasRef.current,
-    rootStore.canvasOptionsStore.width,
-    rootStore.canvasOptionsStore.height,
-    rootStore.canvasOptionsStore.backgroundColor,
-  ]);
   // when changing one of the paramters above, create new gif url
   useEffect(() => {
     if (store.elements.some((el) => el.isFrame)) {
@@ -67,14 +54,38 @@ const ExportPanel = observer(() => {
     animtionStore.fps,
     store.frames,
     fileStore.gifQuality,
+    fileStore.paletteSize,
     store.elements,
     rootStore.canvasRef.current,
     rootStore.canvasOptionsStore.width,
     rootStore.canvasOptionsStore.height,
     rootStore.canvasOptionsStore.backgroundColor,
   ]);
+  const [isHandleCreateGif, setIsHandleCreateGif] = useState(false);
+  const progress = store.progress.conversion;
+  const { ffmpeg } = ffmpegStore;
+  useEffect(() => {
+    const handleProgress = (e: any) => {
+      console.log('progress: ', e);
+      store.progress.conversion = Math.round(e?.progress * 100);
+    };
+    const handleLog = (e: any) => {
+      console.log('log: ', e);
+    };
+    if (isHandleCreateGif) {
+      ffmpeg?.on('progress', handleProgress);
+      ffmpeg?.on('log', (e) => {
+        console.log('log: ', e);
+      });
+      return () => {
+        // free all files from memory
+        ffmpeg?.off('progress', handleProgress);
+        ffmpeg?.off('log', handleLog);
+      };
+    }
+  }, [isHandleCreateGif]);
   return (
-    <div className="flex h-screen  flex-col ">
+    <div className="relative flex h-screen  w-full flex-col dark:bg-slate-900">
       <span className="flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
         Export Your GIF
       </span>
@@ -125,16 +136,32 @@ const ExportPanel = observer(() => {
           </Label>
         </>
         <Separator className="my-4" />
+        <>
+          <Label className="flex flex-col   ">
+            <span className="text-xs ">Palette Size</span>
+            <div className="flex gap-x-4">
+              <Input
+                type="range"
+                min="8"
+                step="8"
+                max="256"
+                value={fileStore.paletteSize}
+                onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))}
+              />
+              <Input
+                className="w-20"
+                type="number"
+                min="8"
+                step="8"
+                max="256"
+                value={fileStore.paletteSize}
+                onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))}
+              />
+            </div>
+          </Label>
+        </>
+        <Separator className="my-4" />
         <CanvasOptions />
-        {previewUrl && (
-          <>
-            <Separator className="my-4" />
-            <Label className="flex flex-col items-start justify-center gap-y-4">
-              <span>Preview</span>
-              <Image src={previewUrl} width={300} height={300} alt="GIF Preview" />
-            </Label>
-          </>
-        )}
         <Separator className="my-4" />
         {store.elements.some((el) => el.isFrame) && !gifUrl && (
           <ShinyButton onClick={handleCreateGif} className=" ">
@@ -188,7 +215,7 @@ const CanvasOptions = observer(() => {
   ]);
   return (
     <>
-      <div className="flex flex-wrap  gap-x-4">
+      <div className="flex flex-wrap  gap-x-2">
         <Label>
           <div className="flex flex-col gap-y-2">
             Width

@@ -130,9 +130,6 @@ export const useManageFabricObjects = () => {
           ) {
             canvas.add(...fabObjs);
             canvas.requestRenderAll();
-            rootStore.setRerunUseManageFabricObjects(false);
-            store.setShadowUpdated(false);
-            store.setTextOptionsUpdated(false);
           }
         } catch (error) {
           console.error('Failed to load image', error);
@@ -150,7 +147,7 @@ export const useManageFabricObjects = () => {
       !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
     ) {
       console.log('Updating canvas objects', canvasObjects, elementsInFrame, frameFabricObject);
-      // canvas?.clear();
+      canvas?.clear();
     }
     canvas?.setBackgroundColor(canvasStore.backgroundColor, () => {
       const cvsObjs = canvas?.getObjects();
@@ -164,6 +161,9 @@ export const useManageFabricObjects = () => {
         }
       });
       manageFabricObjects();
+      rootStore.setRerunUseManageFabricObjects(false);
+      store.setShadowUpdated(false);
+      store.setTextOptionsUpdated(false);
     });
   }, [
     store.currentKeyFrame,
@@ -171,5 +171,9 @@ export const useManageFabricObjects = () => {
     rootStore.rerunUseManageFabricObjects,
     store.shadowUpdated,
     store.textOptionsUpdated,
+    canvasRef,
+    canvasStore.backgroundColor,
+    store.selectedElements,
+    store.frames,
   ]);
 };

@@ -122,6 +122,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.0",
     "vaul": "^0.9.1",
+    "video-range-selector": "^1.2.0",
     "virtua": "^0.33.3"
   },
   "devDependencies": {

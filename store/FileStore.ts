@@ -1,12 +1,13 @@
-import { computed, makeAutoObservable } from 'mobx';
-import { fabric } from 'fabric';
-import GIF from '@/dist/gif.js';
-import { RootStore } from '.';
-import { EditorElement } from '@/types';
+import { ffmpegStore } from '@/store/FFmpegStore';
 import { FabricObjectFactory } from '@/utils/fabric-utils';
+import { fetchFile } from '@ffmpeg/util';
+import { RootStore } from '.';
+import { computed, makeAutoObservable } from 'mobx';
 export class FileStore {
   rootStore: RootStore;
   gifQuality = 10;
+  paletteSize = 256; // New property for palette size
+  ffmpeg = ffmpegStore.ffmpeg;
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this, {
@@ -15,6 +16,8 @@ export class FileStore {
       editorStore: computed,
       fabricObjects: computed,
       frames: computed,
+      height: computed,
+      width: computed,
     });
   }
   get editorStore() {
@@ -22,6 +25,12 @@ export class FileStore {
   }
   get canvas() {
     return this.rootStore?.canvasRef?.current;
+  }
+  get height() {
+    return this.rootStore.canvasOptionsStore.height;
+  }
+  get width() {
+    return this.rootStore.canvasOptionsStore.width;
   }
   get fabricObjects() {
     return this.canvas?.getObjects();
@@ -33,162 +42,148 @@ export class FileStore {
     return this.editorStore?.elements
       .filter((el) => el.isFrame === true)
       .sort((a, b) => a.timeFrame.start - b.timeFrame.start)
-      .sort((a, b) => a.index - b.index);
+      .sort((a, b) => a?.index! - b?.index!);
   }
-  async createGifFromEditorElements(): Promise<string> {
-    const gif = new GIF({
-      workers: 6,
-      quality: this.gifQuality,
-      workerScript: '/gif.worker.js',
-    });
+  async createGifFromEditorElements(isPreview: boolean): Promise<string> {
+    const ffmpeg = this.ffmpeg;
+    if (!ffmpeg?.loaded) return '';
     const frames = this.frames;
     const objectsInFrame = this.editorStore?.elements.filter((el) => el.isFrame === false);
     if (!frames || !objectsInFrame) {
       console.error('%cFrames or ObjectsInFrame not found', 'color: red');
       return '';
     }
-    for (let i = 0; i < frames.length; i++) {
-      const currentFrame = frames[i];
-      const objectsInCurrentFrame = objectsInFrame.filter(
-        (obj) =>
-          obj.timeFrame.start <= currentFrame.timeFrame.start &&
-          obj.timeFrame.end >= currentFrame.timeFrame.end,
-      );
-      const canvas = this.canvas;
-      console.log('CANVAS', canvas);
-      if (!canvas) return Promise.reject('Canvas not found');
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvas.getWidth();
-      tempCanvas.height = canvas.getHeight();
-      const tempCanvasContext = tempCanvas.getContext('2d');
-      if (tempCanvasContext) {
-        tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-        if (this.editorStore?.backgroundColor) {
-          tempCanvasContext.fillStyle = this.editorStore?.backgroundColor;
-          tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        }
-        try {
+    try {
+      for (let i = 0; i < frames.length; i++) {
+        const currentFrame = frames[i];
+        const objectsInCurrentFrame = objectsInFrame.filter(
+          (obj) =>
+            obj.timeFrame.start <= currentFrame.timeFrame.start &&
+            obj.timeFrame.end >= currentFrame.timeFrame.end,
+        );
+        const canvas = this.canvas;
+        if (!canvas) throw new Error('Canvas not found');
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.getWidth();
+        tempCanvas.height = canvas.getHeight();
+        const tempCanvasContext = tempCanvas.getContext('2d');
+        if (tempCanvasContext) {
+          tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+          if (this.editorStore?.backgroundColor) {
+            tempCanvasContext.fillStyle = this.editorStore?.backgroundColor;
+            tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          }
           const fabricFrameObject = await FabricObjectFactory.manageFabricObject(currentFrame);
           if (fabricFrameObject) {
-            fabricFrameObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
-              return this;
-            };
             fabricFrameObject.scaleToWidth(tempCanvas.width);
             fabricFrameObject.scaleToHeight(tempCanvas.height);
             fabricFrameObject.setCoords();
             fabricFrameObject.render(tempCanvasContext);
           }
-          for (let j = 0; j < objectsInCurrentFrame.length; j++) {
-            const editorElement = objectsInCurrentFrame[j];
+          for (const editorElement of objectsInCurrentFrame) {
             const fabricObject = await FabricObjectFactory.manageFabricObject(editorElement);
             if (fabricObject) {
-              fabricObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
-                return this;
-              };
-              fabricObject.setCoords();
               fabricObject.render(tempCanvasContext);
             }
           }
-          gif.addFrame(tempCanvas, {
-            delay: 1000 / (this.animationStore?.fps || 10),
-          });
-        } catch (error) {
-          console.error('Error rendering frame:', error);
+          // Convert canvas to a PNG blob
+          const blob = await new Promise<Blob | null>((resolve) =>
+            tempCanvas.toBlob((blob) => resolve(blob), 'image/png'),
+          );
+          if (blob) {
+            // Write PNG to FFmpeg FS
+            await ffmpeg.writeFile(`frame_${i}.png`, await fetchFile(blob));
+          }
         }
       }
-    }
-    return new Promise((resolve, reject) => {
-      gif.on('progress', (progress: number) => {
-        console.log('GIF progress', progress);
-      });
-      gif.on('finished', (blob: Blob) => {
-        resolve(URL.createObjectURL(blob));
-      });
-      gif.on('error', (error: Error) => {
-        reject(error);
-      });
-      gif.render();
-    });
-  }
-  async createGifPreview(): Promise<string> {
-    const gif = new GIF({
-      workers: 2,
-      quality: 30, // Lower quality for quick preview
-      workerScript: '/gif.worker.js',
-    });
-    const frames = this.frames;
-    const objectsInFrame = this.editorStore?.elements.filter((el) => el.isFrame === false);
-    if (!frames || !objectsInFrame) {
-      console.error('%cFrames or ObjectsInFrame not found', 'color: red');
+      // Ensure frames were saved correctly
+      const files = await ffmpeg.listDir('/');
+      console.log('Files in FS:', files);
+      // Create a video from the PNGs
+      //if isPreview is true, create video in very low quality, meaning low resolution like 200x200
+      const scaleFilter = isPreview ? 'scale=100:100' : `scale=${this.width}:${this.height}`;
+      if (isPreview) {
+        await ffmpeg.exec([
+          '-r',
+          String(this.animationStore?.fps || 10),
+          '-f',
+          'image2',
+          '-y',
+          '-i',
+          'frame_%d.png',
+          '-vcodec',
+          'libx264',
+          '-vf',
+          scaleFilter,
+          '-pix_fmt',
+          'yuv420p',
+          'output.mp4',
+        ]);
+      } else {
+        await ffmpeg.exec([
+          '-r',
+          String(this.animationStore?.fps || 10),
+          '-f',
+          'image2',
+          '-y',
+          '-i',
+          'frame_%d.png',
+          '-vcodec',
+          'libx264',
+          '-pix_fmt',
+          'yuv420p',
+          'output.mp4',
+        ]);
+      }
+      // Generate the palette
+      await ffmpeg.exec([
+        '-y',
+        '-i',
+        'output.mp4',
+        '-vf',
+        `scale=${this.width}:-1:flags=lanczos,palettegen=max_colors=${this.paletteSize}`,
+        'palette.png',
+      ]);
+      // Convert the video to GIF using the palette
+      await ffmpeg.exec([
+        '-y',
+        '-i',
+        'output.mp4',
+        '-i',
+        'palette.png',
+        '-filter_complex',
+        'paletteuse',
+        `output.gif`,
+      ]);
+      // Read the generated GIF
+      const gifData = await ffmpeg.readFile('output.gif');
+      return URL.createObjectURL(new Blob([gifData], { type: 'image/gif' }));
+    } catch (error) {
+      console.error('Error creating GIF:', error);
       return '';
+    } finally {
+      // // Clean up FFmpeg FS
+      // await ffmpeg.deleteFile('output.mp4');
+      // await ffmpeg.deleteFile('output.gif');
+      // await ffmpeg.deleteFile('palette.png');
+      // for (let i = 0; i < frames.length; i++) {
+      //   await ffmpeg.deleteFile(`frame_${i}.png`);
+      // }
     }
-    const frameInterval = Math.max(1, Math.floor(frames.length / 10)); // Reduce number of frames for preview
-    for (let i = 0; i < frames.length; i += frameInterval) {
-      const currentFrame = frames[i];
-      const objectsInCurrentFrame = objectsInFrame.filter(
-        (obj) =>
-          obj.timeFrame.start <= currentFrame.timeFrame.start &&
-          obj.timeFrame.end >= currentFrame.timeFrame.end,
-      );
-      const canvas = this.canvas;
-      if (!canvas) return Promise.reject('Canvas not found');
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvas.getWidth() || 800;
-      tempCanvas.height = canvas.getHeight() || 500;
-      const tempCanvasContext = tempCanvas.getContext('2d');
-      if (tempCanvasContext) {
-        tempCanvasContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-        if (this.rootStore?.canvasOptionsStore?.backgroundColor) {
-          tempCanvasContext.fillStyle = this.rootStore?.canvasOptionsStore.backgroundColor;
-          tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        }
-        try {
-          const fabricFrameObject = await FabricObjectFactory.manageFabricObject(currentFrame);
-          if (fabricFrameObject) {
-            fabricFrameObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
-              return this;
-            };
-            // fabricFrameObject.scaleToWidth(tempCanvas.width);
-            // fabricFrameObject.scaleToHeight(tempCanvas.height);
-            fabricFrameObject.setCoords();
-            fabricFrameObject.render(tempCanvasContext);
-          }
-          for (let j = 0; j < objectsInCurrentFrame.length; j++) {
-            const editorElement = objectsInCurrentFrame[j];
-            const fabricObject = await FabricObjectFactory.manageFabricObject(editorElement);
-            if (fabricObject) {
-              fabricObject.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
-                return this;
-              };
-              fabricObject.setCoords();
-              fabricObject.render(tempCanvasContext);
-            }
-          }
-          gif.addFrame(tempCanvas, {
-            delay: 1000 / (this.animationStore?.fps || 10),
-          });
-        } catch (error) {
-          console.error('Error rendering frame:', error);
-        }
-      }
-    }
-    return new Promise((resolve, reject) => {
-      gif.on('progress', (progress: number) => {
-        console.log('GIF preview progress', progress);
-      });
-      gif.on('finished', (blob: Blob) => {
-        resolve(URL.createObjectURL(blob));
-      });
-      gif.on('error', (error: Error) => {
-        reject(error);
-      });
-      gif.render();
-    });
   }
   handleSaveAsGif = async (): Promise<string> => {
     try {
-      const gifUrl = await this.createGifFromEditorElements();
+      const gifUrl = await this.createGifFromEditorElements(false);
       console.log('GIF URL', gifUrl);
+      // Clean up FFmpeg FS
+      const ffmpeg = this.ffmpeg;
+      if (!ffmpeg) return '';
+      await ffmpeg.deleteFile('output.mp4');
+      await ffmpeg.deleteFile('output.gif');
+      await ffmpeg.deleteFile('palette.png');
+      for (let i = 0; i < frames.length; i++) {
+        await ffmpeg.deleteFile(`frame_${i}.png`);
+      }
       return gifUrl;
     } catch (error) {
       console.error('Error creating GIF', error);

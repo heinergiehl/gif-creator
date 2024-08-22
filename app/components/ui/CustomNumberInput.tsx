@@ -50,9 +50,9 @@ const CustomNumberInput: React.FC<CustomNumberInputPropbs> = ({
       <CustomTooltip content={inputTooltip}>
         <Input
           onChange={(e) => debouncedHandleChange(Number(e.target.value))}
-          className="w-[60px] rounded-l-none rounded-r-none border
-            bg-slate-400
-                  ring-0 transition-colors duration-300 ease-in-out focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-input dark:bg-background dark:hover:bg-slate-800 dark:focus:outline-none dark:focus:ring-0 dark:focus-visible:bg-slate-900 dark:focus-visible:ring-0 dark:focus-visible:ring-offset-0"
+          className="  mx-1 w-[60px] rounded-none
+            border
+                  bg-slate-50 ring-0 transition-colors duration-300 ease-in-out focus:border-0 focus:border-none focus:outline-none focus:ring-0 focus:ring-offset-0  focus-visible:border-none focus-visible:ring-0 active:border-none active:ring-0 dark:border-input dark:bg-background dark:hover:bg-slate-800 dark:focus:outline-none dark:focus:ring-0 dark:focus-visible:bg-slate-900 dark:focus-visible:ring-0 dark:focus-visible:ring-offset-0"
           id={name}
           name={name}
           type="text"

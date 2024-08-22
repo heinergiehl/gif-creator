@@ -30,7 +30,7 @@ const TextStyleOptions = observer(function TextStyleOptions() {
   if (selectedElements.length === 0) return null;
   return (
     <div className="">
-      <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+      <span className="font-md my-auto flex h-[50px] w-full  items-center justify-center bg-slate-300 text-sm dark:bg-slate-900">
         Text Style
       </span>
       <div className="my-4 flex p-4">

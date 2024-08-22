@@ -31,6 +31,12 @@ export const TimeFrameView = observer((props: { element: EditorElement }) => {
       onClick={() => {
         store.setSelectedElements([element.id]);
       }}
+      onPointerDown={() => {
+        store.setSelectedElements([element.id]);
+      }}
+      onTouchStart={() => {
+        store.setSelectedElements([element.id]);
+      }}
       key={element.id}
       className={`relative my-2 flex h-[25px]    overflow-hidden ${
         isSelected ? 'border-2 border-indigo-600 bg-slate-200 dark:bg-slate-500' : ''

@@ -309,16 +309,16 @@ const Editor = React.memo(
               <div className="absolute z-[9999] h-full w-full bg-gray-200 opacity-35"></div>
             </>
           )}
-          <div className="z-1 hidden flex-row  md:flex md:h-screen md:flex-col">
+          <div className="z-1 hidden  flex-row md:flex md:h-screen md:flex-col">
             <Sidebar />
-            <div className="relative ml-[90px] hidden h-full max-w-[450px]  md:flex">
+            <div className="relative hidden h-full w-[350px]  md:ml-[90px] md:flex">
               <Resources />
             </div>
           </div>
-          <div className="flex h-full w-screen flex-col  items-center justify-center md:w-full">
+          <div className=" flex h-screen w-screen flex-col  items-center justify-center bg-slate-100 dark:bg-slate-800">
             <EditResource />
             <div
-              className="flex h-[calc(100svh-50px)]  flex-col items-center justify-center md:w-full md:max-w-[900px]"
+              className="flex h-full flex-col items-center justify-center  md:h-[calc(100svh-50px)] md:w-full md:max-w-[900px]"
               id="editor-container"
             >
               <CustomAlertDialog />
@@ -326,53 +326,57 @@ const Editor = React.memo(
                 className="z-1 relative  flex h-full   flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
                 draggable="false"
               >
-                <ScrollArea className="m-auto flex h-[calc(100svh-50px)] w-screen flex-col items-center justify-center gap-y-2  rounded-none md:h-full md:w-full md:flex-row">
+                <ScrollArea className="m-auto flex h-full w-screen flex-col items-center justify-center gap-y-2  rounded-none md:h-[calc(100svh-50px)] md:w-full md:flex-row">
                   <div className="flex w-full flex-col items-center justify-center gap-4  md:flex-row md:justify-start">
-                    <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
-                      <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
-                        <label htmlFor="speed" className="flex flex-col font-semibold ">
-                          <span className="text-sm text-gray-600">FPS of your GIF</span>
-                          <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
-                          <input
-                            id="speed"
-                            onChange={(e) => {
-                              animationStore.fps = parseFloat(e.target.value);
-                              if (timelineStore) timelineStore.formatCurrentTime();
-                            }}
-                            type="range"
-                            min="1"
-                            max="30"
-                          />
-                        </label>
-                        <button
-                          onClick={() => {
-                            if (store.isPlaying) store.isPaused = !store.isPaused;
-                            if (timelineStore) timelineStore.playSequence();
-                          }}
-                          className="play-button "
-                        >
-                          {store.isPlaying ? (
-                            <FaStopCircle size={54} className="" />
-                          ) : (
-                            <FaPlayCircle size={54} />
-                          )}
-                        </button>{' '}
-                        <CanvasSettings />
+                    <ScrollArea className="h-[35dvh] w-screen md:h-full md:w-full">
+                      <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row">
+                        <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
+                          <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
+                            <label htmlFor="speed" className="flex flex-col font-semibold ">
+                              <span className="text-sm text-gray-600">FPS of your GIF</span>
+                              <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
+                              <input
+                                id="speed"
+                                onChange={(e) => {
+                                  animationStore.fps = parseFloat(e.target.value);
+                                  if (timelineStore) timelineStore.formatCurrentTime();
+                                }}
+                                type="range"
+                                min="1"
+                                max="30"
+                              />
+                            </label>
+                            <button
+                              onClick={() => {
+                                if (store.isPlaying) store.isPaused = !store.isPaused;
+                                if (timelineStore) timelineStore.playSequence();
+                              }}
+                              className="play-button "
+                            >
+                              {store.isPlaying ? (
+                                <FaStopCircle size={54} className="" />
+                              ) : (
+                                <FaPlayCircle size={54} />
+                              )}
+                            </button>{' '}
+                            <CanvasSettings />
+                          </div>
+                          {/* SIDEBAR */}
+                        </div>
+                        <CanvasComponent containerWidth={containerWidth} />
                       </div>
-                      {/* SIDEBAR */}
-                    </div>
-                    <CanvasComponent containerWidth={containerWidth} />
+                    </ScrollArea>
                   </div>
-                  <ScrollArea className="h-[15vh] w-screen md:h-full md:w-full" draggable="false">
+                  <ScrollArea className="h-[25dvh] w-screen md:h-full md:w-full" draggable="false">
                     <EditorCarousel containerWidth={containerWidth} />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
                   {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-[320px] w-full md:hidden">
+                  <ScrollArea className="h-[35dvh] w-full md:hidden">
                     <Resources />
                     <ScrollBar orientation="vertical" />
                   </ScrollArea>
-                  <div className="z-999999  relative w-screen md:hidden">
+                  <div className="z-999999  relative  w-screen md:hidden">
                     <Sidebar />
                   </div>
                   <ScrollBar orientation="vertical" />

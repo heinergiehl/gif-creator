@@ -530,7 +530,10 @@ export const useInitializeCanvas = () => {
       }
       fabric.Object.prototype.zIndex = 0;
       fabric.Object.prototype.selectable = true;
-      fabric.Object.prototype.selectionBackgroundColor = 'rgba(0, 0, 0, 0.3)';
+      fabric.Object.prototype.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
+        return this;
+      };
+      // fabric.Object.prototype.selectionBackgroundColor = 'rgba(0, 0, 0, 0.3)';
       fabric.Object.prototype.borderColor = 'blue';
       fabric.Object.prototype.stateProperties?.push('id', 'zIndex');
       fabric.Object.prototype.statefullCache = true;

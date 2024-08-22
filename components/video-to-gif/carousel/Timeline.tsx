@@ -65,7 +65,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           id="timeline"
           style={{ width }}
           onMouseMove={handleMouseMove}
-          className="relative flex flex-col items-end"
+          className="relative flex h-full flex-col items-end justify-center"
           onClick={() => {
             editorStore.currentKeyFrame = frameNumber - 1;
           }}
@@ -102,34 +102,36 @@ const Timeline: React.FC<TimelineProps> = observer(
             ></div>
           </div>
         </div>
-        <ScrollArea
-          type="always"
-          className="flex h-[80px] items-center justify-center overflow-visible rounded-md border bg-slate-100
-          dark:bg-slate-800
+        {editorStore.elements.find((el) => el.isFrame === false) && (
+          <ScrollArea
+            type="always"
+            className="flex h-[100px] items-center justify-center overflow-visible rounded-none border bg-slate-100
+          dark:bg-slate-900
           "
-          style={{
-            minWidth: width,
-            width,
-            height: '80px',
-          }}
-        >
-          <div
-            className="flex w-full flex-col overflow-visible p-4"
             style={{
               minWidth: width,
               width,
+              height: '100px',
             }}
           >
-            {editorStore.elements.map(
-              (obj, index) =>
-                !obj.isFrame && (
-                  <CustomTooltip content={obj.name} key={index}>
-                    <TimeFrameView element={obj} />
-                  </CustomTooltip>
-                ),
-            )}
-          </div>
-        </ScrollArea>
+            <div
+              className="flex h-full w-full flex-col overflow-visible py-2"
+              style={{
+                minWidth: width,
+                width,
+              }}
+            >
+              {editorStore.elements.map(
+                (obj, index) =>
+                  !obj.isFrame && (
+                    <CustomTooltip content={obj.name} key={index}>
+                      <TimeFrameView element={obj} />
+                    </CustomTooltip>
+                  ),
+              )}
+            </div>
+          </ScrollArea>
+        )}
       </>
     );
   },

@@ -215,8 +215,8 @@ export default function Home() {
                   <CTA />
                 </FadeInUpWrapper>
                 <FadeInUpWrapper>
-                  <div className="relative m-auto flex w-full items-center justify-center rounded-xl">
-                    <AnimatedListDemo className="absolute z-[999] hidden w-full max-w-[500px] opacity-0 transition-all duration-500 hover:translate-x-20 hover:opacity-100 md:block" />
+                  <div className="relative m-auto flex w-full items-center justify-start rounded-xl">
+                    <AnimatedListDemo className="absolute z-[999] hidden w-full max-w-[500px] opacity-0 transition-all duration-500 hover:translate-x-5 hover:opacity-100 md:block" />
                     <Image
                       src="/hero-dark.png"
                       alt="Hero Image"
@@ -227,11 +227,11 @@ export default function Home() {
                     <Image
                       width={1200}
                       height={500}
-                      src="/dashboard-light.png"
+                      src="/hero-white.png"
                       alt="Hero Image"
                       className=" block rounded-[inherit] border object-contain shadow-lg dark:hidden md:w-[1200px]"
                     />
-                    <BorderBeam size={250} duration={12} delay={9} />
+                    <BorderBeam size={250} duration={12} delay={9} borderWidth={5} />
                   </div>
                 </FadeInUpWrapper>
               </div>

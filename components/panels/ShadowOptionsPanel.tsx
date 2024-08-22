@@ -30,7 +30,7 @@ const ShadowOptionsPanel = observer(function ShadowOptionsPanel() {
   };
   return (
     <div className="">
-      <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
+      <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-300 text-sm font-medium dark:bg-slate-900">
         {' '}
         Shadow Options
       </span>

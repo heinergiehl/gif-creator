@@ -34,7 +34,7 @@ export const BentoCard = ({
     >
       {/* show only on hover, fade in */}
       <BorderBeam
-        borderWidth={2}
+        borderWidth={5}
         className={cn(
           'pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100',
         )}

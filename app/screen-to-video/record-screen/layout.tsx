@@ -7,5 +7,5 @@ export const metadata: Metadata = {
   keywords: 'screen, recorder, free',
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>;
+  return <div className="">{children}</div>;
 }

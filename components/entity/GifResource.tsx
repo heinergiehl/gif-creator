@@ -91,8 +91,8 @@ const GifResource = observer(() => {
         <CustomInputFile key={inputKey} onChange={handleFileChange} type="gif" />
         <CustomProgress />
       </CustomDialog>
-      <>
-        <div className="flex h-[50px] w-full items-center justify-center bg-slate-200 text-sm dark:bg-slate-900">
+      <div className="bg-slate-300 dark:bg-slate-900 md:h-full">
+        <div className="flex h-[50px] w-full items-center justify-center  text-sm font-medium ">
           Upload GIF
         </div>
         <div className="flex w-full flex-col items-start justify-center gap-y-4 p-8  text-xs">
@@ -153,7 +153,7 @@ const GifResource = observer(() => {
           )}
           <CustomProgress />
         </div>
-      </>
+      </div>
     </div>
   );
 });

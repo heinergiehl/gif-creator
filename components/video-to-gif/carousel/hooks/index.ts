@@ -166,23 +166,20 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
     //   carouselContainer.scrollBy({ left: 10, behavior: 'smooth' });
     // }
   }, [mousePosition]);
-  const handleSelectFrame = useCallback(
-    (id: string, multiSelect = false) => {
-      const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
-      if (multiSelect) {
-        const currentSelection = store.selectedElements.map((el) => el.id);
-        if (currentSelection.includes(id)) {
-          store.setSelectedElements(currentSelection.filter((selectedId) => selectedId !== id));
-        } else {
-          store.setSelectedElements([...currentSelection, id]);
-        }
+  const handleSelectFrame = (id: string, multiSelect = false) => {
+    const selectedFrameIdx = store.frames.findIndex((frame) => frame.id === id);
+    if (multiSelect) {
+      const currentSelection = store.selectedElements.map((el) => el.id);
+      if (currentSelection.includes(id)) {
+        store.setSelectedElements(currentSelection.filter((selectedId) => selectedId !== id));
       } else {
-        store.setSelectedElements([id]);
+        store.setSelectedElements([...currentSelection, id]);
       }
-      store.currentKeyFrame = selectedFrameIdx;
-    },
-    [store],
-  );
+    } else {
+      store.setSelectedElements([id]);
+    }
+    store.currentKeyFrame = selectedFrameIdx;
+  };
   const handleDeleteFrame = useCallback(
     (index: number): void => {
       const frameToDelete = store.frames[index];

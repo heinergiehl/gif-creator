@@ -58,10 +58,10 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >
-        <Card className="relative flex  h-full w-full items-center justify-center rounded-lg">
+        <Card className="relative flex  items-center justify-center rounded-lg">
           <div
             className={cn([
-              'group absolute inset-0 h-full w-full  rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-slate-700',
+              'group absolute inset-0   rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-slate-700',
               isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-900',
             ])}
           >
@@ -111,5 +111,5 @@ const SortableItem: React.FC<SortableItemProps> = observer(
 );
 export default React.memo(SortableItem);
 const SkeletonLoader = () => (
-  <div className="skeleton-loader h-[80px] w-[120px] animate-pulse rounded-lg bg-gray-300"></div>
+  <div className="skeleton-loader h-[70px] w-[70px] animate-pulse rounded-lg bg-gray-300"></div>
 );

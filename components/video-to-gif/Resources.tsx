@@ -27,7 +27,11 @@ export const Resources = observer(() => {
   useEffect(() => {
     editorStore.setAllOptionsToFalse();
   }, [selectedMenuOption, editorStore.toggleOptions]);
-  return <RenderResource />;
+  return (
+    <div className="w-full bg-slate-300">
+      <RenderResource />
+    </div>
+  );
 });
 const RenderResource = observer(({}: {}) => {
   const store = useStores().uiStore;

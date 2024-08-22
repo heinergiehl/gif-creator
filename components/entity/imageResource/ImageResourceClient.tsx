@@ -44,13 +44,13 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
             //   className="  cursor-pointer touch-none rounded-lg object-contain"
             //   crossOrigin="anonymous"
             // />
-            <Card className="relative flex h-[80px]  w-[80px] items-center justify-center rounded-lg shadow-xl shadow-black drop-shadow-xl">
+            <div className="relative flex h-[80px]  w-[80px] items-center justify-center rounded-lg shadow-xl shadow-black drop-shadow-xl">
               <div
                 className={cn([
                   'group absolute inset-0 z-0 rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-blue-500',
                 ])}
               ></div>
-              <CardContent className="z-1  flex items-center justify-center  rounded-lg p-0  ">
+              <div className="z-1  flex items-center justify-center  rounded-lg p-0  ">
                 <Image
                   id={`imageResource-${index}`}
                   src={image.webformatURL}
@@ -62,8 +62,8 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
                   "
                   crossOrigin="anonymous"
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         },
       },
@@ -73,7 +73,7 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
       <div
         id={'imageResource-' + index}
         ref={setNodeRef}
-        className="group h-[100px] w-[100px] touch-none bg-gray-100 bg-inherit text-inherit opacity-100 transition-colors duration-500 ease-in-out hover:opacity-100 dark:bg-slate-700 dark:hover:bg-slate-900"
+        className="group h-[100px] w-[100px] touch-none rounded-md  bg-inherit bg-slate-400 text-inherit opacity-100 transition-colors duration-500 ease-in-out hover:opacity-100 dark:bg-slate-700 dark:hover:bg-slate-900"
       >
         {/* drag handle, nice looking */}
         <div {...attributes} {...listeners} ref={setActivatorNodeRef} className="relative">

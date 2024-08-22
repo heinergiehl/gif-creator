@@ -24,6 +24,9 @@ import SelectionArea from '@viselect/vanilla';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { createPortal } from 'react-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 export interface EditorCarouselProps {
   containerWidth: number;
 }
@@ -252,7 +255,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           id={frame.id}
           key={index}
           className={cn([
-            'selectable relative flex h-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
+            'selectable relative flex h-[74px] w-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
             index === store.currentKeyFrame ? 'border-blue-500' : 'border-transparent',
           ])}
           style={{
@@ -276,13 +279,13 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         </Droppable>
       );
     });
-  }, [store.frames, store.currentKeyFrame, calculateTransform, hoverIndex, updateHoverIndex]);
+  }, [store.frames, store.currentKeyFrame, calculateTransform, hoverIndex]);
   console.log('ACTIVE', active?.data?.current?.image);
   return (
     <div
       onPointerDown={() => selectionRef.current?.clearSelection()}
       draggable="false"
-      className="flex w-screen select-none  flex-col  items-center justify-center gap-y-4 md:w-full md:max-w-[900px] md:items-start"
+      className="flex w-screen select-none flex-col  items-center justify-center gap-y-4 dark:bg-slate-800 md:w-full md:max-w-[900px] md:items-start"
       onMouseMove={debouncedHandleMouseMove}
     >
       <Timeline
@@ -299,7 +302,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         }}
         draggable="false"
         id="carousel-container"
-        className="relative flex w-screen  items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted md:w-full"
+        className="relative flex w-screen items-center  justify-start gap-4 overflow-y-hidden rounded-none bg-muted bg-slate-200 dark:bg-slate-900 md:w-full"
         ref={carouselRef}
       >
         {store.frames.length === 0 && <CarouselDroppable />}
@@ -313,15 +316,22 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
               height: 140,
               padding: '25px ',
             }}
+            className=""
             horizontal
           >
             {frames}
           </VList>
         </SortableContext>
         {createPortal(
-          <DragOverlay>
-            {active && !(active?.id as String)?.includes('Resource') && (
-              <DraggedImagePreview src={store.frames.find((fr) => fr.id === active?.id)?.src!} />
+          <DragOverlay
+            modifiers={[restrictToHorizontalAxis]}
+            dropAnimation={{
+              duration: 200,
+              easing: 'ease',
+            }}
+          >
+            {active && store.frames.find((fr) => fr.id === active.id)?.src && (
+              <DraggedImagePreview src={store.frames.find((fr) => fr.id === active.id)?.src!} />
             )}
           </DragOverlay>,
           document.body,

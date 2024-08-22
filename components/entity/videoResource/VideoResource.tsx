@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { useStores } from '@/store';
 import { CustomProgress } from '@/components/ui/CustomProgress';
 import { CustomDialog } from '@/app/components/ui/CustomDialog';
-import { Separator } from '@radix-ui/react-select';
 import { loadFFMPEG, loadUserVideos, handleFileChange, handleAddButtonClick } from './utils';
 import FrameSettings from './FrameSettings';
 import FileInput from './FileInput';
@@ -12,6 +11,7 @@ import VideoList from './VideoList';
 import { VideoResourceProps } from './types';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 const VideoResource: React.FC<VideoResourceProps> = observer(() => {
   const { editorStore, supabase } = useStores();
   const [frameRate, setFrameRate] = useState<number>(1);
@@ -27,8 +27,8 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
   //   loadUserVideos(supabase, editorStore, setLoading);
   // }, [supabase, editorStore]);
   return (
-    <ScrollArea className=" mb-[90px] h-[85vh]">
-      <div className="relative flex  flex-col items-center justify-center gap-4">
+    <ScrollArea className=" mb-[90px]  h-[85vh] w-screen  bg-slate-300 dark:bg-slate-900  md:h-full md:w-full">
+      <div className="  flex w-full flex-col items-center justify-center gap-4 ">
         <CustomDialog
           header="Add more frames from another video"
           open={openModal}
@@ -56,23 +56,13 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
           />
           <CustomProgress />
         </CustomDialog>
-        <div className=" w-full bg-slate-200 text-sm dark:bg-slate-900">
-          <span className="flex h-[50px]  items-center justify-center"> Upload Video</span>
+        <div className="w-full bg-slate-300 text-sm dark:bg-slate-900 md:h-full">
+          <span className="flex h-[50px] items-center  justify-center font-medium">
+            {' '}
+            Upload Video
+          </span>
         </div>
-        <FileInput
-          onChange={(event) =>
-            handleFileChange(
-              event,
-              ffmpegRef,
-              frameRate,
-              quality,
-              editorStore,
-              setInputKey,
-              supabase,
-            )
-          }
-        />
-        <div className="flex  w-full flex-col items-start justify-center gap-y-4 p-8 text-xs">
+        <div className="flex  w-full flex-col items-start justify-center  bg-slate-300 p-8 text-sm  dark:bg-slate-900">
           <FrameSettings
             frameRate={frameRate}
             setFrameRate={setFrameRate}
@@ -108,6 +98,19 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
             />
           )} */}
         </div>
+        <FileInput
+          onChange={(event) =>
+            handleFileChange(
+              event,
+              ffmpegRef,
+              frameRate,
+              quality,
+              editorStore,
+              setInputKey,
+              supabase,
+            )
+          }
+        />
       </div>
     </ScrollArea>
   );
