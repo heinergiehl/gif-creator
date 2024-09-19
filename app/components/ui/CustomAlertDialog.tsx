@@ -26,7 +26,7 @@ export const CustomAlertDialog = observer(function CustomAlertDialog() {
           <AlertDialogDescription>{info.content}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={toggleAlertDialog}>Ok</AlertDialogAction>
+          <AlertDialogAction onClick={toggleAlertDialog}>OK</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
