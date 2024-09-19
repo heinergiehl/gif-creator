@@ -12,8 +12,8 @@ export const CustomAccordion = ({ trigger, content }: CustomAccordionProps) => {
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
-        <AccordionTrigger className="text-2xl">{trigger}</AccordionTrigger>
-        <AccordionContent className="text-xl">{content}</AccordionContent>
+        <AccordionTrigger className="text-xl">{trigger}</AccordionTrigger>
+        <AccordionContent>{content}</AccordionContent>
       </AccordionItem>
     </Accordion>
   );

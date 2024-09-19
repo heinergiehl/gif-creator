@@ -286,8 +286,8 @@ export default function Home() {
       <div className="relative z-40 flex w-full flex-col items-center justify-center opacity-100">
         <section className="mt-[100px] h-screen w-full">
           <div className="flex items-center justify-center">
-            <div className="flex h-screen min-h-screen max-w-6xl flex-col items-center justify-center gap-x-2">
-              <NeonGradientCard className="m-auto flex   items-center justify-center ">
+            <div className="flex h-screen  max-w-6xl flex-col items-center justify-center gap-x-2">
+              <NeonGradientCard className=" flex   items-center justify-center ">
                 <h1 className="pointer-events-none z-10 w-full  bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-7xl font-bold leading-none tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
                   Feature-Rich, Free-to-Use GIF Maker
                 </h1>
@@ -296,22 +296,22 @@ export default function Home() {
                 Convert videos to GIFs, edit them by adding text, stickers, and more, and share them
                 with your friends. No sign-up required and 100% free.
               </p>
-              <div className="mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
+              <div className=" mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
                 <CTA />
-                <div className="relative m-auto flex w-full items-center justify-start rounded-xl">
+                <div className="relative z-10 m-auto flex w-full items-center justify-start rounded-xl">
                   <Image
                     src="/hero-dark.png"
                     alt="GifMagic.app Hero Image"
                     width={1200}
                     height={500}
-                    className="hidden rounded-[inherit] border object-contain shadow-lg dark:block md:w-[1200px]"
+                    className=" z-10 hidden rounded-[inherit] border object-contain shadow-lg dark:block md:w-[1200px]"
                   />
                   <Image
                     width={1200}
                     height={500}
                     src="/hero-white.png"
                     alt="GifMagic.app Hero Image"
-                    className="block rounded-[inherit] border object-contain shadow-lg dark:hidden md:w-[1200px]"
+                    className=" z-10 block rounded-[inherit] border object-contain shadow-lg dark:hidden md:w-[1200px]"
                   />
                   <BorderBeam size={250} duration={12} delay={9} borderWidth={5} />
                 </div>
@@ -319,9 +319,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="py-16">
-          <div className="container mx-auto flex h-full w-full flex-col px-4">
-            <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/80 bg-clip-text text-center text-2xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
+        <section className="z-[999]">
+          <div className="container  mx-auto flex h-full w-full flex-col px-4 ">
+            <h2 className="pointer-events-none mb-8  whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/80 bg-clip-text py-28 text-center text-2xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
               Why Choose GifMagic.app?
             </h2>
             {/* Bento Grid Layout */}
@@ -341,9 +341,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="py-16">
+        <section className="">
           <div className="container mx-auto px-4">
-            <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
+            <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text py-28 text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
               Frequently Asked Questions
             </h2>
             <div className="space-y-2 text-xl">
