@@ -327,7 +327,7 @@ export default function Home() {
             {/* Bento Grid Layout */}
             <div
               className="grid auto-rows-fr grid-cols-1 gap-2 lg:grid-cols-3"
-              style={{ gridAutoRows: 'minmax(200px, auto)' }}
+              style={{ gridAutoRows: 'minmax(100px, auto)' }}
             >
               {features.map((feature, idx) => (
                 <div

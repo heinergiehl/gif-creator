@@ -1,0 +1,61 @@
+name: CI/CD – GifCreator
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Change this if your app listens on a different port
+      APP_PORT: 3004
+    steps:
+      # 1) Checkout your repo
+      - name: Checkout
+        uses: actions/checkout@v3
+      # 2) Install Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+      # 3) (Optional) Create .env.production on the runner
+      #    Only include the vars your app actually needs.
+      - name: Create .env.production
+        run: |
+          cat > .env.production <<EOF
+          APP_PORT=${{ env.APP_PORT }}
+          PRODUCTION=true
+          # Add any other secrets here:
+          # NEXT_PUBLIC_FOO=${{ secrets.NEXT_PUBLIC_FOO }}
+          EOF
+      # 4) Install & build
+      - name: Install & Build
+        run: |
+          bun install
+          bun run build
+      # 5) Prepare SSH key
+      - name: Copy SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+      # 6) SSH into VPS and deploy
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            # A) Regenerate .env.production on the server
+            cat > /var/www/gif-creator/.env.production <<EOF
+            APP_PORT=${{ env.APP_PORT }}
+            PRODUCTION=true
+            # …other vars if needed…
+            EOF
+            # B) Pull latest code, install, build & reload
+            cd /var/www/gif-creator
+            git pull origin main
+            bun install
+            bun run build
+            pm2 reload ecosystem.config.js --only gif-creator --env production
