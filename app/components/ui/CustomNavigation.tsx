@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { ModeToggle } from './DarkToggle';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 interface CustomNavigationProps {
   sections: {
     section: string;
@@ -39,39 +40,46 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
     <div
       className={cn([
         `supports-backdrop-blur:bg-white/60 fixed inset-0    top-0   z-[800] flex
-                      h-[70px]  w-full flex-none items-center justify-center bg-white/95  backdrop-blur transition-colors duration-500 dark:border-slate-50/[0.06] dark:bg-transparent lg:z-50 lg:grid-cols-2 lg:border-b lg:border-slate-900/10`,
+                      h-[70px]  w-full flex-none items-center justify-between bg-white/95  backdrop-blur transition-colors duration-500 dark:border-slate-50/[0.06] dark:bg-transparent lg:z-50 lg:grid-cols-2 lg:border-b lg:border-slate-900/10`,
         isScrolled ? ' shadow-lg dark:border-gray-700  dark:shadow-xl' : '',
       ])}
     >
-      <NavigationMenu className="sticky">
-        <NavigationMenuList className="">
-          {sections.map((section) => (
-            <NavigationMenuItem key={section.section} className="">
-              <NavigationMenuTrigger className="text-lg ">{section.section}</NavigationMenuTrigger>
-              <NavigationMenuContent className="">
-                <ul
-                  className="supports-backdrop-blur:bg-white/60 z-[200]      rounded-md border-b-2 
-               bg-opacity-80 p-4   opacity-100    dark:backdrop-blur md:w-[500px]
-                 lg:w-[800px]   "
-                >
-                  {section.links ? (
-                    section.links.map((link) => (
-                      <ListItem key={link.title} href={link.href} title={link.title}>
-                        {link.description}
+      <div className="flex w-full items-center justify-between px-4 lg:px-8">
+        <Link href="/" className="flex items-center space-x-2">
+          <Image width={200} height={200} src="/logo.png" alt="logo" className="h-12 w-auto" />
+        </Link>
+        <NavigationMenu className="sticky">
+          <NavigationMenuList className="">
+            {sections.map((section) => (
+              <NavigationMenuItem key={section.section} className="">
+                <NavigationMenuTrigger className="text-lg ">
+                  {section.section}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent className="">
+                  <ul
+                    className="supports-backdrop-blur:bg-white/60 z-[200]      rounded-md border-b-2 
+               bg-opacity-80 p-4   opacity-100    dark:backdrop-blur 
+                  "
+                  >
+                    {section.links ? (
+                      section.links.map((link) => (
+                        <ListItem key={link.title} href={link.href} title={link.title}>
+                          {link.description}
+                        </ListItem>
+                      ))
+                    ) : (
+                      <ListItem href={section.href ?? ''} title={section.section}>
+                        {section.description}
                       </ListItem>
-                    ))
-                  ) : (
-                    <ListItem href={section.href ?? ''} title={section.section}>
-                      {section.description}
-                    </ListItem>
-                  )}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
-      <ModeToggle />
+                    )}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+        <ModeToggle />
+      </div>
     </div>
   );
 }
