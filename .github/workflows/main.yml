@@ -48,13 +48,13 @@ jobs:
           script: |
             set -e
             # A) Regenerate .env.production on the server
-            cat > /var/www/gif-creator/.env.production <<EOF
+            cat > /var/www/myapps/gif-creator/.env.production <<EOF
             APP_PORT=${{ env.APP_PORT }}
             PRODUCTION=true
             # …other vars if needed…
             EOF
             # B) Pull latest code, install, build & reload
-            cd /var/www/gif-creator
+            cd /var/www/myapps/gif-creator
             git pull origin main
             bun install
             bun run build
