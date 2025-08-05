@@ -23,6 +23,57 @@ export const viewport: Viewport = {
   // Also supported by less commonly used
   // interactiveWidget: 'resizes-visual',
 };
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://www.gifmagic.app'),
+  title: {
+    default: 'GifMagic.app - Advanced GIF Maker & Editor',
+    template: '%s | GifMagic.app'
+  },
+  description: 'Free online GIF maker and editor. Create, resize, crop, rotate animated GIFs. Convert videos to GIFs with professional editing tools.',
+  keywords: ['GIF maker', 'GIF editor', 'video to GIF', 'animated GIF', 'online GIF tools'],
+  authors: [{ name: 'GifMagic.app' }],
+  creator: 'GifMagic.app',
+  publisher: 'GifMagic.app',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://www.gifmagic.app',
+    siteName: 'GifMagic.app',
+    title: 'GifMagic.app - Free Online GIF Maker & Editor',
+    description: 'Create and edit animated GIFs online. Convert videos to GIFs, resize, crop, rotate, and optimize with professional tools.',
+    images: [
+      {
+        url: '/hero-dark.png',
+        width: 1200,
+        height: 630,
+        alt: 'GifMagic.app - GIF Maker and Editor',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GifMagic.app - Free Online GIF Maker & Editor',
+    description: 'Create and edit animated GIFs online. Convert videos to GIFs with professional tools.',
+    images: ['/hero-dark.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
 export default function RootLayout({
   children,
 }: Readonly<{

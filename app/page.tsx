@@ -13,7 +13,6 @@ import {
 import { CTA } from '@/components/pages/CTA';
 import { cn } from '@/lib/utils';
 import { v2 as cloudinary } from 'cloudinary';
-import { CustomAccordion } from './components/ui/CustomAccordion';
 import { Footer } from './components/ui/Footer';
 import { Metadata } from 'next';
 // Import shadcn components
@@ -22,45 +21,45 @@ import { BorderBeam } from '@/components/magicui/border-beam';
 import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 export const metadata: Metadata = {
-  title: 'GifMagic.app - Free Online GIF Maker',
+  title: 'GifMagic.app - Free Online GIF Maker & Editor | Resize, Crop, Rotate GIFs',
   description:
-    'Convert videos to GIFs, edit them by adding text, stickers, and more, and share them with your friends. No sign-up required and 100% free.',
+    'Free online GIF maker and editor. Convert videos to GIFs, resize animated images, crop GIFs, rotate animations, add text, optimize file size, split frames, and more. Create high-quality GIFs with no watermarks. Works with WebP, APNG, AVIF formats.',
   keywords:
-    'GIF maker, video to GIF, free GIF editor, online GIF converter, no sign-up GIF tool, GIF editor',
+    'GIF maker, video to GIF, GIF editor, animated GIF maker, resize GIF, crop GIF, rotate GIF, GIF optimizer, split GIF frames, add text to GIF, GIF converter, online GIF tools, edit GIF frames, GIF animation editor, compress GIF, WebP to GIF, APNG maker, free GIF editor, no watermark GIF, animated image editor, GIF effects, frame editor, GIF duration editor, image to GIF, animated GIF creator',
   alternates: { canonical: 'https://www.gifmagic.app/' },
 };
 const files = [
   {
-    name: '⚡ Blazingly Fast',
-    body: 'GifMagic.app is designed to be fast and efficient, allowing you to convert videos to GIFs in seconds.',
+    name: '⚡ Blazingly Fast GIF Processing',
+    body: 'Create and edit animated GIFs in seconds with our optimized GIF maker. Fast video to GIF conversion with professional quality output.',
   },
   {
-    name: '💾 No Data Stored',
-    body: 'This application runs entirely in your browser, and no data is stored on our servers, as we do not have any.',
+    name: '💾 No Data Stored - Complete Privacy',
+    body: 'All GIF editing and processing happens locally in your browser. No files uploaded to servers, ensuring complete privacy for your animated images.',
   },
   {
-    name: '💻 Feature-Rich Editor',
-    body: 'Edit your GIFs with ease using our feature-rich editor. Add text, stickers, and more to your GIFs.',
+    name: '💻 Advanced GIF Editor & Frame Control',
+    body: 'Professional GIF editing tools: resize animated images, crop GIFs, rotate animations, optimize file size, edit individual frames, control animation speed, and add text overlays.',
   },
   {
-    name: '🔒 Privacy Guaranteed',
-    body: 'All processing is done locally in your browser. Your files are never uploaded to our servers, ensuring complete privacy.',
+    name: '🔒 Privacy Guaranteed - Local Processing',
+    body: 'All GIF creation and editing is done locally in your browser. Your animated files never leave your device, ensuring complete privacy and security.',
   },
   {
-    name: '🚀 High-Quality Output',
-    body: 'Create high-quality GIFs with smooth animations and vibrant colors.',
+    name: '🚀 High-Quality GIF Output & Optimization',
+    body: 'Create high-quality animated GIFs with smooth frame transitions, vibrant colors, and optimized file sizes. Professional results without watermarks.',
   },
   {
-    name: '🎨 Customization Options',
-    body: 'Personalize your GIFs with various customization options including filters, effects, and frames.',
+    name: '🎨 Comprehensive GIF Customization',
+    body: 'Full control over your animated GIFs: adjust frame duration, apply effects, add text and stickers, resize dimensions, crop regions, and optimize for different platforms.',
   },
   {
-    name: '📱 Mobile-Friendly',
-    body: 'Use GifMagic.app on any device. Our tool is fully responsive and works on all platforms.',
+    name: '📱 Mobile-Friendly GIF Tools',
+    body: 'Create and edit GIFs on any device. Our responsive GIF maker and editor work perfectly on desktop, tablet, and mobile platforms.',
   },
   {
-    name: '👁️ Preview Before Download',
-    body: 'Preview your GIFs in real-time before downloading to ensure they meet your expectations.',
+    name: '👁️ Real-Time GIF Preview & Frame Editor',
+    body: 'Preview your animated GIFs in real-time while editing. See frame-by-frame changes, animation timing, and effects before downloading your final GIF.',
   },
 ];
 const optimizeVideoUrl = cloudinary.url(
@@ -228,51 +227,126 @@ const features = [
   },
 ];
 export default function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "GifMagic.app - Advanced GIF Maker & Editor",
+    "url": "https://www.gifmagic.app",
+    "description": "Free online GIF maker and editor. Create, resize, crop, rotate, and optimize animated GIFs. Convert videos to GIFs with professional editing tools.",
+    "applicationCategory": "ImageApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Video to GIF converter",
+      "Resize animated GIFs", 
+      "Crop GIF animations",
+      "Rotate animated images",
+      "Frame-by-frame editor",
+      "Add text to GIFs",
+      "GIF optimizer",
+      "Split GIF frames",
+      "Animation speed control",
+      "No watermarks"
+    ],
+    "browserRequirements": "HTML5, JavaScript enabled",
+    "author": {
+      "@type": "Organization",
+      "name": "GifMagic.app"
+    }
+  };
+
   const faqData = [
     {
-      question: 'How do I convert a video to a GIF?',
+      question: 'How do I convert a video to GIF with frame editing?',
       answer:
-        "Simply upload your video file to GifMagic.app, and our tool will instantly convert it into a high-quality GIF. You can then customize the GIF's frame rate, add text, or edit it further according to your needs.",
+        "Upload your video file to GifMagic.app for instant conversion to high-quality GIF. Use our advanced editor to resize animations, crop regions, rotate images, edit individual frames, adjust animation speed, and optimize file size. Perfect for creating professional animated GIFs.",
     },
     {
-      question: 'Is GifMagic.app free to use?',
+      question: 'Can I resize and crop animated GIFs online for free?',
       answer:
-        'Yes, GifMagic.app is completely free to use. There are no hidden fees or premium versions.',
+        'Yes, our free GIF editor includes professional resizing and cropping tools. Resize animated images to any dimensions, crop specific regions, and maintain animation quality. No watermarks or limits on our animated image editor.',
     },
     {
-      question: 'Do I need to sign up to use GifMagic.app?',
-      answer: 'No sign-up is required. You can start converting and editing your GIFs immediately.',
+      question: 'Does your GIF maker support frame-by-frame editing?',
+      answer: 'Absolutely! Edit individual GIF frames, control animation timing, add text overlays, apply effects, and optimize each frame. Our frame editor gives you complete control over your animated GIF creation.',
     },
     {
-      question: 'Are my uploaded files stored on your servers?',
+      question: 'How do I optimize GIF file size without losing quality?',
       answer:
-        'No, all processing is done locally in your browser. We do not store any of your data.',
+        'Use our GIF optimizer to compress animated files while maintaining visual quality. Adjust frame rate, reduce colors, resize dimensions, and apply optimization algorithms to create smaller GIF files perfect for web use.',
     },
     {
-      question: 'Can I edit my GIFs after creating them?',
-      answer: 'Absolutely! You can add text, stickers, and more using our feature-rich editor.',
+      question: 'Can I rotate and flip animated GIFs online?',
+      answer: 'Yes, our GIF rotation tool lets you rotate animations by any degree, flip horizontally or vertically, and maintain smooth animation flow. Perfect for correcting orientation in animated images.',
     },
     {
-      question: 'What file formats do you support?',
-      answer: 'We support a wide range of video formats including MP4, AVI, MOV, and more.',
+      question: 'What animated image formats do you support?',
+      answer: 'We support GIF, WebP, APNG, AVIF, and more. Convert between formats, edit animations, and maintain quality across all supported animated image types.',
     },
     {
-      question: 'Can I share my GIFs directly to social media?',
+      question: 'How do I add text and effects to animated GIFs?',
       answer:
-        'Yes, after creating your GIF, you can download it and share it on any social media platform.',
+        'Our GIF editor includes text overlay tools, stickers, effects, and filters. Add animated text, apply visual effects, and customize your GIFs with professional editing features.',
     },
     {
-      question: 'Is there a limit to the file size I can upload?',
-      answer: 'Currently, we support files up to 100MB to ensure fast processing times.',
+      question: 'Is there a limit to GIF file size for editing?',
+      answer: 'Currently, we support animated files up to 100MB to ensure fast processing. Perfect for most GIF editing needs including video conversion, frame editing, and optimization.',
     },
     {
-      question: 'How can I provide feedback or report issues?',
+      question: 'Can I split GIF into individual frames for editing?',
       answer:
-        'We welcome your feedback! Please contact us through our support page for any inquiries or issues.',
+        'Yes, use our GIF splitter to extract individual frames from animated GIFs. Edit each frame separately, reorder sequences, and reassemble into new animations with our frame editor.',
+    },
+    {
+      question: 'How do I create a GIF with a transparent background?',
+      answer: 'To create a GIF with a transparent background, start with images (like PNGs) that already have transparency. When you upload them to our GIF maker, the transparency will be preserved. You can also use our editor to remove a background color from an existing GIF or video.',
+    },
+    {
+      question: 'Can I combine multiple GIFs into one?',
+      answer: 'Yes, you can easily combine multiple GIFs. Upload your GIF files to our editor, and you can arrange them side-by-side or end-to-end. You can also adjust the order and timing of each GIF to create a seamless new animation.',
+    },
+    {
+      question: 'What is the best frame rate for a smooth GIF?',
+      answer: 'For a smooth, fluid animation, a frame rate of 24-30 frames per second (FPS) is ideal. However, for most web use, 10-15 FPS provides a good balance between smoothness and file size. Our editor allows you to adjust the frame rate to find the perfect setting.',
+    },
+    {
+      question: 'How do I make a looping GIF?',
+      answer: 'All GIFs created with GifMagic.app loop by default. You can control the loop settings in our editor. Choose to loop infinitely, or set a specific number of repetitions. For a seamless "boomerang" effect, you can reverse a segment of your animation and append it to the end.',
+    },
+    {
+      question: 'What is the difference between GIF, WebP, and APNG?',
+      answer: 'GIF is the most widely supported format but is limited to 256 colors. WebP and APNG are more modern formats that support millions of colors and better transparency, resulting in higher quality and often smaller file sizes. Our tool lets you create and convert between all these formats.',
     },
   ];
+
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqData.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
-    <div className="relative z-40 h-full w-screen text-black dark:text-white md:w-full">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <div className="relative z-40 h-full w-screen text-black dark:text-white md:w-full">
       <div
         className="absolute inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
                [background:radial-gradient(125%_125%_at_50%_50%,#fdfdfd_30%,#63e_100%)]
@@ -289,12 +363,11 @@ export default function Home() {
             <div className="flex h-screen  max-w-6xl flex-col items-center justify-center gap-x-2">
               <NeonGradientCard className="mt-[170px] flex   items-center justify-center ">
                 <h1 className="pointer-events-none z-10 w-full  bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-7xl font-bold leading-none tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
-                  Feature-Rich, Free-to-Use GIF Maker
+                  Advanced GIF Maker & Animated Image Editor
                 </h1>
               </NeonGradientCard>
               <p className="max-w-6xl text-pretty px-4 py-6 text-center text-xl md:px-0">
-                Convert videos to GIFs, edit them by adding text, stickers, and more, and share them
-                with your friends. No sign-up required and 100% free.
+                Create, edit, and optimize animated GIFs with professional tools. Convert videos to GIFs, resize and crop animations, rotate images, edit individual frames, add text overlays, and compress file sizes. Support for GIF, WebP, APNG formats - all free with no watermarks.
               </p>
               <div className=" mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
                 <CTA />
@@ -322,7 +395,7 @@ export default function Home() {
         <section className="z-[999]">
           <div className="container  mx-auto flex h-full w-full flex-col px-4 ">
             <h2 className="pointer-events-none mb-8  whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/80 bg-clip-text py-28 text-center text-2xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
-              Why Choose GifMagic.app?
+              Professional GIF Editing Tools
             </h2>
             {/* Bento Grid Layout */}
             <div
@@ -344,11 +417,14 @@ export default function Home() {
         <section className="">
           <div className="container mx-auto px-4">
             <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text py-28 text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
-              Frequently Asked Questions
+              GIF Maker & Editor FAQ
             </h2>
-            <div className="space-y-2 text-xl">
+            <div className="mx-auto max-w-4xl space-y-8 mb-[100px]">
               {faqData.map((faq, index) => (
-                <CustomAccordion trigger={faq.question} content={faq.answer} key={index} />
+                <div key={index} className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
+                  <h3 className="mb-4 text-2xl font-bold text-[#ff2975]">{faq.question}</h3>
+                  <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">{faq.answer}</p>
+                </div>
               ))}
             </div>
           </div>
@@ -356,5 +432,6 @@ export default function Home() {
         <Footer />
       </div>
     </div>
+    </>
   );
 }

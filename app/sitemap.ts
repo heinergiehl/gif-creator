@@ -32,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date().toISOString(),
     },
     {
+      url: 'https://www.gifmagic.app/edit-gifs',
+      changeFrequency: 'daily',
+      priority: 1,
+      lastModified: new Date().toISOString(),
+    },
+    {
       url: 'https://www.gifmagic.app/screen-to-video',
       changeFrequency: 'daily',
       priority: 1,

@@ -5,9 +5,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/contact', '/privacy-policy', '/terms-of-service'],
+        disallow: ['/api/', '/login', '/account'],
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: ['/api/', '/login', '/account'],
       },
     ],
-    sitemap: 'https://gifmagic.app/sitemap.xml',
+    sitemap: 'https://www.gifmagic.app/sitemap.xml',
+    host: 'https://www.gifmagic.app',
   };
 }
