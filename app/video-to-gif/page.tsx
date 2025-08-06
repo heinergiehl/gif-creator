@@ -130,7 +130,10 @@ export default function VideoToGif() {
                   <p className="py-6">
                     Convert videos to high-quality animated GIFs with our professional video to GIF converter. Upload MP4, AVI, MOV files and transform them into optimized GIFs. Advanced editing tools included: resize dimensions, crop regions, add text overlays, control frame rate, and optimize file size. No watermarks, completely free.
                   </p>
-                  <Link href="/video-to-gif/converter-and-editor" className="btn btn-primary">
+                  <Link 
+                    href="/video-to-gif/converter-and-editor/editor" 
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-white h-11 px-8 bg-gradient-to-r from-[#ff2975] to-[00FFF1] hover:opacity-90"
+                  >
                     Convert Video to GIF Now
                   </Link>
          

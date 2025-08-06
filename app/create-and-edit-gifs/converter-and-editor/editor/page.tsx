@@ -1,4 +1,4 @@
-'use client';
+
 import React from 'react';
 import dynamic from 'next/dynamic';
 
@@ -12,5 +12,6 @@ const DynamicEditor = dynamic(() => import('@/components/video-to-gif/Editor'), 
 });
 
 export default function EditGifsEditor() {
+    console.log('EditGifsEditor loaded');
   return <DynamicEditor />;
 }
