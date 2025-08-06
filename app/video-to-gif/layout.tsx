@@ -7,10 +7,7 @@ import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { CTA } from '@/components/pages/CTA';
 import { BentoGrid } from '@/components/magicui/bento-grid';
 import { cn } from '@/lib/utils';
-const FadeInUpWrapper = dynamic(
-  () => import('@/components/ui/FadeInWrapper').then((mod) => mod.FadeInUpWrapper),
-  { ssr: false },
-);
+
 export const metadata: Metadata = {
   title: 'Video to GIF Converter - Convert MP4, AVI, MOV to Animated GIF | GifMagic.app',
   description:
@@ -132,23 +129,23 @@ export default function VideoToGif() {
           <section className="hero bg-base-200">
             <div className="hero-content text-center">
               <div className="mx-auto max-w-lg">
-                <FadeInUpWrapper>
+            
                   <h1 className="text-5xl font-bold">
                     Free Video to GIF Converter - MP4, AVI, MOV to Animated GIF
                   </h1>
                   <p className="py-6">
                     Convert videos to high-quality animated GIFs with our professional video to GIF converter. Upload MP4, AVI, MOV files and transform them into optimized GIFs. Advanced editing tools included: resize dimensions, crop regions, add text overlays, control frame rate, and optimize file size. No watermarks, completely free.
                   </p>
-                  <Link href="/video-to-gif/converter-and-editor" className="btn btn-primary">
+                  <Link href="/video-to-gif/converter-and-editor/editor" className="btn btn-primary">
                     Convert Video to GIF Now
                   </Link>
-                </FadeInUpWrapper>
+             
               </div>
             </div>
           </section>
           <section className="py-16">
             <div className="container mx-auto flex h-full w-full flex-col px-4">
-              <FadeInUpWrapper>
+            
                 <h2 className="mb-8 text-center text-3xl font-bold">
                   Professional Video to GIF Conversion Features
                 </h2>
@@ -160,11 +157,11 @@ export default function VideoToGif() {
                     </div>
                   ))}
                 </div>
-              </FadeInUpWrapper>
+            
             </div>
           </section>
           <section className="py-16">
-            <FadeInUpWrapper>
+   
               <div className="container mx-auto px-4">
                 <h2 className="mb-8 text-center text-3xl font-bold">
                   How to Convert Video to GIF Online
@@ -196,10 +193,10 @@ export default function VideoToGif() {
                   </div>
                 </div>
               </div>
-            </FadeInUpWrapper>
+   
           </section>
           <section className=" py-16">
-            <FadeInUpWrapper>
+  
               <div className="container mx-auto px-4">
                 <h2 className="mb-8 text-center text-3xl font-bold">
                   Video to GIF Converter FAQ
@@ -213,7 +210,7 @@ export default function VideoToGif() {
                   ))}
                 </div>
               </div>
-            </FadeInUpWrapper>
+    
           </section>
         </main>
         <Footer />
