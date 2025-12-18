@@ -93,7 +93,7 @@
     "mobx-persist-store": "^1.1.5",
     "mobx-react": "^9.1.0",
     "mobx-react-lite": "^4.0.6",
-    "next": "^15.0.0-rc.0",
+    "next": "15.0.7",
     "next-cloudinary": "^6.5.1",
     "next-themes": "^0.3.0",
     "npm": "^10.8.1",

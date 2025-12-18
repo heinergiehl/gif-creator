@@ -5,15 +5,12 @@ import RootNavigation from './RootNavigation';
 import GoogleAnalytics from '@/app/components/consent/GoogleAnalytics';
 import { Suspense } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import dynamic from 'next/dynamic';
+import CookieBannerWrapper from '@/app/components/consent/CookieBannerWrapper';
 import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Metadata } from 'next';
 const inter = Inter({ subsets: ['latin'] });
-const CookieBanner = dynamic(() => import('@/app/components/consent/CookieBanner'), {
-  ssr: false,
-});
 import type { Viewport } from 'next';
 export const viewport: Viewport = {
   width: 'device-width',
@@ -25,14 +22,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.gifmagic.app'),
+  metadataBase: new URL('https://gif-creator.heinerdevelops.tech/'),
   title: {
-    default: 'GifMagic.app - Advanced GIF Maker & Editor',
-    template: '%s | GifMagic.app'
+    default: 'https://gif-creator.heinerdevelops.tech/ - Advanced GIF Maker & Editor',
+    template: '%s | https://gif-creator.heinerdevelops.tech/',
   },
-  description: 'Free online GIF maker and editor. Create, resize, crop, rotate animated GIFs. Convert videos to GIFs with professional editing tools.',
+  description:
+    'Free online GIF maker and editor. Create, resize, crop, rotate animated GIFs. Convert videos to GIFs with professional editing tools.',
   keywords: ['GIF maker', 'GIF editor', 'video to GIF', 'animated GIF', 'online GIF tools'],
-  authors: [{ name: 'GifMagic.app' }],
+  authors: [{ name: 'https://gif-creator.heinerdevelops.tech/' }],
   creator: 'GifMagic.app',
   publisher: 'GifMagic.app',
   formatDetection: {
@@ -43,10 +41,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.gifmagic.app',
+    url: 'https://gif-creator.heinerdevelops.tech/',
     siteName: 'GifMagic.app',
-    title: 'GifMagic.app - Free Online GIF Maker & Editor',
-    description: 'Create and edit animated GIFs online. Convert videos to GIFs, resize, crop, rotate, and optimize with professional tools.',
+    title: 'Create GIFS instantly without the need of logging in - Free Online GIF Maker & Editor',
+    description:
+      'Create and edit animated GIFs online. Convert videos to GIFs, resize, crop, rotate, and optimize with professional tools.',
     images: [
       {
         url: '/hero-dark.png',
@@ -59,7 +58,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GifMagic.app - Free Online GIF Maker & Editor',
-    description: 'Create and edit animated GIFs online. Convert videos to GIFs with professional tools.',
+    description:
+      'Create and edit animated GIFs online. Convert videos to GIFs with professional tools.',
     images: ['/hero-dark.png'],
   },
   robots: {
@@ -105,7 +105,7 @@ export default function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        <CookieBanner />
+        <CookieBannerWrapper />
       </body>
     </html>
   );
