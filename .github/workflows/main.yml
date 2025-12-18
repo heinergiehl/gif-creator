@@ -55,7 +55,8 @@ jobs:
             EOF
             # B) Pull latest code, install, build & reload
             cd /var/www/myapps/gif-creator
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
             bun install
             bun run build
             pm2 reload ecosystem.config.js --only gif-creator --env production
