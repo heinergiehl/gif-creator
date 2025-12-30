@@ -14,24 +14,19 @@ export const useManageFabricObjects = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const manageFabricObjects = async () => {
-      console.log('manageFabricObject');
       if (canvas) {
         FabricObjectFactory.setCanvas(canvas);
         let frame: EditorElement | null;
         try {
           const currentKeyFrame = store.currentKeyFrame;
-          console.log('currentKeyFrame in useManageFabricObjects: ', currentKeyFrame);
           const selectedFrame = store.frames[currentKeyFrame];
           if (!selectedFrame) {
-            console.error('No frame selected');
             canvas.setBackgroundColor(canvasStore.backgroundColor, () => {
               canvas.requestRenderAll();
             });
             return;
           }
-          console.log('selectedFrame in useManageFabricObjects: ', selectedFrame);
           frame = store.elements.find((element) => element.id === selectedFrame.id) || null;
-          console.log('frame in useManageFabricObjects: ', frame);
           if (!frame) {
             return;
           }
@@ -138,7 +133,6 @@ export const useManageFabricObjects = () => {
     };
     // check if  the objectsInCurrentFrame and the frame  are  the ones that are on the canvas, if not, update the canvas
     const canvasObjects = canvas?.getObjects();
-    console.log('canvasObjects', canvasObjects);
     const elementsInFrame = store.elementsInCurrentFrame;
     const frame = store.frames[store.currentKeyFrame];
     const frameFabricObject = canvasObjects?.find((obj) => obj.id === frame?.id);
@@ -146,7 +140,6 @@ export const useManageFabricObjects = () => {
       !frameFabricObject ||
       !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
     ) {
-      console.log('Updating canvas objects', canvasObjects, elementsInFrame, frameFabricObject);
       canvas?.clear();
     }
     canvas?.setBackgroundColor(canvasStore.backgroundColor, () => {

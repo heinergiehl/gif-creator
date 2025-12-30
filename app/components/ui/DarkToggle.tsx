@@ -4,13 +4,21 @@ import { useTheme } from 'next-themes';
 import { Toggle } from '@/components/ui/toggle';
 import { FaCloudMoon, FaCloudSun } from 'react-icons/fa6';
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = resolvedTheme === 'dark';
   return (
     <Toggle
-      aria-label="Toggle Dark Mode"
-      onClick={() => setTheme(() => (theme === 'dark' ? 'white' : 'dark'))}
+      aria-label="Toggle color theme"
+      disabled={!mounted}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
-      {theme === 'dark' ? <FaCloudSun size={24} /> : <FaCloudMoon size={24} />}
+      {!mounted ? <FaCloudMoon size={24} /> : isDark ? <FaCloudSun size={24} /> : <FaCloudMoon size={24} />}
     </Toggle>
   );
 }

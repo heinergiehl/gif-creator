@@ -1,10 +1,12 @@
 import { Metadata } from 'next';
+import { SITE_BRAND } from '@/lib/site';
 export const metadata: Metadata = {
-  title:
-    'Screen to MP4 Video Recorder - Record your screen and save it as a video (Screen-To-Video)',
+  title: `Free Online Screen Recorder - Record Screen to Video (MP4) | ${SITE_BRAND}`,
   description:
-    "Record your screen, and save it as a video. You can choose different resolutions, and crop the video to the size you want. It's free and super simple.Then, you can download the video, and turn it into a GIF, or edit it further.",
-  keywords: 'screen, recorder, free',
+    'Record your screen online and download the recording as a video. Choose resolution, crop to the area you want, then convert the clip to a GIF — free and easy to use.',
+  keywords:
+    'screen recorder, online screen recorder, record screen to video, screen to MP4, screen recording tool, screen to GIF, free screen recorder',
+  alternates: { canonical: '/screen-to-video' },
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return <div>{children}</div>;

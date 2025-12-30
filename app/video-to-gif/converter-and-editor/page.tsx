@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 export default function VideoToGifConverterPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Professional Video to GIF Converter & Editor",
-    "url": "https://www.gifmagic.app/video-to-gif/converter-and-editor",
+    "url": absoluteUrl('/video-to-gif/converter-and-editor'),
     "description": "Advanced video to GIF converter with professional editing tools. Convert MP4, AVI, MOV to high-quality animated GIFs with frame-by-frame editing.",
     "applicationCategory": "VideoApplication",
     "operatingSystem": "Web Browser",
@@ -30,7 +31,7 @@ export default function VideoToGifConverterPage() {
     ],
     "author": {
       "@type": "Organization",
-      "name": "GifMagic.app"
+      "name": SITE_BRAND
     }
   };
 

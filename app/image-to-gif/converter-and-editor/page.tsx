@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 export default function ImageToGifConverterPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Professional Image to GIF Converter & Editor",
-    "url": "https://www.gifmagic.app/image-to-gif/converter-and-editor",
+    "url": absoluteUrl('/image-to-gif/converter-and-editor'),
     "description": "Advanced image to GIF converter with professional editing tools. Create animated GIFs from JPG, PNG, WebP photos.",
     "applicationCategory": "ImageApplication",
     "operatingSystem": "Web Browser",
@@ -30,7 +31,7 @@ export default function ImageToGifConverterPage() {
     ],
     "author": {
       "@type": "Organization",
-      "name": "GifMagic.app"
+      "name": SITE_BRAND
     }
   };
 

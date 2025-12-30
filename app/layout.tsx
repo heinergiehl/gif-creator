@@ -10,56 +10,54 @@ import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Metadata } from 'next';
+import { SITE_BRAND, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 const inter = Inter({ subsets: ['latin'] });
 import type { Viewport } from 'next';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  // Also supported by less commonly used
-  // interactiveWidget: 'resizes-visual',
+  viewportFit: 'cover',
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gif-creator.heinerdevelops.tech/'),
+  metadataBase: SITE_URL,
   title: {
-    default: 'https://gif-creator.heinerdevelops.tech/ - Advanced GIF Maker & Editor',
-    template: '%s | https://gif-creator.heinerdevelops.tech/',
+    default: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    template: `%s | ${SITE_BRAND}`,
   },
-  description:
-    'Free online GIF maker and editor. Create, resize, crop, rotate animated GIFs. Convert videos to GIFs with professional editing tools.',
-  keywords: ['GIF maker', 'GIF editor', 'video to GIF', 'animated GIF', 'online GIF tools'],
-  authors: [{ name: 'https://gif-creator.heinerdevelops.tech/' }],
-  creator: 'GifMagic.app',
-  publisher: 'GifMagic.app',
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: '/' },
+  applicationName: SITE_NAME,
+  keywords: ['GIF maker', 'GIF editor', 'video to GIF', 'image to GIF', 'animated GIF editor'],
+  authors: [{ name: SITE_BRAND }],
+  creator: SITE_BRAND,
+  publisher: SITE_BRAND,
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
+  category: 'technology',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://gif-creator.heinerdevelops.tech/',
-    siteName: 'GifMagic.app',
-    title: 'Create GIFS instantly without the need of logging in - Free Online GIF Maker & Editor',
-    description:
-      'Create and edit animated GIFs online. Convert videos to GIFs, resize, crop, rotate, and optimize with professional tools.',
+    url: SITE_URL,
+    siteName: SITE_BRAND,
+    title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: '/hero-dark.png',
         width: 1200,
         height: 630,
-        alt: 'GifMagic.app - GIF Maker and Editor',
+        alt: `${SITE_BRAND} — GIF maker and editor`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GifMagic.app - Free Online GIF Maker & Editor',
-    description:
-      'Create and edit animated GIFs online. Convert videos to GIFs with professional tools.',
+    title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    description: SITE_DESCRIPTION,
     images: ['/hero-dark.png'],
   },
   robots: {
@@ -81,10 +79,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <Suspense>
-        <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
-      </Suspense>
       <body
         className={cn([
           inter.className,
@@ -92,20 +86,22 @@ export default function RootLayout({
           'h-full select-none',
         ])}
       >
+        <Suspense>
+          <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
+        </Suspense>
         <ThemeProvider
           themes={['orange', 'light', 'dark', 'rose']}
           defaultTheme="dark"
           attribute="class"
           enableSystem
         >
-          {/* only render navigation when not on pathes that start with  converter-and-editor  */}
           <RootNavigation />
           <Toaster />
           {children}
+          <CookieBannerWrapper />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        <CookieBannerWrapper />
       </body>
     </html>
   );

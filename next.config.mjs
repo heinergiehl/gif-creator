@@ -1,5 +1,13 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const baseConfig = {
+  outputFileTracingRoot: __dirname,
   images: {
     remotePatterns: [{
       protocol: 'https',
@@ -58,4 +66,10 @@ const nextConfig = {
     }
   }
 }
-export default nextConfig
+
+export default function nextConfig(phase) {
+  return {
+    distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '.next-build',
+    ...baseConfig,
+  };
+}

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { ModeToggle } from './DarkToggle';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+
 interface CustomNavigationProps {
   sections: {
     section: string;
@@ -45,8 +45,11 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
       ])}
     >
       <div className="flex w-full items-center justify-between px-4 lg:px-8">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image width={200} height={200} src="/logo.png" alt="logo" className="h-12 w-auto" />
+        <Link href="/" className="flex items-center space-x-1">
+          {/* display GIF-Creator as nice text */}
+          <div className="text-2xl font-bold text-blue-600">GIF</div>
+          <div className="text-2xl font-bold text-purple-600">Creator</div>
+        
         </Link>
         <NavigationMenu className="sticky">
           <NavigationMenuList className="">
@@ -78,6 +81,12 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
             ))}
           </NavigationMenuList>
         </NavigationMenu>
+        <Link
+          href="/edit-gifs/converter-and-editor"
+          className="hidden items-center rounded-md bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl sm:inline-flex"
+        >
+          Open GIF Editor
+        </Link>
         <ModeToggle />
       </div>
     </div>

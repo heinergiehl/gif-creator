@@ -1,39 +1,30 @@
 import Link from 'next/link';
 import { Footer } from '@/app/components/ui/Footer';
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Video to GIF Converter - Convert MP4, AVI, MOV to Animated GIF | GifMagic.app',
-  description:
-    'Free online video to GIF converter. Transform MP4, AVI, MOV, and other video formats into high-quality animated GIFs. Resize, crop, optimize, and edit frames. No watermarks, no sign-up required.',
-  keywords:
-    'video to GIF converter, MP4 to GIF, AVI to GIF, MOV to GIF, convert video to GIF, online GIF converter, animated GIF maker, video converter, GIF from video, free video to GIF, resize GIF from video, crop video to GIF, optimize GIF size, video GIF editor',
-  alternates: { canonical: 'https://www.gifmagic.app/video-to-gif' },
-};
+import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 const features = [
   {
-    name: '⚡ Fast Video to GIF Conversion',
-    body: 'Convert videos to high-quality animated GIFs in seconds. Support for MP4, AVI, MOV, and other popular video formats with optimized processing.',
+    name: 'Fast video to GIF conversion',
+    body: 'Convert common formats like MP4, AVI, and MOV into smooth animated GIFs in seconds — right in your browser.',
   },
   {
-    name: '💾 Secure Local Processing',
-    body: 'All video to GIF conversion happens locally in your browser. No files uploaded to servers, ensuring complete privacy for your video content.',
+    name: 'Private by design',
+    body: 'Processing runs locally in your browser so your video stays on your device.',
   },
   {
-    name: '💻 Advanced GIF Editor & Customization',
-    body: 'Professional GIF editing tools: resize animated GIFs, crop regions, rotate images, add text overlays, control frame rate, optimize file size, and apply effects to your converted videos.',
+    name: 'Built-in GIF editor',
+    body: 'Crop, resize, rotate, add text, adjust frame rate, and optimize file size for the perfect loop.',
   },
   {
-    name: '🎯 Frame-by-Frame Control',
-    body: 'Extract specific frames from your video, control animation timing, adjust playback speed, and edit individual frames for perfect GIF creation.',
+    name: 'Trim and timing control',
+    body: 'Pick the exact moment, adjust speed, and fine-tune timing so your GIF feels natural.',
   },
   {
-    name: '🔧 Multiple Video Format Support',
-    body: 'Convert MP4, AVI, MOV, WMV, FLV, and other video formats to GIF. Automatic format detection and optimized conversion for each video type.',
+    name: 'Wide format support',
+    body: 'Works with MP4, AVI, MOV, WebM, and more — with automatic format handling.',
   },
   {
-    name: '📱 Mobile-Friendly Video to GIF Converter',
-    body: 'Create GIFs from videos on any device. Our responsive video to GIF converter works perfectly on desktop, tablet, and mobile browsers.',
+    name: 'Works on desktop and mobile',
+    body: 'Use the same converter on desktop, tablet, or phone — no app needed.',
   },
 ];
 const faqData = [
@@ -82,8 +73,8 @@ export default function VideoToGif() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "Video to GIF Converter - GifMagic.app",
-    "url": "https://www.gifmagic.app/video-to-gif",
+    "name": `Video to GIF Converter - ${SITE_BRAND}`,
+    "url": absoluteUrl('/video-to-gif'),
     "description": "Free online video to GIF converter. Convert MP4, AVI, MOV videos to high-quality animated GIFs with professional editing tools.",
     "applicationCategory": "VideoApplication",
     "operatingSystem": "Web Browser",
@@ -105,7 +96,7 @@ export default function VideoToGif() {
     ],
     "author": {
       "@type": "Organization",
-      "name": "GifMagic.app"
+      "name": SITE_BRAND
     }
   };
 
@@ -128,11 +119,11 @@ export default function VideoToGif() {
                     Free Video to GIF Converter - MP4, AVI, MOV to Animated GIF
                   </h1>
                   <p className="py-6">
-                    Convert videos to high-quality animated GIFs with our professional video to GIF converter. Upload MP4, AVI, MOV files and transform them into optimized GIFs. Advanced editing tools included: resize dimensions, crop regions, add text overlays, control frame rate, and optimize file size. No watermarks, completely free.
+                    Turn a short clip into a crisp, looping GIF. Upload MP4, AVI, MOV (and more), trim the scene, crop and resize, add text, and export an optimized GIF. Free to use, and your export is watermark-free.
                   </p>
                   <Link 
                     href="/video-to-gif/converter-and-editor/editor" 
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-white h-11 px-8 bg-gradient-to-r from-[#ff2975] to-[00FFF1] hover:opacity-90"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-white h-11 px-8 bg-gradient-to-r from-[#ff2975] to-[#00FFF1] hover:opacity-90"
                   >
                     Convert Video to GIF Now
                   </Link>

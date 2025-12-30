@@ -1,11 +1,19 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { SITE_BRAND } from '@/lib/site';
+
+export const metadata: Metadata = {
+  title: `Terms of Service | ${SITE_BRAND}`,
+  description: `Terms and conditions for using ${SITE_BRAND} and its online GIF creation tools.`,
+  alternates: { canonical: '/terms-of-service' },
+};
 function TermsOfService() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="my-8 text-center text-4xl font-bold">Terms of Service</h1>
       <p className="mb-4">
-        Welcome to GifMagic.app! Please read these Terms of Service ("Terms", "Terms of Service")
-        carefully before using the GifMagic.app website (the "Service") operated by GifMagic.app
+        Welcome to {SITE_BRAND}! Please read these Terms of Service ("Terms", "Terms of Service")
+        carefully before using the {SITE_BRAND} website (the "Service") operated by {SITE_BRAND}
         ("us", "we", or "our").
       </p>
       <h2 className="my-4 text-3xl font-bold">1. Acceptance of Terms</h2>
@@ -21,7 +29,7 @@ function TermsOfService() {
       <h2 className="my-4 text-3xl font-bold">3. Your Content</h2>
       <p className="mb-4">
         You retain all rights in, and are solely responsible for, the content you post to
-        GifMagic.app.
+        {SITE_BRAND}.
       </p>
       <h2 className="my-4 text-3xl font-bold">4. Privacy & Data Protection</h2>
       <p className="mb-4">

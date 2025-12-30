@@ -1,5 +1,6 @@
 import { FaRegCopyright } from 'react-icons/fa';
 import Link from 'next/link';
+import { SITE_BRAND } from '@/lib/site';
 export const Footer = () => {
   return (
     <footer className="footer footer-center bg-base-300 text-base-content fixed bottom-0 flex justify-evenly p-4">
@@ -11,7 +12,7 @@ export const Footer = () => {
           <span>Image to GIF</span>
         </Link>
         <Link href="/screen-to-video">
-          <span>Screen To Video</span>
+          <span>Screen Recorder</span>
         </Link>
         <Link href="/edit-gifs">
           <span>Edit GIFs</span>
@@ -25,13 +26,16 @@ export const Footer = () => {
         <Link href="/terms-of-service">
           <span>Terms of Service</span>
         </Link>
+        <Link href="/info/cookies">
+          <span>Cookie Policy</span>
+        </Link>
         <Link href="/contact">
           <span>Contact</span>
         </Link>
       </div>
       <p>
         <span className="flex items-center justify-center">
-          GIFMagic.app <FaRegCopyright className="mx-1" /> 2024. All rights reserved.
+          {SITE_BRAND} <FaRegCopyright className="mx-1" /> 2024. All rights reserved.
         </span>
       </p>
     </footer>

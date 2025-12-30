@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
+import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'GIF Editor - GifMagic.app',
+  title: `GIF Editor - ${SITE_BRAND}`,
   description: 'Interactive GIF editor interface.',
   robots: 'noindex, nofollow'
 };

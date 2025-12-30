@@ -4,19 +4,28 @@ import { Input } from './input';
 import { cn } from '@/lib/utils';
 import { login, signup } from './actions';
 import { IconBrandGithub, IconBrandGoogle, IconBrandOnlyfans } from '@tabler/icons-react';
-export default function SignupFormDemo() {
+import type { Metadata } from 'next';
+import { SITE_BRAND } from '@/lib/site';
+
+export const metadata: Metadata = {
+  title: `Sign in | ${SITE_BRAND}`,
+  description: `Sign in to your ${SITE_BRAND} account to manage your profile and saved projects.`,
+  robots: { index: false, follow: false },
+};
+
+export default function LoginPage() {
   return (
     <div className="mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
-        Welcome to Aceternity
+        Sign in to {SITE_BRAND}
       </h2>
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-        Login to aceternity if you can because we don&apos;t have a login flow yet
+        Log in to access your account and manage your profile.
       </p>
       <form className="my-8">
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" name="email" />
+          <Input id="email" placeholder="you@example.com" type="email" name="email" />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>
