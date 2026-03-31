@@ -2,15 +2,12 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import RootNavigation from './RootNavigation';
-import GoogleAnalytics from '@/app/components/consent/GoogleAnalytics';
-import { Suspense } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import CookieBannerWrapper from '@/app/components/consent/CookieBannerWrapper';
 import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Metadata } from 'next';
-import { SITE_BRAND, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
+import { SITE_BRAND, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL } from '@/lib/site';
 const inter = Inter({ subsets: ['latin'] });
 import type { Viewport } from 'next';
 export const viewport: Viewport = {
@@ -28,7 +25,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   alternates: { canonical: '/' },
   applicationName: SITE_NAME,
-  keywords: ['GIF maker', 'GIF editor', 'video to GIF', 'image to GIF', 'animated GIF editor'],
+  keywords: SITE_KEYWORDS,
   authors: [{ name: SITE_BRAND }],
   creator: SITE_BRAND,
   publisher: SITE_BRAND,
@@ -86,9 +83,6 @@ export default function RootLayout({
           'h-full select-none',
         ])}
       >
-        <Suspense>
-          <GoogleAnalytics GA_MEASUREMENT_ID="G-8M37TENBJS" />
-        </Suspense>
         <ThemeProvider
           themes={['orange', 'light', 'dark', 'rose']}
           defaultTheme="dark"
@@ -98,7 +92,6 @@ export default function RootLayout({
           <RootNavigation />
           <Toaster />
           {children}
-          <CookieBannerWrapper />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

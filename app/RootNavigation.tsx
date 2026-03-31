@@ -1,17 +1,4 @@
 'use client';
-import * as React from 'react';
-import Link from 'next/link';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
-import { ModeToggle } from './components/ui/DarkToggle';
 import CustomNavigation from './components/ui/CustomNavigation';
 import { usePathname } from 'next/navigation';
 const sections = [
@@ -37,6 +24,31 @@ const sections = [
         title: 'Screen Recorder',
         href: '/screen-to-video',
         description: 'Record your screen to video, then convert the clip to a GIF.',
+      },
+    ],
+  },
+  {
+    section: 'Learn',
+    links: [
+      {
+        title: 'GIF Blog',
+        href: '/blog',
+        description: 'Read practical guides for making, editing, optimizing, and converting GIFs.',
+      },
+      {
+        title: 'Make a GIF from video',
+        href: '/blog/how-to-make-a-gif-from-a-video',
+        description: 'Trim, crop, and convert MP4, MOV, and WebM clips into clean looping GIFs.',
+      },
+      {
+        title: 'Edit a GIF without quality loss',
+        href: '/blog/how-to-edit-a-gif-without-losing-quality',
+        description: 'Learn how to resize, crop, add text, and tune timing without hurting readability.',
+      },
+      {
+        title: 'Reduce GIF file size',
+        href: '/blog/optimize-gif-size-without-losing-quality',
+        description: 'Compress and optimize GIFs with practical file-size reduction techniques.',
       },
     ],
   },

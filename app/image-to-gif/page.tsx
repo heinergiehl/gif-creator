@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Footer } from '../components/ui/Footer';
+import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { SITE_BRAND } from '@/lib/site';
 export const metadata: Metadata = {
   title: `Image to GIF Converter - Create Animated GIFs from Photos | ${SITE_BRAND}`,
@@ -81,6 +82,15 @@ export default function ImageToGif() {
             </div>
           </div>
         </section>
+        <LatestPostsSection
+          title="Image to GIF guides worth linking to"
+          description="Support image-sequence and photo-to-GIF searches with focused tutorials on timing, smooth playback, and file-size control."
+          postSlugs={[
+            'turn-images-into-a-smooth-animated-gif',
+            'how-to-edit-a-gif-without-losing-quality',
+            'optimize-gif-size-without-losing-quality',
+          ]}
+        />
         <Footer />
       </main>
     </div>

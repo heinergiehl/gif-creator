@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Footer } from '@/app/components/ui/Footer';
+import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 export default function ScreenToVideo() {
   const structuredData = {
@@ -169,6 +170,15 @@ export default function ScreenToVideo() {
             </div>
           </div>
         </section>
+        <LatestPostsSection
+          title="Screen recording to GIF workflow guides"
+          description="Give search engines and users a clearer path from screen capture intent to conversion, editing, and optimization content."
+          postSlugs={[
+            'record-screen-and-turn-it-into-a-gif',
+            'how-to-make-a-gif-from-a-video',
+            'optimize-gif-size-without-losing-quality',
+          ]}
+        />
       </main>
       <Footer />
     </div>

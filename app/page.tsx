@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 import { Card } from '@/components/ui/card';
 import { BorderBeam } from '@/components/magicui/border-beam';
+import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { CTA } from '@/components/pages/CTA';
@@ -424,6 +425,15 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <LatestPostsSection
+          title="Learn the workflows behind better GIFs"
+          description="Build topical depth around GIF creation, editing, optimization, and screen-to-GIF workflows with practical guides that complement the core tools."
+          postSlugs={[
+            'how-to-make-a-gif-from-a-video',
+            'how-to-edit-a-gif-without-losing-quality',
+            'optimize-gif-size-without-losing-quality',
+          ]}
+        />
         <section className="">
           <div className="container mx-auto px-4">
             <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text py-28 text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">

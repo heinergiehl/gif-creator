@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 import { Footer } from '../components/ui/Footer';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
@@ -213,6 +214,16 @@ export default function EditGifs() {
               </div>
             </div>
           </section>
+
+          <LatestPostsSection
+            title="Editing, resizing, and optimization guides"
+            description="Reinforce editing intent with supporting content that answers adjacent questions users search before and after opening the editor."
+            postSlugs={[
+              'how-to-edit-a-gif-without-losing-quality',
+              'optimize-gif-size-without-losing-quality',
+              'how-to-make-a-gif-from-a-video',
+            ]}
+          />
 
           <Footer />
         </div>

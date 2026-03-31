@@ -1,43 +1,71 @@
-import { FaRegCopyright } from 'react-icons/fa';
 import Link from 'next/link';
 import { SITE_BRAND } from '@/lib/site';
+
+const toolLinks = [
+  { href: '/video-to-gif', label: 'Video to GIF' },
+  { href: '/image-to-gif', label: 'Image to GIF' },
+  { href: '/screen-to-video', label: 'Screen Recorder' },
+  { href: '/edit-gifs', label: 'Edit GIFs' },
+  { href: '/blog', label: 'Blog' },
+];
+
+const legalLinks = [
+  { href: '/privacy-policy', label: 'Privacy Policy' },
+  { href: '/terms-of-service', label: 'Terms of Service' },
+  { href: '/info/cookies', label: 'Cookie Policy' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/rss.xml', label: 'RSS' },
+  { href: '/sitemap.xml', label: 'Sitemap' },
+];
+
 export const Footer = () => {
   return (
-    <footer className="footer footer-center bg-base-300 text-base-content fixed bottom-0 flex justify-evenly p-4">
-      <div className="flex items-center justify-center space-x-4">
-        <Link href="/video-to-gif">
-          <span>Video to GIF</span>
-        </Link>
-        <Link href="/image-to-gif">
-          <span>Image to GIF</span>
-        </Link>
-        <Link href="/screen-to-video">
-          <span>Screen Recorder</span>
-        </Link>
-        <Link href="/edit-gifs">
-          <span>Edit GIFs</span>
-        </Link>
+    <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {/* Link grid — stacks on mobile, rows on wider screens */}
+        <div className="grid gap-8 sm:grid-cols-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Tools
+            </h3>
+            <ul className="mt-3 grid gap-2">
+              {toolLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="inline-block py-1 text-sm text-slate-700 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Legal &amp; info
+            </h3>
+            <ul className="mt-3 grid gap-2">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="inline-block py-1 text-sm text-slate-700 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          {SITE_BRAND} &copy; {new Date().getFullYear()}. All rights reserved.
+        </div>
       </div>
-      {/* links to the pages */}
-      <div className="flex items-center justify-center space-x-4">
-        <Link href="/privacy-policy">
-          <span>Privacy Policy</span>
-        </Link>
-        <Link href="/terms-of-service">
-          <span>Terms of Service</span>
-        </Link>
-        <Link href="/info/cookies">
-          <span>Cookie Policy</span>
-        </Link>
-        <Link href="/contact">
-          <span>Contact</span>
-        </Link>
-      </div>
-      <p>
-        <span className="flex items-center justify-center">
-          {SITE_BRAND} <FaRegCopyright className="mx-1" /> 2024. All rights reserved.
-        </span>
-      </p>
     </footer>
   );
 };

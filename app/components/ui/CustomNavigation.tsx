@@ -1,15 +1,8 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { ModeToggle } from './DarkToggle';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +19,11 @@ interface CustomNavigationProps {
   }[];
 }
 export default function CustomNavigation({ sections }: CustomNavigationProps) {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -36,81 +33,203 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    setOpenSection(null);
+    setMobileOpen(false);
+  }, [pathname]);
+
+  /* Lock body scroll when mobile menu is open */
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  const featuredLinks = useMemo(
+    () => [
+      { title: 'Blog', href: '/blog' },
+      { title: 'Video to GIF', href: '/video-to-gif' },
+      { title: 'Image to GIF', href: '/image-to-gif' },
+      { title: 'Edit GIFs', href: '/edit-gifs' },
+    ],
+    [],
+  );
+
   return (
     <div
       className={cn([
-        `supports-backdrop-blur:bg-white/60 fixed inset-0    top-0   z-[800] flex
-                      h-[70px]  w-full flex-none items-center justify-between bg-white/95  backdrop-blur transition-colors duration-500 dark:border-slate-50/[0.06] dark:bg-transparent lg:z-50 lg:grid-cols-2 lg:border-b lg:border-slate-900/10`,
-        isScrolled ? ' shadow-lg dark:border-gray-700  dark:shadow-xl' : '',
+        'fixed inset-x-0 top-0 z-[800] border-b border-slate-200/80 bg-white/95 backdrop-blur transition-colors duration-300 dark:border-slate-800/80 dark:bg-slate-950/80',
+        isScrolled ? 'shadow-lg shadow-slate-900/5 dark:shadow-black/20' : '',
       ])}
     >
-      <div className="flex w-full items-center justify-between px-4 lg:px-8">
-        <Link href="/" className="flex items-center space-x-1">
-          {/* display GIF-Creator as nice text */}
-          <div className="text-2xl font-bold text-blue-600">GIF</div>
-          <div className="text-2xl font-bold text-purple-600">Creator</div>
-        
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:h-[72px] lg:px-8">
+        {/* ---- Logo ---- */}
+        <Link href="/" className="flex shrink-0 items-center space-x-1">
+          <span className="text-xl font-bold text-blue-600 sm:text-2xl">GIF</span>
+          <span className="text-xl font-bold text-purple-600 sm:text-2xl">Creator</span>
         </Link>
-        <NavigationMenu className="sticky">
-          <NavigationMenuList className="">
-            {sections.map((section) => (
-              <NavigationMenuItem key={section.section} className="">
-                <NavigationMenuTrigger className="text-lg ">
-                  {section.section}
-                </NavigationMenuTrigger>
-                <NavigationMenuContent className="">
-                  <ul
-                    className="supports-backdrop-blur:bg-white/60 z-[200]      rounded-md border-b-2 
-               bg-opacity-80 p-4   opacity-100    dark:backdrop-blur 
-                  "
-                  >
-                    {section.links ? (
-                      section.links.map((link) => (
-                        <ListItem key={link.title} href={link.href} title={link.title}>
+
+        {/* ---- Desktop nav ---- */}
+        <nav className="hidden items-center gap-1 lg:flex">
+          {featuredLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white',
+                pathname === link.href && 'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
+              )}
+            >
+              {link.title}
+            </Link>
+          ))}
+
+          {sections.map((section) => (
+            <div
+              key={section.section}
+              className="relative"
+              onMouseEnter={() => setOpenSection(section.section)}
+              onMouseLeave={() => setOpenSection((current) => (current === section.section ? null : current))}
+            >
+              <button
+                type="button"
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white',
+                  openSection === section.section && 'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
+                )}
+                onClick={() =>
+                  setOpenSection((current) => (current === section.section ? null : section.section))
+                }
+              >
+                {section.section}
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              {openSection === section.section ? (
+                <div className="absolute left-0 top-[calc(100%+12px)] w-[420px] rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/30">
+                  <div className="grid gap-2">
+                    {section.links?.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="rounded-2xl px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-900"
+                      >
+                        <div className="text-base font-semibold text-slate-950 dark:text-white">
+                          {link.title}
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
                           {link.description}
-                        </ListItem>
-                      ))
-                    ) : (
-                      <ListItem href={section.href ?? ''} title={section.section}>
-                        {section.description}
-                      </ListItem>
-                    )}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
-        <Link
-          href="/edit-gifs/converter-and-editor"
-          className="hidden items-center rounded-md bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl sm:inline-flex"
-        >
-          Open GIF Editor
-        </Link>
-        <ModeToggle />
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </nav>
+
+        {/* ---- Right side actions ---- */}
+        <div className="ml-auto flex items-center gap-2">
+          <Link
+            href="/edit-gifs/converter-and-editor"
+            className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl sm:px-5 sm:py-2.5 sm:text-sm"
+          >
+            Open Editor
+          </Link>
+          <ModeToggle />
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900 lg:hidden"
+            onClick={() => setMobileOpen((current) => !current)}
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
+
+      {/* ---- Mobile menu ---- */}
+      {mobileOpen ? (
+        <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 bg-white px-4 pb-8 pt-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden">
+          <div className="grid gap-1">
+            {featuredLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'rounded-2xl px-4 py-3.5 text-base font-medium text-slate-700 transition active:bg-slate-200 dark:text-slate-300 dark:active:bg-slate-800',
+                  pathname === link.href
+                    ? 'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-900/60',
+                )}
+              >
+                {link.title}
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3">
+            {sections.map((section) => (
+              <div key={section.section} className="rounded-2xl border border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between px-4 py-3.5 text-left"
+                  onClick={() =>
+                    setOpenSection((current) => (current === section.section ? null : section.section))
+                  }
+                  aria-expanded={openSection === section.section}
+                >
+                  <span className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                    {section.section}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 text-slate-400 transition-transform duration-200',
+                      openSection === section.section && 'rotate-180',
+                    )}
+                  />
+                </button>
+                {openSection === section.section ? (
+                  <div className="grid gap-1 px-2 pb-3">
+                    {section.links?.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="rounded-2xl px-3 py-3 transition active:bg-slate-200 dark:active:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/60"
+                      >
+                        <div className="text-sm font-semibold text-slate-950 dark:text-white">
+                          {link.title}
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                          {link.description}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile CTA */}
+          <div className="mt-6">
+            <Link
+              href="/edit-gifs/converter-and-editor"
+              className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3.5 text-base font-semibold text-white shadow-lg transition hover:from-blue-700 hover:to-purple-700"
+            >
+              Open GIF Editor
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
-const ListItem = React.forwardRef<
-  React.ElementRef<'a'>,
-  { href: string; title: string; children?: React.ReactNode }
->(({ href, title, children, ...props }, ref) => {
-  return (
-    <Link href={href} legacyBehavior passHref>
-      <NavigationMenuLink
-        className={cn([navigationMenuTriggerStyle(), ' z-[300] my-4 rounded-md py-8 text-lg '])}
-      >
-        <span
-          ref={ref}
-          className="cursor-pointer rounded-md transition-colors duration-200 ease-in-out "
-          {...props}
-        >
-          <div className="font-medium leading-none ">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
-        </span>
-      </NavigationMenuLink>
-    </Link>
-  );
-});
-ListItem.displayName = 'ListItem';

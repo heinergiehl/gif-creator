@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Footer } from '@/app/components/ui/Footer';
+import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 const features = [
   {
@@ -200,6 +201,15 @@ export default function VideoToGif() {
               </div>
       
           </section>
+          <LatestPostsSection
+            title="Video to GIF tutorials and optimization tips"
+            description="These guides support the same search intent as the converter page and help users choose better clip length, quality, and file-size settings."
+            postSlugs={[
+              'how-to-make-a-gif-from-a-video',
+              'optimize-gif-size-without-losing-quality',
+              'record-screen-and-turn-it-into-a-gif',
+            ]}
+          />
         </main>
         <Footer />
       </div>

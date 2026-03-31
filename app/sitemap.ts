@@ -1,80 +1,22 @@
 import { MetadataRoute } from 'next';
+import { getAllPosts } from '@/lib/blog';
+import { getPublicAppRoutes, getRouteChangeFrequency, getRoutePriority } from '@/lib/site-content';
 import { SITE_URL } from '@/lib/site';
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
   const toUrl = (path: string) => new URL(path, SITE_URL).toString();
-  return [
-    {
-      url: toUrl('/'),
-      changeFrequency: 'weekly',
-      priority: 1,
-      lastModified,
-    },
-    {
-      url: toUrl('/video-to-gif'),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-      lastModified,
-    },
-    {
-      url: toUrl('/video-to-gif/converter-and-editor'),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-      lastModified,
-    },
-    {
-      url: toUrl('/image-to-gif'),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-      lastModified,
-    },
-    {
-      url: toUrl('/image-to-gif/converter-and-editor'),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-      lastModified,
-    },
-    {
-      url: toUrl('/edit-gifs'),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-      lastModified,
-    },
-    {
-      url: toUrl('/edit-gifs/converter-and-editor'),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-      lastModified,
-    },
-    {
-      url: toUrl('/screen-to-video'),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-      lastModified,
-    },
-    {
-      url: toUrl('/privacy-policy'),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-      lastModified,
-    },
-    {
-      url: toUrl('/terms-of-service'),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-      lastModified,
-    },
-    {
-      url: toUrl('/contact'),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-      lastModified,
-    },
-    {
-      url: toUrl('/info/cookies'),
-      changeFrequency: 'monthly',
-      priority: 0.2,
-      lastModified,
-    },
-  ];
+  const routeEntries = getPublicAppRoutes().map((route) => ({
+    url: toUrl(route),
+    changeFrequency: getRouteChangeFrequency(route),
+    priority: getRoutePriority(route),
+    lastModified: new Date(),
+  }));
+
+  const blogEntries = getAllPosts().map((post) => ({
+    url: toUrl(`/blog/${post.slug}`),
+    changeFrequency: 'monthly' as const,
+    priority: 0.75,
+    lastModified: new Date(post.updated ?? post.date),
+  }));
+
+  return [...routeEntries, ...blogEntries];
 }

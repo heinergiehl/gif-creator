@@ -20,6 +20,25 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Blog content
+
+Static blog posts live in `content/blog/*.md` and are rendered by the app router at `/blog` and `/blog/[slug]`.
+
+The site also generates these automatically from the file-based content/app structure:
+
+- `/sitemap.xml` from public app routes plus Markdown blog posts
+- `/rss.xml` from all Markdown blog posts
+
+Each Markdown file uses frontmatter for SEO metadata and internal linking:
+
+- `title`, `description`, `date`, `updated`
+- `author`, `category`, `tags`, `keywords`
+- `featured`, `featuredRank`
+- `relatedSlugs` for cross-linking between posts
+- `ctaHref`, `ctaLabel` for the primary product link inside each article
+
+To add a new post, create a new Markdown file in `content/blog`, then include natural internal links to relevant tool pages such as `/video-to-gif`, `/image-to-gif`, `/edit-gifs`, or `/screen-to-video`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
