@@ -61,7 +61,9 @@ jobs:
             git log -1 --pretty=%s
             bun install
             bun run build
+            pm2 delete gif_creator 2>/dev/null || true
             pm2 startOrReload ecosystem.config.js --only gif-creator --env production
+            pm2 save
             sleep 5
             pm2 describe gif-creator | sed -n '1,40p'
             curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/" | grep -q "Learn the workflows behind better GIFs"
