@@ -7,7 +7,7 @@ export const useFFMPEG = (ffmpegRef: React.MutableRefObject<FFmpeg>, store: any)
   useEffect(() => {
     const loadFFMPEG = async () => {
       const ffmpeg = ffmpegRef.current;
-      ffmpeg.on('log', ({ message }) => console.log(message));
+      ffmpeg.on('log', () => {});
       ffmpeg.on('progress', (e) => (store.progress.conversion = e.progress * 100));
       await ffmpeg.load({
         coreURL: await toBlobURL(

@@ -11,7 +11,6 @@ const DragableView = observer(function DragableView(props: {
   total: number;
   onChange: (value: number) => void;
 }) {
-  console.log('DRAGGABLE VIEW');
   const ref = useRef<{
     div: HTMLDivElement | null;
     isDragging: boolean;
@@ -25,7 +24,6 @@ const DragableView = observer(function DragableView(props: {
   });
   const { current: data } = ref;
   function calculateNewValue(mouseX: number): number {
-    console.log('CALCULATE NEW VALUE');
     if (!data.div || !data.div.parentElement) return 0;
     const deltaX = mouseX - data.initialMouseX;
     const parentWidth = data.div.parentElement.clientWidth;

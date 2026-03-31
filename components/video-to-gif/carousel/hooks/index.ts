@@ -64,7 +64,6 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
   }, [store.currentKeyFrame, currentlySelectedFrame, setCurrentlySelectedFrame]);
   useDndMonitor({
     onDragOver: (event) => {
-      console.log('event in onDragOver: ', event);
       const newIndex = store.frames.findIndex((frame) => frame.id === event.over?.id);
       updateHoverIndex(newIndex);
     },
@@ -73,7 +72,6 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
       store.isDragging = false;
     },
     onDragMove: (event) => {
-      console.log('event in onDragMove: ', event);
       handleAutoScroll();
       const carouselContent = carouselRef.current;
       if (!carouselContent || !event.active || !event.active.rect.current.translated) return;
@@ -178,17 +176,11 @@ const useDragAndDropAndCarousel = (initialCardWidth = 120): UseDragAndDropAndCar
     } else {
       store.setSelectedElements([id]);
     }
-    store.currentKeyFrame = selectedFrameIdx;
+    store.setCurrentKeyFrame(selectedFrameIdx);
   };
   const handleDeleteFrame = useCallback(
     (index: number): void => {
-      const frameToDelete = store.frames[index];
-      store.elements = store.elements.filter((element) => element.id !== frameToDelete.id);
-      store.frames = store.frames.filter((frame) => frame.id !== store.frames[index].id);
-      if (index === store.currentKeyFrame || index === store.frames.length - 1) {
-        const newSelectedIndex = (index === 0 ? 0 : index - 1) % store.frames.length;
-        store.currentKeyFrame = newSelectedIndex;
-      }
+      store.deleteFrame(index);
     },
     [store],
   );

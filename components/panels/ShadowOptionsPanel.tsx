@@ -16,7 +16,6 @@ const ShadowOptionsPanel = observer(function ShadowOptionsPanel() {
     property: keyof fabric.IShadowOptions,
     value: string | number | boolean,
   ) => {
-    console.log('handleChange', property, value);
     store.updateSelectedElementsShadow(property, value);
     store.setShadowUpdated(true);
   };

@@ -20,5 +20,5 @@ const DynamicEditor = dynamic(
 );
 
 export default function VideoToGifEditorPage() {
-  return <DynamicEditor />;
+  return <DynamicEditor initialMenuOption="Video" />;
 }

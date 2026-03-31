@@ -7,6 +7,7 @@ const FrameSettings: React.FC<FrameSettingsProps> = ({
   setFrameRate,
   quality,
   setQuality,
+  disabled = false,
 }) => {
   return (
     <>
@@ -20,6 +21,7 @@ const FrameSettings: React.FC<FrameSettingsProps> = ({
           max="24"
           value={frameRate}
           onChange={(e) => setFrameRate(parseFloat(e.target.value))}
+          disabled={disabled}
           className=""
         />
       </Label>
@@ -35,6 +37,7 @@ const FrameSettings: React.FC<FrameSettingsProps> = ({
           min={0.1}
           value={quality}
           onChange={(e) => setQuality(parseFloat(e.target.value))}
+          disabled={disabled}
           className=""
         />
       </Label>

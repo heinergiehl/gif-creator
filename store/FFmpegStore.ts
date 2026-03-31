@@ -10,7 +10,7 @@ class FFmpegStore {
   }
   async loadFFMPEG() {
     this.ffmpeg = new FFmpeg();
-    this.ffmpeg.on('log', ({ message }) => console.log(message));
+    this.ffmpeg.on('log', () => {});
     await this.ffmpeg.load({
       coreURL: await toBlobURL(
         'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',

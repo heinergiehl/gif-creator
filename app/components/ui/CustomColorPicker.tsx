@@ -51,7 +51,6 @@ const images = [
 export function CustomColorPicker({ value, onChange, label, name }: CustomColorPickerProps) {
   const [background, setBackground] = useState(value);
   const defaultTab = useMemo(() => {
-    console.log(background, 'CUSTOMCOLORPICKER');
     if (background.includes('url')) return 'image';
     if (background.includes('gradient')) return 'gradient';
     return 'solid';

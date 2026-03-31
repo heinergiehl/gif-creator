@@ -4,6 +4,7 @@ import { EditorElement, TimeFrame } from '@/types';
 import { RootStore } from '.';
 export class TimelineStore {
   private rootStore?: RootStore;
+  private playbackTimeout: ReturnType<typeof setTimeout> | null = null;
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
@@ -31,8 +32,8 @@ export class TimelineStore {
   }
   formatCurrentTime(): string {
     if (!this.editorStore || !this.animationStore) return this.formatTime(0);
-    const frameTimeInSeconds = this.editorStore?.currentKeyFrame / this.animationStore?.fps || 0;
-    const totalTimeInSeconds = this.editorStore?.frames.length / this.animationStore?.fps || 0;
+    const frameTimeInSeconds = this.editorStore.currentFrameTimeInMs / 1000;
+    const totalTimeInSeconds = this.editorStore.maxTime / 1000;
     return `${this.formatTime(frameTimeInSeconds)} / ${this.formatTime(totalTimeInSeconds)}`;
   }
   private formatTime(timeInSeconds: number): string {
@@ -55,25 +56,48 @@ export class TimelineStore {
       this.stopPlayback();
       return;
     }
-    this.editorStore!.currentKeyFrame = frame;
+    this.editorStore!.setCurrentKeyFrame(frame);
     // this.animationStore!.addCurrentGifFrameToCanvas();
   }
   private startPlayback() {
+    if (!this.editorStore || !this.animationStore || this.editorStore.frames.length === 0) {
+      return;
+    }
     this.editorStore!.isPlaying = true;
-    let currentFrame = this.editorStore!.currentKeyFrame;
-    this.editorStore!.playInterval = setInterval(
-      () => {
-        this.updateFrame(currentFrame);
-        currentFrame++;
-      },
-      1000 / (this.animationStore!.fps * this.animationStore!.speedFactor),
+    let currentFrame =
+      this.editorStore.currentKeyFrame >= this.editorStore.frames.length - 1
+        ? 0
+        : this.editorStore.currentKeyFrame;
+    this.updateFrame(currentFrame);
+    const tick = () => {
+      if (!this.editorStore?.isPlaying || !this.animationStore) {
+        return;
+      }
+      currentFrame += 1;
+      if (currentFrame >= this.editorStore.frames.length) {
+        this.stopPlayback();
+        return;
+      }
+      this.updateFrame(currentFrame);
+      this.playbackTimeout = setTimeout(
+        tick,
+        this.animationStore.timePerFrameInMs / this.animationStore.speedFactor,
+      );
+    };
+    this.playbackTimeout = setTimeout(
+      tick,
+      this.animationStore.timePerFrameInMs / this.animationStore.speedFactor,
     );
   }
   private stopPlayback() {
+    if (this.playbackTimeout) {
+      clearTimeout(this.playbackTimeout);
+      this.playbackTimeout = null;
+    }
     if (this.editorStore!.playInterval) {
       clearInterval(this.editorStore!.playInterval);
       this.editorStore!.playInterval = null;
-      this.editorStore!.isPlaying = false;
     }
+    this.editorStore!.isPlaying = false;
   }
 }

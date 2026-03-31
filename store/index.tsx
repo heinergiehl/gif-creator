@@ -1,5 +1,5 @@
 'use client';
-import React, { MutableRefObject, createContext, useContext } from 'react';
+import React, { MutableRefObject, createContext, useContext, useRef } from 'react';
 import { configure, makeAutoObservable } from 'mobx';
 import { ScreenToVideoStore } from './ScreenToVideoStore';
 import { AnimationStore } from './AnimationStore';
@@ -17,6 +17,7 @@ import { observer } from 'mobx-react-lite';
 import { Canvas } from 'fabric/fabric-impl';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import { MenuOption } from '@/types';
 configure({
   enforceActions: 'never',
 });
@@ -25,9 +26,13 @@ export class RootStore {
   supabase: SupabaseClient;
   touchActionEnabled = false;
   rerunUseManageFabricObjects = false;
-  constructor(canvasRef: MutableRefObject<Canvas | null>) {
+  constructor(
+    canvasRef: MutableRefObject<Canvas | null>,
+    initialMenuOption: MenuOption = 'Video',
+  ) {
     this.canvasRef = canvasRef;
     this.supabase = createClient();
+    this.uiStore = new UIStore(initialMenuOption);
     makeAutoObservable(this);
   }
   setTouchActionEnabled = (value: boolean) => {
@@ -44,12 +49,19 @@ export class RootStore {
   canvasOptionsStore = new CanvasOptionsStore(this);
   fileStore = new FileStore(this);
   screenToVideoStore = new ScreenToVideoStore(this);
-  uiStore = new UIStore();
+  uiStore: UIStore;
 }
 const StoreContext = createContext<RootStore | undefined>(undefined);
-export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StoreProvider: React.FC<{
+  children: React.ReactNode;
+  initialMenuOption?: MenuOption;
+}> = ({ children, initialMenuOption = 'Video' }) => {
   const canvasRef = useCanvas().canvasRef;
-  const rootStore = new RootStore(canvasRef);
+  const rootStoreRef = useRef<RootStore>();
+  if (!rootStoreRef.current) {
+    rootStoreRef.current = new RootStore(canvasRef, initialMenuOption);
+  }
+  const rootStore = rootStoreRef.current;
   injectStores({
     rootStore: rootStore,
   });

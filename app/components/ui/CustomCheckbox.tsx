@@ -17,7 +17,6 @@ const CustomCheckBox = ({
   name,
   checked,
 }: CustomCheckboxProps) => {
-  console.log('CustomCheckBox', value, checked);
   return (
     <div className={cn(['flex flex-col items-center justify-center '])}>
       <Label

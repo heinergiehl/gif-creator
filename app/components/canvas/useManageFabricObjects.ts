@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
-import { FabricObjectFactory, createFilter } from '@/utils/fabric-utils';
+import { useEffect, useRef } from 'react';
+import { FabricObjectFactory } from '@/utils/fabric-utils';
 import { EditorElement } from '@/types';
-import { EditorStore } from '@/store/EditorStore';
 import { useStores } from '@/store';
 import { fabric } from 'fabric';
 import { useCanvas } from './canvasContext';
@@ -10,154 +9,97 @@ export const useManageFabricObjects = () => {
   const canvasRef = useCanvas().canvasRef;
   const canvasStore = useStores().canvasOptionsStore;
   const rootStore = useStores();
+  const syncIdRef = useRef(0);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const manageFabricObjects = async () => {
-      if (canvas) {
-        FabricObjectFactory.setCanvas(canvas);
-        let frame: EditorElement | null;
-        try {
-          const currentKeyFrame = store.currentKeyFrame;
-          const selectedFrame = store.frames[currentKeyFrame];
-          if (!selectedFrame) {
-            canvas.setBackgroundColor(canvasStore.backgroundColor, () => {
-              canvas.requestRenderAll();
-            });
-            return;
+    // Increment sync ID so stale async runs can bail out
+    const currentSyncId = ++syncIdRef.current;
+    const syncCanvasObjects = async () => {
+      // If another sync was triggered while we were queued, bail
+      if (currentSyncId !== syncIdRef.current) return;
+      FabricObjectFactory.setCanvas(canvas);
+      const selectedFrame = store.frames[store.currentKeyFrame];
+      const frame = selectedFrame
+        ? store.elements.find((element) => element.id === selectedFrame.id) || null
+        : null;
+      const elementsInFrame = store.elementsInCurrentFrame;
+      const desiredElements = frame ? [frame, ...elementsInFrame] : [];
+      const desiredIds = new Set(desiredElements.map((element) => element.id));
+
+      canvas.setBackgroundColor(canvasStore.backgroundColor, () => {
+        canvas.requestRenderAll();
+      });
+
+      if (!frame) {
+        const canvasObjects = canvas
+          .getObjects()
+          .filter((object) => object.id !== 'selection-rectangle');
+        canvasObjects.forEach((object) => {
+          if (object.id) {
+            canvas.remove(object);
           }
-          frame = store.elements.find((element) => element.id === selectedFrame.id) || null;
-          if (!frame) {
-            return;
-          }
-          // sort elementsIncurrentFrame by the order of canvas.getObjects()
-          const frameFabricObject = await FabricObjectFactory.manageFabricObject(frame);
-          // store.updateElement(frame?.id, {
-          //   placement: {
-          //     ...frame.placement,
-          //     scaleX: frameFabricObject?.scaleX ?? 1,
-          //     scaleY: frameFabricObject?.scaleY ?? 1,
-          //     rotation: frameFabricObject?.angle ?? 0,
-          //     x: frameFabricObject?.left ?? 0,
-          //     y: frameFabricObject?.top ?? 0,
-          //     width: frameFabricObject?.width ?? 0,
-          //     height: frameFabricObject?.height ?? 0,
-          //     originX: 'center',
-          //     originY: 'center',
-          //   },
-          // });
-          const prms = await Promise.allSettled(
-            elementsInFrame.map((element) => {
-              return FabricObjectFactory.manageFabricObject(element);
-            }),
+        });
+        rootStore.setRerunUseManageFabricObjects(false);
+        store.setShadowUpdated(false);
+        store.setTextOptionsUpdated(false);
+        return;
+      }
+
+      try {
+        // Remove stale objects IMMEDIATELY (before async load) to prevent
+        // old content flashing during frame transitions
+        const staleCanvasObjects = canvas
+          .getObjects()
+          .filter(
+            (object) =>
+              object.id !== 'selection-rectangle' && object.id && !desiredIds.has(object.id),
           );
-          if (!frameFabricObject) {
-            console.error('Failed to create frame in Canvas');
-            return;
+        staleCanvasObjects.forEach((object) => {
+          canvas.remove(object);
+        });
+        canvas.requestRenderAll();
+
+        const fabricObjects = (
+          await Promise.all(
+            desiredElements.map((element) => FabricObjectFactory.manageFabricObject(element)),
+          )
+        ).filter((object): object is fabric.Object => Boolean(object));
+
+        // Bail if a newer sync has been triggered while we were loading
+        if (currentSyncId !== syncIdRef.current) return;
+
+        fabricObjects.sort((a, b) => {
+          const elementA = store.elements.find((element) => element.id === a.id);
+          const elementB = store.elements.find((element) => element.id === b.id);
+          const zIndexA = elementA?.placement.zIndex ?? 0;
+          const zIndexB = elementB?.placement.zIndex ?? 0;
+          return zIndexA - zIndexB;
+        });
+
+        fabricObjects.forEach((object, index) => {
+          const existingObject = canvas.getObjects().find((canvasObject) => canvasObject.id === object.id);
+          if (!existingObject) {
+            canvas.add(object);
           }
-          const fabricObjectsInFrameFullFilled = prms;
-          const fabObjs: fabric.Object[] = [];
-          fabObjs.push(frameFabricObject);
-          store.updateElement(frame?.id, {
-            renderOrder: canvas
-              .getObjects()
-              .map((obj) => obj.id)
-              .filter((id) => id !== undefined),
-            placement: {
-              ...frame.placement,
-              scaleX: frameFabricObject.scaleX || frame.placement.scaleX || 1,
-              scaleY: frameFabricObject.scaleY || frame.placement.scaleY || 1,
-              rotation: frameFabricObject.angle || frame.placement.rotation || 0,
-              x: frameFabricObject.left || frame.placement.x || 0,
-              y: frameFabricObject.top || frame.placement.y || 0,
-              width: frameFabricObject.width || frame.placement.width || 0,
-              height: frameFabricObject.height || frame.placement.height || 0,
-            },
-          });
-          fabricObjectsInFrameFullFilled.forEach((promiseObjSettled) => {
-            if (promiseObjSettled.status === 'fulfilled') {
-              const fabricObject = promiseObjSettled.value;
-              fabricObject?.setCoords();
-              if (fabricObject) {
-                fabObjs.push(fabricObject);
-                // update the element with the new placement
-                const element = store.elements.find((el) => el.id === fabricObject.id);
-                if (element) {
-                  store.updateElement(element.id, {
-                    dataUrl: fabricObject.toDataURL({
-                      format: 'png',
-                      multiplier: 0.1,
-                    }),
-                    placement: {
-                      ...element.placement,
-                      scaleX: fabricObject.scaleX || element.placement.scaleX || 1,
-                      scaleY: fabricObject.scaleY || element.placement.scaleY || 1,
-                      rotation: fabricObject.angle || element.placement.rotation || 0,
-                      x: fabricObject.left || element.placement.x || 0,
-                      y: fabricObject.top || element.placement.y || 0,
-                      width: fabricObject.width || element.placement.width || 0,
-                      height: fabricObject.height || element.placement.height || 0,
-                    },
-                  });
-                }
-              }
-            }
-          });
-          fabObjs.sort((a, b) => {
-            const elementA = store.elements.find((element) => element.id === a.id);
-            const elementB = store.elements.find((element) => element.id === b.id);
-            if (!elementA || !elementB) return 0;
-            if (!elementA.placement.zIndex || !elementB.placement.zIndex) return 0;
-            return elementA.placement.zIndex - elementB.placement.zIndex;
-          });
-          const selectedElements = store.selectedElements;
-          const selectedFabricObjects = selectedElements
-            .map((element) => {
-              return canvas.getObjects().find((obj) => obj.id === element.id);
-            })
-            .filter((obj) => obj !== undefined) as fabric.Object[];
-          // canvas.setActiveObject(selectedFabricObjects[0]);
-          //only add them if they dont exist on canvas already
-          if (
-            !fabObjs.every((obj) =>
-              canvas.getObjects().find((canvasObj) => canvasObj.id === obj.id),
-            )
-          ) {
-            canvas.add(...fabObjs);
-            canvas.requestRenderAll();
+          const targetObject = existingObject || object;
+          if (typeof targetObject.moveTo === 'function') {
+            targetObject.moveTo(index);
           }
-        } catch (error) {
-          console.error('Failed to load image', error);
-        }
+          targetObject.setCoords();
+        });
+
+        canvas.requestRenderAll();
+      } catch (error) {
+        console.error('Failed to sync fabric objects', error);
+      } finally {
+        rootStore.setRerunUseManageFabricObjects(false);
+        store.setShadowUpdated(false);
+        store.setTextOptionsUpdated(false);
       }
     };
-    // check if  the objectsInCurrentFrame and the frame  are  the ones that are on the canvas, if not, update the canvas
-    const canvasObjects = canvas?.getObjects();
-    const elementsInFrame = store.elementsInCurrentFrame;
-    const frame = store.frames[store.currentKeyFrame];
-    const frameFabricObject = canvasObjects?.find((obj) => obj.id === frame?.id);
-    if (
-      !frameFabricObject ||
-      !elementsInFrame.every((element) => canvasObjects?.find((obj) => obj.id === element.id))
-    ) {
-      canvas?.clear();
-    }
-    canvas?.setBackgroundColor(canvasStore.backgroundColor, () => {
-      const cvsObjs = canvas?.getObjects();
-      // make sure to remove the objects from the canvas that are not in the elementsinFrame array
-      cvsObjs?.forEach((obj) => {
-        if (
-          !elementsInFrame.find((element) => element.id === obj.id) &&
-          rootStore.rerunUseManageFabricObjects
-        ) {
-          canvas?.remove(obj);
-        }
-      });
-      manageFabricObjects();
-      rootStore.setRerunUseManageFabricObjects(false);
-      store.setShadowUpdated(false);
-      store.setTextOptionsUpdated(false);
-    });
+
+    syncCanvasObjects();
   }, [
     store.currentKeyFrame,
     store.elements,
@@ -166,7 +108,40 @@ export const useManageFabricObjects = () => {
     store.textOptionsUpdated,
     canvasRef,
     canvasStore.backgroundColor,
-    store.selectedElements,
     store.frames,
   ]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const selectedObjects = store.selectedElements
+      .map((element) => canvas.getObjects().find((object) => object.id === element.id))
+      .filter((object): object is fabric.Object => Boolean(object));
+    const activeObjects = canvas.getActiveObjects();
+    const activeIds = activeObjects.map((object) => object.id).filter(Boolean);
+    const selectedIds = selectedObjects.map((object) => object.id).filter(Boolean);
+    const selectionChanged =
+      activeIds.length !== selectedIds.length ||
+      !selectedIds.every((id) => activeIds.includes(id));
+
+    if (!selectionChanged) {
+      return;
+    }
+
+    if (selectedObjects.length === 0) {
+      canvas.discardActiveObject();
+      canvas.requestRenderAll();
+      return;
+    }
+
+    if (selectedObjects.length === 1) {
+      canvas.setActiveObject(selectedObjects[0]);
+    } else {
+      const selection = new fabric.ActiveSelection(selectedObjects, { canvas });
+      canvas.setActiveObject(selection);
+    }
+
+    canvas.requestRenderAll();
+  }, [canvasRef, store.selectedElements]);
 };

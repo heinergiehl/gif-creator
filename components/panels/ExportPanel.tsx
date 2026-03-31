@@ -1,26 +1,19 @@
 'use client';
-import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { useStores } from '@/store';
 import { Confetti } from '@/components/magicui/confetti';
-import ShinyButton from '../magicui/shiny-button';
 import AnimatedShinyText from '../magicui/animated-shiny-text';
 import { ArrowRightIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '../ui/use-toast';
-import CustomRangeInput from '@/app/components/ui/CustomRangeInput';
 import { Input } from '../ui/input';
-import CustomNumberInput from '@/app/components/ui/CustomNumberInput';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
 import { SelectSeparator } from '../ui/select';
 import CustomTextInput from '@/app/components/ui/CustomTextInput';
-import Image from 'next/image';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
-import { set, throttle } from 'lodash';
-import CircularProgress from '@/app/components/ui/CircularProgress';
 import { ffmpegStore } from '@/store/FFmpegStore';
 const ExportPanel = observer(() => {
   const rootStore = useStores();
@@ -28,8 +21,12 @@ const ExportPanel = observer(() => {
   const animtionStore = rootStore.animationStore;
   const fileStore = rootStore.fileStore;
   const [gifUrl, setGifUrl] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isHandleCreateGif, setIsHandleCreateGif] = useState(false);
+  const hasFrames = store.elements.some((el) => el.isFrame);
+  const isEngineReady = Boolean(ffmpegStore.ffmpeg?.loaded) && !ffmpegStore.loading;
+  const canExport = hasFrames && isEngineReady && !isHandleCreateGif;
   const handleCreateGif = async () => {
+    if (!canExport) return;
     setIsHandleCreateGif(true);
     const url = await fileStore.handleSaveAsGif();
     setGifUrl(url); // Store the URL in state
@@ -42,12 +39,12 @@ const ExportPanel = observer(() => {
       origin: { x: 0.2, y: 0 },
     });
     setIsHandleCreateGif(false);
-    store.progress.conversion = 0;
+    store.setProgressState({ conversion: 0 });
   };
   const { toast } = useToast();
   // when changing one of the paramters above, create new gif url
   useEffect(() => {
-    if (store.elements.some((el) => el.isFrame)) {
+    if (hasFrames) {
       setGifUrl(null);
     }
   }, [
@@ -56,40 +53,86 @@ const ExportPanel = observer(() => {
     fileStore.gifQuality,
     fileStore.paletteSize,
     store.elements,
-    rootStore.canvasRef.current,
     rootStore.canvasOptionsStore.width,
     rootStore.canvasOptionsStore.height,
     rootStore.canvasOptionsStore.backgroundColor,
+    hasFrames,
   ]);
-  const [isHandleCreateGif, setIsHandleCreateGif] = useState(false);
   const progress = store.progress.conversion;
   const { ffmpeg } = ffmpegStore;
+  const exportStatus = useMemo(
+    () => [
+      {
+        label: 'Frames added',
+        description: hasFrames ? 'Ready to render your animation.' : 'Add a video, images, or GIF frames first.',
+        ready: hasFrames,
+      },
+      {
+        label: 'Export engine',
+        description: isEngineReady ? 'FFmpeg is ready.' : 'Preparing local export engine...',
+        ready: isEngineReady,
+      },
+    ],
+    [hasFrames, isEngineReady],
+  );
   useEffect(() => {
     const handleProgress = (e: any) => {
-      console.log('progress: ', e);
-      store.progress.conversion = Math.round(e?.progress * 100);
+      store.setProgressState({ conversion: Math.round(e?.progress * 100) });
     };
     const handleLog = (e: any) => {
-      console.log('log: ', e);
+      // FFmpeg log output - silent in production
     };
     if (isHandleCreateGif) {
       ffmpeg?.on('progress', handleProgress);
-      ffmpeg?.on('log', (e) => {
-        console.log('log: ', e);
-      });
+      ffmpeg?.on('log', handleLog);
       return () => {
         // free all files from memory
         ffmpeg?.off('progress', handleProgress);
         ffmpeg?.off('log', handleLog);
       };
     }
-  }, [isHandleCreateGif]);
+  }, [ffmpeg, isHandleCreateGif, store]);
+  useEffect(() => {
+    return () => {
+      if (gifUrl) {
+        URL.revokeObjectURL(gifUrl);
+      }
+    };
+  }, [gifUrl]);
+
+  const createButtonLabel = isHandleCreateGif
+    ? `Rendering GIF${progress ? ` (${progress}%)` : '...'}`
+    : !hasFrames
+      ? 'Add frames to export'
+      : !isEngineReady
+        ? 'Preparing export engine'
+        : 'Create GIF';
+
   return (
     <div className="relative flex h-screen  w-full flex-col dark:bg-slate-900">
       <span className="flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
         Export Your GIF
       </span>
       <ScrollArea className="flex h-[90%] flex-col  gap-y-2 px-4 pr-8">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">Export readiness</div>
+          <div className="mt-3 space-y-3">
+            {exportStatus.map((item) => (
+              <div key={item.label} className="flex items-start gap-3 text-sm">
+                <span
+                  className={cn(
+                    'mt-1 inline-flex h-2.5 w-2.5 rounded-full',
+                    item.ready ? 'bg-emerald-500' : 'bg-amber-500',
+                  )}
+                />
+                <div>
+                  <div className="font-medium text-slate-900 dark:text-white">{item.label}</div>
+                  <div className="text-slate-600 dark:text-slate-300">{item.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         <>
           <Label className="mt-4 flex  flex-col ">
             <span className="text-xs ">Frames Per Second</span>
@@ -163,10 +206,15 @@ const ExportPanel = observer(() => {
         <Separator className="my-4" />
         <CanvasOptions />
         <Separator className="my-4" />
-        {store.elements.some((el) => el.isFrame) && !gifUrl && (
-          <ShinyButton onClick={handleCreateGif} className=" ">
-            Create Gif
-          </ShinyButton>
+        {!gifUrl && (
+          <Button onClick={handleCreateGif} disabled={!canExport} size="lg" className="w-full">
+            {createButtonLabel}
+          </Button>
+        )}
+        {!hasFrames && (
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Start by uploading a video, images, or an existing GIF in the source panel. Once frames exist, export becomes available here.
+          </p>
         )}
         {gifUrl && (
           <>
@@ -181,7 +229,7 @@ const ExportPanel = observer(() => {
                 <AnimatedShinyText className="inline-flex items-center justify-center  px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
                   ✨{' '}
                   <a href={gifUrl} download="animated.gif">
-                    Download Gif
+                    Download GIF
                   </a>
                   <ArrowRightIcon className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                 </AnimatedShinyText>
@@ -197,22 +245,17 @@ const CanvasOptions = observer(() => {
   const rootStore = useStores();
   const canvasOptionsStore = rootStore.canvasOptionsStore;
   const canvas = rootStore.canvasRef.current;
-  const applyChanges = () => {
+  const applyChanges = useCallback(() => {
     if (!canvas) return;
     canvas.setDimensions({
       width: canvasOptionsStore.width,
       height: canvasOptionsStore.height,
     });
-  };
+  }, [canvas, canvasOptionsStore.height, canvasOptionsStore.width]);
+
   useEffect(() => {
     applyChanges();
-  }, [
-    canvas,
-    canvasOptionsStore.width,
-    canvasOptionsStore.height,
-    canvasOptionsStore.backgroundColor,
-    rootStore.editorStore.elements,
-  ]);
+  }, [applyChanges]);
   return (
     <>
       <div className="flex flex-wrap  gap-x-2">

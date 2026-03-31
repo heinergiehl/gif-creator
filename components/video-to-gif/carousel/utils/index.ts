@@ -9,13 +9,7 @@ export const useCarouselUtils = (containerWidth: number) => {
   const active = ctx.active;
   const handleDeleteFrame = useCallback(
     (index: number): void => {
-      const frameToDelete = store.frames[index];
-      store.elements = store.elements.filter((element) => element.id !== frameToDelete.id);
-      store.frames = store.frames.filter((frame) => frame.id !== store.frames[index].id);
-      if (index === store.currentKeyFrame || index === store.frames.length - 1) {
-        const newSelectedIndex = (index === 0 ? 0 : index - 1) % store.frames.length;
-        store.currentKeyFrame = newSelectedIndex;
-      }
+      store.deleteFrame(index);
     },
     [store],
   );
@@ -62,7 +56,6 @@ export const useCarouselUtils = (containerWidth: number) => {
       const carouselContentRight = carouselContentRect.right;
       const activeDraggableIsOnLeftEdge = activeDraggableLeft < carouselContentLeft;
       const activeDraggableIsOnRightEdge = activeDraggableRight > carouselContentRight;
-      console.log('calculateTransform!');
       if (activeDraggableIsOnLeftEdge) return 'translateX(100px)';
       else if (shiftDirection === 'right' && index >= hoverIndex) {
         return 'translateX(100%)';

@@ -11,7 +11,6 @@ interface CustomRangeInputProps {
   max: number;
 }
 const CustomRangeInput = ({ value, onChange, label, name, min, max }: CustomRangeInputProps) => {
-  console.log('CUSTOM RANGE INPUT', value);
   return (
     <div className={cn(['flex flex-col items-center justify-center '])}>
       <Label

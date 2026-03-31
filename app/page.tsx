@@ -1,25 +1,24 @@
-// pages/index.js
-import Image from 'next/image';
-import {
-  AppWindowIcon,
-  SmileIcon,
-  RocketIcon,
-  ShieldCheckIcon,
-  CodeIcon,
-  StarIcon,
-  EyeIcon,
-} from 'lucide-react';
-import { CTA } from '@/components/pages/CTA';
 import { cn } from '@/lib/utils';
 import { v2 as cloudinary } from 'cloudinary';
 import { Footer } from './components/ui/Footer';
 import { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
-// Import shadcn components
 import { Card } from '@/components/ui/card';
 import { BorderBeam } from '@/components/magicui/border-beam';
 import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
+import { CTA } from '@/components/pages/CTA';
+import {
+  AppWindowIcon,
+  CodeIcon,
+  EyeIcon,
+  RocketIcon,
+  ShieldCheckIcon,
+  SmileIcon,
+  StarIcon,
+} from 'lucide-react';
 export const metadata: Metadata = {
   title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
   description:
@@ -366,11 +365,22 @@ export default function Home() {
                   Free Online GIF Maker & Editor
                 </h1>
               </NeonGradientCard>
+              <div className="mt-6 rounded-full border border-white/40 bg-white/60 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-200">
+                Convert video, build from images, or edit an existing GIF — all in one browser-based editor.
+              </div>
               <p className="max-w-6xl text-pretty px-4 py-6 text-center text-xl md:px-0">
-                Convert video to GIF or create GIFs from images — then crop, resize, rotate, add text, adjust speed, and optimize file size. Supports GIF, WebP, and APNG. Free to use, and exported GIFs are watermark-free.
+                Start with a video, image sequence, or GIF. Then crop, resize, rotate, add text, tune timing, and optimize file size with a fast editor that runs locally in your browser. Supports GIF, WebP, and APNG, with no watermark on export.
               </p>
               <div className=" mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
                 <CTA />
+                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <span>Free to use</span>
+                  <span>No sign-up required</span>
+                  <span>Local browser processing</span>
+                  <Link href="/video-to-gif" className="underline decoration-dotted underline-offset-4 hover:text-slate-950 dark:hover:text-white">
+                    Explore video to GIF
+                  </Link>
+                </div>
                 <div className="relative z-10 m-auto flex w-full items-center justify-start rounded-xl">
                   <Image
                     src="/hero-dark.png"

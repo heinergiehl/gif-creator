@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, memo, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { DndContext, DragOverlay, useDndContext, useDraggable } from '@dnd-kit/core';
+import { useDraggable } from '@dnd-kit/core';
 import Image from 'next/image';
 import { useStores } from '@/store';
 import { MagicCard, MagicContainer } from '@/components/magicui/magic-card';
@@ -13,7 +13,6 @@ import { getUid } from '@/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { createPortal } from 'react-dom';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 interface ImageProps {
@@ -159,9 +158,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
-    console.log('isMobile', isMobile);
   }, [window.innerWidth, isMobile, setIsMobile]);
-  const active = useDndContext().active;
   return (
     <ScrollArea className=" h-[450px] w-screen  md:w-[300px]">
       <div className={cn('relative flex w-full flex-wrap items-center justify-center gap-2 ')}>
@@ -178,19 +175,7 @@ export const ImageResourceClient: React.FC<ImageResourceClientProps> = observer(
             <DraggableImage key={image.id} image={image} index={image.id} />
           </div>
         ))}
-        {createPortal(
-          <DragOverlay
-            dropAnimation={null}
-            style={{
-              opacity: 1,
-            }}
-          >
-            {active &&
-              (active.id as String).includes('Resource') &&
-              (active?.data?.current?.dragOverlay ? active?.data?.current?.dragOverlay() : null)}
-          </DragOverlay>,
-          document.body,
-        )}
+
       </div>
       {/* {selectedImage && (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

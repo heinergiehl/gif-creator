@@ -7,29 +7,40 @@ import { useStores } from '@/store';
 export const CustomProgress = observer(() => {
   const store = useStores().editorStore;
   const progress = store.progress;
+  const isVisible =
+    progress.active ||
+    progress.conversion > 0 ||
+    progress.rendering > 0 ||
+    progress.stage === 'ready' ||
+    progress.stage === 'error';
+  const conversionLabel = progress.title || 'Converting your video into frames';
+  const renderingLabel =
+    progress.stage === 'importing'
+      ? 'Loading extracted frames into the editor'
+      : 'Rendering frames for editing';
+  if (!isVisible) {
+    return null;
+  }
   return (
-    <div
-      style={{
-        display: progress.conversion > 0 || progress.conversion < 100 ? 'flex' : 'none',
-      }}
-      className="flex-start flex w-full flex-col items-start justify-center gap-y-4"
-    >
-      <span>We are currently converting the video into single frames</span>
+    <div className="flex-start flex w-full flex-col items-start justify-center gap-y-4">
+      <span>{conversionLabel}</span>
       <Progress value={progress.conversion} />
-      {/* percent */}
       <div className="mt-1 ">
         <span>{Math.round(progress.conversion)}%</span>
       </div>
       {progress.rendering > 0 && (
         <>
-          <span>Wait a quick moment, until the images being rendered and ready to be edited!</span>
+          <span>{renderingLabel}</span>
           <Progress value={progress.rendering} />
           <div className="mt-1 ">
             <span>{Math.round(progress.rendering)}%</span>
           </div>
         </>
       )}
-      {progress.rendering === 100 && <span>Images are ready to be edited!</span>}
+      {progress.stage === 'ready' && <span>{progress.message || 'Images are ready to be edited!'}</span>}
+      {progress.stage === 'error' && (
+        <span className="text-red-500">{progress.message || 'Something went wrong while importing media.'}</span>
+      )}
     </div>
   );
 });

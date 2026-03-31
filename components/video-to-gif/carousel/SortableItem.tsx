@@ -41,7 +41,7 @@ const SortableItem: React.FC<SortableItemProps> = observer(
       setImageLoaded(true);
     };
     const handleImageError = () => {
-      console.log(`Failed to load image: ${id}`);
+      // image load failure handled silently
     };
     const store = useStores().editorStore;
     return (

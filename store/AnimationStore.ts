@@ -19,10 +19,12 @@ export class AnimationStore {
   speedFactor = 1;
   currentTimeInMs = 0;
   isPaused = false;
-  timePerFrameInMs: number = 1000 / this.fps;
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
+  }
+  get timePerFrameInMs() {
+    return this.fps > 0 ? 1000 / this.fps : 0;
   }
   get editorStore(): EditorStore | undefined {
     return this.rootStore?.editorStore;
@@ -32,11 +34,11 @@ export class AnimationStore {
   }
   addAnimation(animation: Animation) {
     if (this.historyStore?.history.length === 0) {
-      this.historyStore?.addState(this.editorStore?.elements || [], this.animations);
+      this.historyStore?.addState();
     }
     this.animations = [...this.animations, animation];
     if (this.historyStore?.history && this.historyStore?.history.length > 0)
-      this.historyStore?.addState(this.editorStore?.elements || [], this.animations);
+      this.historyStore?.addState();
   }
   applyAnimation(animation: Animation, canvas: fabric.Canvas) {
     switch (animation.type) {
@@ -124,14 +126,6 @@ export class AnimationStore {
     const startPosition = this.getSlideStartPosition(direction, targetElement, canvas);
     targetElement.placement.x = startPosition.left || 0;
     targetElement.placement.y = startPosition.top || 0;
-    console.log(
-      'startPosition:',
-      startPosition,
-      'targetPosition:',
-      targetElement.placement,
-      canvas.width,
-      canvas.height,
-    );
     const elementsToAnimate = this.getElementsToAnimate(animation, targetElement, duration);
     elementsToAnimate.forEach((element) => {
       const progress = this.calculateAnimationProgress(
@@ -144,7 +138,6 @@ export class AnimationStore {
         startPosition.left + (targetElement.placement.x - startPosition.left) * progress;
       element.placement.y =
         startPosition.top + (targetElement.placement.y - startPosition.top) * progress;
-      console.log('element.placement:', element.placement, 'progress:', progress);
       this.editorStore?.updateElement(element.id, { placement: element.placement });
     });
   }
@@ -249,7 +242,7 @@ export class AnimationStore {
   saveCurrentState() {
     const affectedElements = this.editorStore?.elements;
     if (!affectedElements) return;
-    this.historyStore?.addState(affectedElements, this.animations);
+    this.historyStore?.addState();
   }
   refreshAnimations(canvas: fabric.Canvas): void {
     this.animations.forEach((animation) => {
@@ -261,10 +254,10 @@ export class AnimationStore {
     const historyState = this.historyStore?.deleteAndGetStateBeforeAnimation(id);
     if (historyState && this.editorStore) {
       this.editorStore.elements = [...historyState.elements];
-      this.editorStore.frames = historyState.elements.map((el) => ({
-        src: el.src,
-        id: el.id,
-      }));
+      this.editorStore.frames = [...historyState.frames];
+      this.editorStore.syncFramesTimeline();
+      this.editorStore.setCurrentKeyFrame(historyState.currentKeyFrame);
+      this.editorStore.setSelectedElements(historyState.selectedElementIds);
       if (this.rootStore?.canvasRef.current)
         this.refreshAnimations(this.rootStore?.canvasRef.current);
     }
@@ -273,7 +266,7 @@ export class AnimationStore {
     const index = this.animations.findIndex((animation) => animation.id === id);
     if (index !== -1) {
       this.animations[index] = updatedAnimation;
-      this.historyStore?.addState(this.editorStore?.elements || [], this.animations);
+      this.historyStore?.addState();
     }
   }
   undo() {

@@ -335,17 +335,17 @@ export class FabricObjectFactory {
     image.set({
       id: image.id,
       crossOrigin: 'anonymous',
-      opacity: options.opacity,
-      zIndex,
-      left: x,
-      top: y,
+      opacity: options.opacity ?? image.opacity,
+      zIndex: zIndex ?? (image as any).zIndex,
+      left: x ?? image.left,
+      top: y ?? image.top,
       width: width || image.width,
       height: height || image.height,
-      scaleX,
-      scaleY,
+      scaleX: scaleX ?? image.scaleX,
+      scaleY: scaleY ?? image.scaleY,
       originX: 'left',
       originY: 'top',
-      angle: rotation,
+      angle: rotation ?? image.angle,
       shadow: new fabric.Shadow({
         ...(image.shadow as fabric.IShadowOptions),
         ...shadow,
@@ -467,15 +467,15 @@ export class FabricObjectFactory {
       linethrough,
     } = options.properties || {};
     text.set({
-      zIndex: options.placement?.zIndex,
+      zIndex: options.placement?.zIndex ?? (text as any).zIndex,
       id: text.id,
-      left: x,
-      top: y,
-      width,
-      height,
-      scaleX,
-      scaleY,
-      angle: rotation,
+      left: x ?? text.left,
+      top: y ?? text.top,
+      width: width ?? text.width,
+      height: height ?? text.height,
+      scaleX: scaleX ?? text.scaleX,
+      scaleY: scaleY ?? text.scaleY,
+      angle: rotation ?? text.angle,
       text: textContent,
       fontSize,
       fontFamily,
@@ -618,7 +618,6 @@ export function gradientObjectToString(gradient: fabric.IGradientOptions): strin
     '0,0,1,1': 'to bottom right',
   };
   if (!gradient?.coords || !gradient.colorStops || !gradient.type) {
-    console.log('Invalid gradient object in gradientObjectToString:', gradient);
     return '';
   }
   const coordsKey = `${gradient.coords.x1},${gradient.coords.y1},${gradient.coords.x2},${gradient.coords.y2}`;
@@ -666,7 +665,6 @@ export const createFilter = (filterType: FilterType, options: FilterInputOptions
     case FilterType.Sepia:
       return new fabric.Image.filters.Sepia(options as any);
     case FilterType.Brightness:
-      console.log('Creating Brightness filter with options:', options);
       return new fabric.Image.filters.Brightness(options as any);
     case FilterType.Contrast:
       return new fabric.Image.filters.Contrast(options as any);

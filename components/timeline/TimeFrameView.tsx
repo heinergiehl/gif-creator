@@ -81,7 +81,11 @@ export const TimeFrameView = observer((props: { element: EditorElement }) => {
         >
           <span className="left-30 "> {frameNumberStart}</span>
           <span className="w-full leading-3"> {element.name}</span>
-          <Image src={element.dataUrl || ''} alt="element" width={20} height={20} />
+          {element.dataUrl ? (
+            <Image src={element.dataUrl} alt="element" width={20} height={20} />
+          ) : (
+            <div className="h-5 w-5 shrink-0 rounded bg-slate-500/30" />
+          )}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={'outline'} className="m-0 h-5 w-5 rounded-full p-0">

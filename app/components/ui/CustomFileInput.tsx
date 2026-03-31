@@ -1,12 +1,9 @@
 'use client';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { DropzoneRootProps, useDropzone } from 'react-dropzone';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { FaRegFileVideo, FaRegImage } from 'react-icons/fa6';
 import { AiOutlineFileGif } from 'react-icons/ai';
-import { color } from 'framer-motion';
 interface InputFileProps {
   type: 'video' | 'image' | 'gif';
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -42,9 +39,9 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
   };
   // acceptablesTypes mapping to the file ending
   const acceptableExtensions = {
-    video: ['.mp4', '.webm', '.mov', '.avi'],
-    image: ['.jpg', '.jpeg', '.png'],
-    gif: ['gif'],
+    video: ['.mp4', '.webm', '.mov', '.avi', '.mkv'],
+    image: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'],
+    gif: ['.gif'],
   };
   const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject, isDragActive } =
     useDropzone({
@@ -75,24 +72,18 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
       <div
         {...getRootProps({ style })}
         className={cn([
-          'relative flex h-full max-w-xs items-center justify-center gap-1.5 rounded transition-colors duration-300 ease-in-out',
+          'relative flex h-full max-w-xs cursor-pointer items-center justify-center gap-1.5 rounded transition-colors duration-300 ease-in-out',
         ])}
       >
-        <Label
-          onClick={(e) => {
-            e.preventDefault();
-          }}
+        <div
           className={cn([
             'flex h-full w-full cursor-pointer flex-col items-start justify-evenly gap-y-2  transition-colors duration-300',
           ])}
-          htmlFor="file-upload-droppable"
         >
           {LabelContent(type, style, isDragReject, isDragAccept, isDragActive, isFocused)}
-        </Label>
-        <Input
+        </div>
+        <input
           {...getInputProps()}
-          id="file-upload-droppable"
-          name="file-upload-droppable"
           className="absolute hidden h-full w-full"
         />
       </div>
@@ -119,7 +110,7 @@ const LabelContent = (
         return null;
     }
   };
-  const Text = useCallback(() => {
+  const Text = () => {
     switch (fileType) {
       case 'video':
       case 'image':
@@ -132,7 +123,7 @@ const LabelContent = (
       default:
         return null;
     }
-  }, [fileType, isDragAccept, isDragReject, isFocused]);
+  };
   return (
     <div
       className={cn([

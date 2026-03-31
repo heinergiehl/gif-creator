@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/utils/cn';
 const DraggedImagePreview = ({ src }: { src: string }) => {
-  console.log('DraggedImagePreview', src);
   return (
     <div className=" flex h-full w-full items-center justify-center p-0 shadow-2xl shadow-black drop-shadow-2xl">
       <Image

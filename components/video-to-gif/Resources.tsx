@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useStores } from '@/store';
 import { observer } from 'mobx-react';
 import { TextResourcesPanel } from '@/components/panels/TextResourcesPanel';
@@ -10,23 +10,18 @@ import GifResource from '../entity/GifResource';
 import ExportPanel from '../panels/ExportPanel';
 import { AnimationsPanel } from '../panels/AnimationsPanel';
 import { EditOptionsPanel } from '../panels/EditOptionsPanel';
-import { MenuOption } from '@/types';
-import { useCanvas } from '@/app/components/canvas/canvasContext';
 import ShadowOptionsPanel from '../panels/ShadowOptionsPanel';
 import TextStyleOptions from '../panels/TextStyleOptions';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
-import { ScrollArea } from '../ui/scroll-area';
 export type AnimationResourceProps = {
   animation: Animation;
 };
 export const Resources = observer(() => {
-  const sidebarRef = React.useRef<HTMLDivElement>(null);
   const store = useStores().uiStore;
   const editorStore = useStores().editorStore;
   const selectedMenuOption = store.selectedMenuOption;
   useEffect(() => {
     editorStore.setAllOptionsToFalse();
-  }, [selectedMenuOption, editorStore.toggleOptions]);
+  }, [selectedMenuOption, editorStore]);
   return (
     <div className="w-full bg-slate-300">
       <RenderResource />
@@ -37,7 +32,6 @@ const RenderResource = observer(({}: {}) => {
   const store = useStores().uiStore;
   const selectedMenuOption = store.selectedMenuOption;
   const editorStore = useStores().editorStore;
-  const sidebarRef = React.useRef<HTMLDivElement>(null);
   if (editorStore.toggleOptions.get('shadowOptions')) {
     return <ShadowOptionsPanel />;
   }

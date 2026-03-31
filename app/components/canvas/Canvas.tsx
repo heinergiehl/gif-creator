@@ -46,13 +46,18 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
   const [close, setClose] = useState(true);
   const hasAlreadyFrames = store.frames.length > 0;
   const getObjectCenter = (obj: fabric.Object) => {
-    const boundingRect = obj.getBoundingRect(true, true);
-    return {
-      x: boundingRect.left + boundingRect.width / 2,
-      y: boundingRect.top + boundingRect.height / 2,
-    };
+    try {
+      const boundingRect = obj.getBoundingRect(true, true);
+      const x = boundingRect.left + boundingRect.width / 2;
+      const y = boundingRect.top + boundingRect.height / 2;
+      if (!isFinite(x) || !isFinite(y)) return null;
+      return { x, y };
+    } catch {
+      return null;
+    }
   };
   const activeObject = canvasRef.current?.getActiveObject();
+  const objectCenter = activeObject ? getObjectCenter(activeObject) : null;
   useEffect(() => {
     if (window.innerWidth < 768) {
       canvasRef.current?.setWidth(window.innerWidth);
@@ -79,28 +84,30 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
     }
   }, [window.innerWidth, window.innerHeight, store.currentKeyFrame]);
   return (
-    <div id="grid-canvas-container" className="relative  flex items-center justify-center">
+    <div
+      id="grid-canvas-container"
+      ref={setNodeRef}
+      className={cn([
+        'relative flex items-center justify-center rounded-lg transition-all duration-200',
+        isOver && hasAlreadyFrames && 'ring-4 ring-blue-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
+        isOver && !hasAlreadyFrames && 'ring-4 ring-red-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
+      ])}
+    >
       <canvas
         id="canvas"
-        ref={setNodeRef}
         className={cn([
-          'relative flex  transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
-          isOver && hasAlreadyFrames
-            ? 'border-4 border-blue-500'
-            : isOver && !hasAlreadyFrames
-              ? 'border-4 border-red-500'
-              : 'border-4 border-transparent',
+          'relative flex transform justify-center drop-shadow-lg transition-all duration-300 ease-in-out',
         ])}
       />
-      {activeObject && (
+      {activeObject && objectCenter && (
         <>
           {/* Card for displaying size */}
           <div
             id="size-overlay"
             style={{
               position: 'absolute',
-              top: getObjectCenter(activeObject).y + 20,
-              left: getObjectCenter(activeObject).x - 20,
+              top: objectCenter.y + 20,
+              left: objectCenter.x - 20,
               pointerEvents: 'none',
             }}
             className={cn(['flex'])}
@@ -124,8 +131,8 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
             id="angle-overlay"
             style={{
               position: 'absolute',
-              top: getObjectCenter(activeObject).y,
-              left: getObjectCenter(activeObject).x - 20,
+              top: objectCenter.y,
+              left: objectCenter.x - 20,
               pointerEvents: 'none',
             }}
             className={cn(['flex'])}
@@ -145,6 +152,23 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
           </div>
         </>
       )}
+      {/* Drop zone labels — always mounted, toggled via opacity to avoid Fabric.js DOM conflicts */}
+      <div
+        className={cn([
+          'pointer-events-none absolute -top-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-white shadow-lg transition-opacity duration-150',
+          isOver && hasAlreadyFrames ? 'bg-blue-600 opacity-100' : 'opacity-0',
+        ])}
+      >
+        Drop to add as overlay
+      </div>
+      <div
+        className={cn([
+          'pointer-events-none absolute -top-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-white shadow-lg transition-opacity duration-150',
+          isOver && !hasAlreadyFrames ? 'bg-red-600 opacity-100' : 'opacity-0',
+        ])}
+      >
+        Add frames first
+      </div>
     </div>
   );
 });

@@ -3,6 +3,7 @@ import { EditorElement, ImageEditorElement, Placement, TextEditorElement } from 
 import { fabric } from 'fabric';
 import { getUid, isHtmlImageElement } from '@/utils';
 import { AnimationStore } from './AnimationStore';
+import { HistoryStore } from './HistoryStore';
 import { DragStartEvent } from '@dnd-kit/core';
 import { RootStore } from '.';
 import { Store } from 'lucide-react';
@@ -110,6 +111,10 @@ export class EditorStore {
   activeDraggable: DragStartEvent | null = null;
   insertIndex = null;
   progress = {
+    active: false,
+    stage: 'idle',
+    title: '',
+    message: '',
     conversion: 0,
     rendering: 0,
   };
@@ -125,8 +130,8 @@ export class EditorStore {
   shadowUpdated: boolean = false;
   showAlertDialog: boolean = false;
   toggleOptions = new Map<string, boolean>([
-    ['showShadowOptions', false],
-    ['showEditOptions', false],
+    ['shadowOptions', false],
+    ['editOptions', false],
     ['textStyleOptions', false],
   ]);
   copiedElements: EditorElement[] = [];
@@ -172,18 +177,96 @@ export class EditorStore {
   }
   setConversionProgress(progress: number) {
     this.conversion = progress;
+    this.progress.conversion = progress;
   }
   setRenderingProgress(progress: number) {
     this.rendering = progress;
+    this.progress.rendering = progress;
+  }
+  setProgressState(
+    changes: Partial<{
+      active: boolean;
+      stage: string;
+      title: string;
+      message: string;
+      conversion: number;
+      rendering: number;
+    }>,
+  ) {
+    this.progress = {
+      ...this.progress,
+      ...changes,
+    };
+  }
+  resetProgress() {
+    this.progress = {
+      active: false,
+      stage: 'idle',
+      title: '',
+      message: '',
+      conversion: 0,
+      rendering: 0,
+    };
+    this.conversion = 0;
+    this.rendering = 0;
+  }
+  appendFrames(frames: Frame[]) {
+    if (frames.length === 0) {
+      return;
+    }
+
+    this.frames = [...this.frames, ...frames];
+    this.addImages();
+  }
+  appendImageResources(images: string[]) {
+    if (images.length === 0) {
+      return;
+    }
+
+    this.images = [...this.images, ...images];
+  }
+  removeImageResourceAt(index: number) {
+    if (index < 0 || index >= this.images.length) {
+      return;
+    }
+
+    this.images = this.images.filter((_, imageIndex) => imageIndex !== index);
+  }
+  resetDocument() {
+    if (this.playInterval) {
+      clearInterval(this.playInterval);
+      this.playInterval = null;
+    }
+
+    this.frames = [];
+    this.elements = [];
+    this.selectedElements = [];
+    this.currentKeyFrame = 0;
+    this.currentTimeInMs = 0;
+    this.maxTime = 0;
+    this.isPlaying = false;
+    this.isPaused = false;
+    this.resetProgress();
   }
   get animationStore(): AnimationStore | undefined {
     return this.rootStore.animationStore;
+  }
+  get historyStore(): HistoryStore | undefined {
+    return this.rootStore.historyStore;
+  }
+  private runDocumentCommand(mutator: () => void) {
+    if (this.historyStore && this.historyStore.history.length === 0) {
+      this.historyStore.addState();
+    }
+    mutator();
+    this.historyStore?.addState();
   }
   addElement(element: EditorElement): void {
     this.elements.push(element);
   }
   removeFrame(id: string) {
     this.frames = this.frames.filter((frame) => frame.id !== id);
+    this.syncFramesTimeline();
   }
   setCopiedElements(elements: EditorElement[]) {
     this.copiedElements = elements;
@@ -313,7 +396,6 @@ export class EditorStore {
   }
   updateZIndex(objects: fabric.Object[], canvas: fabric.Canvas) {
     objects.forEach((object) => {
-      console.log('Object in updateZIndex:', object);
       const element = this.elements.find((el) => el.id === object.id);
       if (element) {
         const frameElements = this.elements.filter(
@@ -341,14 +423,6 @@ export class EditorStore {
       const updatedElement = this.elements.find((e) => e.id === el.id);
       return updatedElement ? updatedElement : el;
     });
-    console.log(
-      'Updated Z-index:',
-      this.elements.map((e) => ({
-        id: e.id,
-        zIndex: e.placement.zIndex,
-        type: e.type,
-      })),
-    );
   }
   // orderDisplayedElements(canvasObject: fabric.Canvas) {
   //   const selectedElementFrame = this.elements.find(
@@ -383,26 +457,106 @@ export class EditorStore {
   // }
   updateMaxTime() {
     this.maxTime = this.frames.length * this.animationStore!.timePerFrameInMs;
+    return this.maxTime;
+  }
+  get frameElements() {
+    return this.frames
+      .map((frame) => this.elements.find((element) => element.isFrame && element.id === frame.id))
+      .filter((element): element is EditorElement => Boolean(element));
+  }
+  get hasFrames() {
+    return this.frames.length > 0 && this.frameElements.length > 0;
+  }
+  get currentFrameTimeInMs() {
+    return this.currentKeyFrame * this.animationStore!.timePerFrameInMs;
+  }
+  setCurrentKeyFrame(index: number) {
+    if (this.frames.length === 0) {
+      this.currentKeyFrame = 0;
+      this.currentTimeInMs = 0;
+      return;
+    }
+    const clampedIndex = Math.max(0, Math.min(index, this.frames.length - 1));
+    this.currentKeyFrame = clampedIndex;
+    this.currentTimeInMs = this.currentFrameTimeInMs;
+  }
+  syncFramesTimeline() {
+    const frameDuration = this.animationStore!.timePerFrameInMs;
+    if (this.frames.length === 0) {
+      this.maxTime = 0;
+      this.currentKeyFrame = 0;
+      this.currentTimeInMs = 0;
+      return;
+    }
+
+    this.maxTime = this.frames.length * frameDuration;
+    this.elements = this.elements.map((element) => {
+      if (!element.isFrame) {
+        return element;
+      }
+
+      const frameIndex = this.frames.findIndex((frame) => frame.id === element.id);
+      if (frameIndex === -1) {
+        return element;
+      }
+
+      return {
+        ...element,
+        index: frameIndex,
+        order: frameIndex,
+        timeFrame: {
+          start: frameIndex * frameDuration,
+          end: (frameIndex + 1) * frameDuration,
+        },
+      };
+    });
+
+    this.setCurrentKeyFrame(this.currentKeyFrame);
+  }
+  updateFrameSource(frameId: string, src?: string) {
+    this.frames = this.frames.map((frame) =>
+      frame.id === frameId
+        ? {
+            ...frame,
+            src: src || frame.src,
+          }
+        : frame,
+    );
+  }
+  updateCurrentFrameSource(src?: string) {
+    const currentFrame = this.frames[this.currentKeyFrame];
+    if (!currentFrame) {
+      return;
+    }
+
+    this.updateFrameSource(currentFrame.id, src);
   }
   updateFramesOrder(oldIndex: number, newIndex: number) {
-    const movedFrame = this.frames[oldIndex];
-    const editorElementToMove = this.elements[oldIndex];
-    if (!movedFrame) return;
-    this.frames = this.frames.filter((frame, i) => i !== oldIndex);
-    this.frames.splice(newIndex, 0, movedFrame);
-    this.elements = this.elements.filter((element, i) => i !== oldIndex);
-    this.elements.splice(newIndex, 0, editorElementToMove);
+    this.reorderFrames(oldIndex, newIndex);
+  }
+  reorderFrames(oldIndex: number, newIndex: number) {
+    if (
+      oldIndex < 0 ||
+      newIndex < 0 ||
+      oldIndex >= this.frames.length ||
+      newIndex >= this.frames.length ||
+      oldIndex === newIndex
+    ) {
+      return;
+    }
+    this.runDocumentCommand(() => {
+      const [movedFrame] = this.frames.splice(oldIndex, 1);
+      this.frames.splice(newIndex, 0, movedFrame);
+      this.syncFramesTimeline();
+      const selectedFrameId = this.frames[newIndex]?.id;
+      if (selectedFrameId) {
+        this.setSelectedElements([selectedFrameId]);
+      }
+      this.setCurrentKeyFrame(newIndex);
+    });
   }
   updateEditorElementsForFrames() {
-    const frameDuration = this.maxTime / this.frames.length;
-    // Update timeFrames based on the new order of frames
-    this.elements = this.elements.map((element, index) => {
-      if (element.isFrame) {
-        element.timeFrame.start = index * frameDuration;
-        element.timeFrame.end = (index + 1) * frameDuration;
-      }
-      return element;
-    });
+    this.syncFramesTimeline();
   }
   // get all the Objects in the frame; the problem tho, currentKeyFrame is not a time but just an index
   get elementsInCurrentFrame() {
@@ -426,8 +580,8 @@ export class EditorStore {
       // }
       return (
         !element.isFrame &&
-        element.timeFrame.start <= this.currentKeyFrame * this.animationStore!.timePerFrameInMs &&
-        element.timeFrame.end >= this.currentKeyFrame * this.animationStore!.timePerFrameInMs
+        element.timeFrame.start <= this.currentFrameTimeInMs &&
+        element.timeFrame.end >= this.currentFrameTimeInMs
       );
     });
     return objectsInCurrentFrame;
@@ -436,7 +590,6 @@ export class EditorStore {
     property: K,
     value: fabric.ITextOptions[K],
   ): void {
-    console.log('updateTextProperties:', property, value, this.selectedElements);
     this.selectedElements.forEach((element) => {
       if (element.type === 'text') {
         const selectedElement = element as TextEditorElement;
@@ -454,11 +607,12 @@ export class EditorStore {
     this.fabricObjectUpdated = false;
   }
   elementsInCurrentFrameHelper(currentFrame: number) {
+    const currentFrameTimeInMs = currentFrame * this.animationStore!.timePerFrameInMs;
     const objectsInCurrentFrame = this.elements.slice().filter((element) => {
       // if (element.isFrame) {
       return (
-        element.timeFrame.start <= currentFrame * this.animationStore!.timePerFrameInMs &&
-        element.timeFrame.end >= currentFrame * this.animationStore!.timePerFrameInMs
+        element.timeFrame.start <= currentFrameTimeInMs &&
+        element.timeFrame.end >= currentFrameTimeInMs
       );
     });
     return objectsInCurrentFrame;
@@ -550,7 +704,6 @@ export class EditorStore {
     const canvasWidth = canvas.getWidth();
     const canvasHeight = canvas.getHeight();
     const activeObject = canvas.getActiveObject();
-    console.log('activeOBject: ', activeObject?.type);
     if (!activeObject) return;
     if (activeObject.type === 'activeSelection') {
       const activeSelection = activeObject as fabric.ActiveSelection;
@@ -602,15 +755,6 @@ export class EditorStore {
     if (!selectedObjects) return;
     if (selectedObjects.type === 'activeSelection') {
       const activeSelection = selectedObjects as fabric.ActiveSelection;
-      console.log(
-        'activeSelection:',
-        activeSelection.getObjects().map((obj) => ({ left: obj.left, top: obj.top })),
-        'canvas.getObjects():',
-        canvas.getActiveObjects().map((obj) => ({
-          left: obj.left,
-          top: obj.top,
-        })),
-      );
       this.distributeMultipleObjects(canvas.getActiveObjects(), distribution, canvas);
     } else {
       this.alignSingleObject(selectedObjects, 'center', canvas.getWidth(), canvas.getHeight());
@@ -651,26 +795,7 @@ export class EditorStore {
     const freeSpaceVertical = canvasHeight - totalHeightOfAllObjects;
     const spaceBetweenObjectsHorizontal = freeSpaceHorizontal / (sortedObjects.length - 1);
     const spaceBetweenObjectsVertical = freeSpaceVertical / (sortedObjects.length - 1);
-    console.log(
-      'totalWidthOfAllObjects',
-      totalWidthOfAllObjects,
-      'totalHeightOfAllObjects:',
-      totalHeightOfAllObjects,
-      'spaceBetweenObjectsHorizontal:',
-      spaceBetweenObjectsHorizontal,
-      'spaceBetweenObjectsVertical:',
-      spaceBetweenObjectsVertical,
-    );
     sortedObjects.forEach((obj, index) => {
-      console.log(
-        'sortedObjects:',
-        obj.left,
-        obj.top,
-        obj.getScaledWidth(),
-        obj.getScaledHeight(),
-        'index:',
-        index,
-      );
       if (distribution === 'horizontal') {
         obj.set({
           left: currentX,
@@ -728,22 +853,117 @@ export class EditorStore {
     return editorElement.type === 'image';
   }
   setSelectedElements(ids: string[]): void {
-    console.log(
-      'Setting selected elements:',
-      ids,
-      'elements:',
-      this.elements.map((e) => e.id),
-    );
     if (ids.length === 0) {
       this.selectedElements = [];
-      console.log('Selected elements:', this.selectedElements);
       return;
     }
     this.selectedElements = this.elements.filter((el) => ids.includes(el.id));
-    console.log(
-      'Selected elements in setSelectedElements:',
-      this.selectedElements.map((e) => e.id),
-    );
+  }
+  deleteFramesByIds(ids: string[]) {
+    if (ids.length === 0) return;
+    this.runDocumentCommand(() => {
+      this.frames = this.frames.filter((frame) => !ids.includes(frame.id));
+      this.elements = this.elements.filter((element) => !ids.includes(element.id));
+      this.selectedElements = this.selectedElements.filter((element) => !ids.includes(element.id));
+      this.syncFramesTimeline();
+      const nextFrameId = this.frames[Math.min(this.currentKeyFrame, this.frames.length - 1)]?.id;
+      if (nextFrameId) {
+        this.setSelectedElements([nextFrameId]);
+      } else {
+        this.setSelectedElements([]);
+      }
+    });
+  }
+  deleteElementsByIds(ids: string[]) {
+    if (ids.length === 0) return;
+    this.runDocumentCommand(() => {
+      this.frames = this.frames.filter((frame) => !ids.includes(frame.id));
+      this.elements = this.elements.filter((element) => !ids.includes(element.id));
+      this.selectedElements = this.selectedElements.filter((element) => !ids.includes(element.id));
+      this.syncFramesTimeline();
+    });
+  }
+  duplicateElement(
+    elementId: string,
+    overrides?: Partial<EditorElement> & {
+      placement?: Partial<Placement>;
+      properties?: Record<string, unknown>;
+    },
+  ) {
+    const sourceElement = this.elements.find((element) => element.id === elementId);
+    if (!sourceElement) return null;
+
+    let duplicatedElement: EditorElement | null = null;
+    this.runDocumentCommand(() => {
+      const nextId = `element-${getUid()}`;
+      duplicatedElement = {
+        ...sourceElement,
+        ...overrides,
+        id: nextId,
+        isFrame: false,
+        index: this.elements.length,
+        order: this.elements.length,
+        copied: false,
+        placement: {
+          ...sourceElement.placement,
+          ...overrides?.placement,
+        },
+        properties: {
+          ...sourceElement.properties,
+          ...(sourceElement.type !== 'text' ? { elementId: nextId } : {}),
+          ...overrides?.properties,
+        } as EditorElement['properties'],
+      } as EditorElement;
+      this.elements.push(duplicatedElement);
+      this.setSelectedElements([nextId]);
+      this.syncFramesTimeline();
+    });
+
+    return duplicatedElement;
+  }
+  pasteFramesAt(
+    insertIndex: number,
+    framesToPaste: Frame[],
+    elementsToPaste: EditorElement[],
+    action: 'copy' | 'paste' | 'cut',
+  ) {
+    if (framesToPaste.length === 0 || elementsToPaste.length === 0) return [] as string[];
+
+    const normalizedIndex = Math.max(0, Math.min(insertIndex, this.frames.length));
+    const idMap = new Map<string, string>();
+    const preparedFrames = framesToPaste.map((frame) => {
+      const nextId = action === 'cut' ? frame.id : getUid();
+      idMap.set(frame.id, nextId);
+      return {
+        ...frame,
+        id: nextId,
+      };
+    });
+    const preparedElements = elementsToPaste.map((element) => {
+      const nextId = idMap.get(element.id) || (action === 'cut' ? element.id : getUid());
+      return {
+        ...element,
+        id: nextId,
+        index: undefined,
+        order: normalizedIndex,
+        properties: {
+          ...element.properties,
+          ...(element.type !== 'text' && 'elementId' in element.properties
+            ? { elementId: nextId }
+            : {}),
+        },
+      } as EditorElement;
+    });
+
+    this.runDocumentCommand(() => {
+      this.frames.splice(normalizedIndex, 0, ...preparedFrames);
+      this.elements = this.elements.concat(preparedElements);
+      this.syncFramesTimeline();
+      this.setSelectedElements(preparedElements.map((element) => element.id));
+      this.setCurrentKeyFrame(normalizedIndex);
+    });
+
+    return preparedElements.map((element) => element.id);
   }
   getSelectedElement() {
     return this.selectedElements;
@@ -1122,12 +1342,16 @@ export class EditorStore {
         rotation: 0,
         scaleX: 1,
         scaleY: 1,
-        zIndex: options.isFrame ? 0 : 1,
+        zIndex: options.isFrame
+          ? 0
+          : Math.max(0, ...this.elements.map((el) => el.placement.zIndex)) + 1,
       },
-      timeFrame: {
-        start: 0,
-        end: this.maxTime,
-      },
+      timeFrame: options.isFrame
+        ? { start: 0, end: this.maxTime }
+        : {
+            start: this.currentKeyFrame * (this.animationStore?.timePerFrameInMs ?? 0),
+            end: (this.currentKeyFrame + 1) * (this.animationStore?.timePerFrameInMs ?? 0),
+          },
       properties: {
         text: options.text,
         fontSize: options.fontSize,
@@ -1160,13 +1384,12 @@ export class EditorStore {
       this.addImage(indexWithOffset, frame.src, true, frame.id);
     });
     if (!this.elements.length) return;
-    this.updateMaxTime();
-    console.log('maxTime', this.maxTime);
-    this.setSelectedElements([this.elements[0].id]);
-    if (!this.elements.length) return;
-    this.updateMaxTime();
-    console.log('maxTime', this.maxTime);
-    // this.setSelectedElements([this.elements[0].id]);
+    this.syncFramesTimeline();
+    const firstFrameId = this.frames[0]?.id;
+    if (firstFrameId) {
+      this.setSelectedElements([firstFrameId]);
+      this.setCurrentKeyFrame(0);
+    }
   }
   updateEditorElement(editorElement: EditorElement) {
     this.elements = this.elements.map((element) => {
@@ -1180,8 +1403,8 @@ export class EditorStore {
     this.selectedElements = this.selectedElements.filter((el) => el.id !== id);
   }
   deleteFrame(index: number) {
-    this.frames = this.frames.filter((frame, i) => i !== index);
-    this.elements = this.elements.filter((element, i) => i !== index);
-    this.frames = this.frames;
+    const frameToDelete = this.frames[index];
+    if (!frameToDelete) return;
+    this.deleteFramesByIds([frameToDelete.id]);
   }
 }

@@ -22,7 +22,6 @@ export const useCanvasResize = (
         object.top && (object.top *= scale);
         object.setCoords();
       });
-      console.log('Canvas resized');
     };
     window.addEventListener('resize', resizeCanvas);
     // resizeCanvas();

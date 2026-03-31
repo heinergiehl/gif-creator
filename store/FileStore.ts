@@ -7,10 +7,10 @@ export class FileStore {
   rootStore: RootStore;
   gifQuality = 10;
   paletteSize = 256; // New property for palette size
-  ffmpeg = ffmpegStore.ffmpeg;
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this, {
+      ffmpeg: computed,
       canvas: computed,
       animationStore: computed,
       editorStore: computed,
@@ -22,6 +22,9 @@ export class FileStore {
   }
   get editorStore() {
     return this.rootStore.editorStore;
+  }
+  get ffmpeg() {
+    return ffmpegStore.ffmpeg;
   }
   get canvas() {
     return this.rootStore?.canvasRef?.current;
@@ -44,6 +47,25 @@ export class FileStore {
       .sort((a, b) => a.timeFrame.start - b.timeFrame.start)
       .sort((a, b) => a?.index! - b?.index!);
   }
+  private async deleteFileIfPresent(fileName: string) {
+    const ffmpeg = this.ffmpeg;
+    if (!ffmpeg) return;
+    try {
+      await ffmpeg.deleteFile(fileName);
+    } catch (error) {
+      console.warn(`Skipping cleanup for ${fileName}`, error);
+    }
+  }
+
+  private async cleanupGeneratedFiles(frameCount: number) {
+    await this.deleteFileIfPresent('output.mp4');
+    await this.deleteFileIfPresent('output.gif');
+    await this.deleteFileIfPresent('palette.png');
+    for (let i = 0; i < frameCount; i++) {
+      await this.deleteFileIfPresent(`frame_${i}.png`);
+    }
+  }
+
   async createGifFromEditorElements(isPreview: boolean): Promise<string> {
     const ffmpeg = this.ffmpeg;
     if (!ffmpeg?.loaded) return '';
@@ -98,7 +120,6 @@ export class FileStore {
       }
       // Ensure frames were saved correctly
       const files = await ffmpeg.listDir('/');
-      console.log('Files in FS:', files);
       // Create a video from the PNGs
       //if isPreview is true, create video in very low quality, meaning low resolution like 200x200
       const scaleFilter = isPreview ? 'scale=100:100' : `scale=${this.width}:${this.height}`;
@@ -161,29 +182,13 @@ export class FileStore {
     } catch (error) {
       console.error('Error creating GIF:', error);
       return '';
-    } finally {
-      // // Clean up FFmpeg FS
-      // await ffmpeg.deleteFile('output.mp4');
-      // await ffmpeg.deleteFile('output.gif');
-      // await ffmpeg.deleteFile('palette.png');
-      // for (let i = 0; i < frames.length; i++) {
-      //   await ffmpeg.deleteFile(`frame_${i}.png`);
-      // }
     }
   }
   handleSaveAsGif = async (): Promise<string> => {
     try {
+      const frameCount = this.frames.length;
       const gifUrl = await this.createGifFromEditorElements(false);
-      console.log('GIF URL', gifUrl);
-      // Clean up FFmpeg FS
-      const ffmpeg = this.ffmpeg;
-      if (!ffmpeg) return '';
-      await ffmpeg.deleteFile('output.mp4');
-      await ffmpeg.deleteFile('output.gif');
-      await ffmpeg.deleteFile('palette.png');
-      for (let i = 0; i < frames.length; i++) {
-        await ffmpeg.deleteFile(`frame_${i}.png`);
-      }
+      await this.cleanupGeneratedFiles(frameCount);
       return gifUrl;
     } catch (error) {
       console.error('Error creating GIF', error);

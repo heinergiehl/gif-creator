@@ -110,7 +110,7 @@ export default function VideoToGifConverterPage() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                 <Link 
-                  href="/editor"
+                  href="/video-to-gif/converter-and-editor/editor"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-white h-11 px-8 bg-gradient-to-r from-[#ff2975] to-[#00FFF1] hover:opacity-90"
                 >
                   Start Converting Videos →

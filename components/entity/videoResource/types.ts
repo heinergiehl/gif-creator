@@ -6,6 +6,7 @@ export interface FrameSettingsProps {
   setFrameRate: Dispatch<SetStateAction<number>>;
   quality: number;
   setQuality: Dispatch<SetStateAction<number>>;
+  disabled?: boolean;
 }
 export interface FileInputProps {
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;

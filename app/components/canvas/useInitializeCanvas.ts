@@ -143,11 +143,8 @@ export const useInitializeCanvas = () => {
       x: number,
       y: number,
     ) => {
-      // const selectedObjIds = canvasRef.current?.getActiveObjects().map((obj) => obj.id);
-      // store.elements = store.elements.filter((el: any) => !selectedObjIds?.includes(el.id));
-      canvasRef.current?.remove(transform.target);
-      store.elements = store.elements.filter((el) => el.id !== transform.target?.id);
-      store.frames = store.frames.filter((frame) => frame.id !== transform.target?.id);
+      if (!transform.target?.id) return true;
+      store.deleteElementsByIds([transform.target.id]);
       return true;
     };
     const handleCopy = (
@@ -177,63 +174,22 @@ export const useInitializeCanvas = () => {
             format: 'png',
           });
         }
-        if (selectedElement && isImageEditorElement(selectedElement)) {
-          store.elements = [
-            ...store.elements,
-            {
-              ...selectedElement,
-              order: store.elements.length,
-              index: store.elements.length,
-              dataUrl,
-              id: id,
-              isFrame: false,
-              properties: {
-                ...selectedElement.properties,
-                elementId: id,
-              },
-              placement: {
-                ...selectedElement.placement,
-                x: clonedObj?.left || 0,
-                y: clonedObj?.top || 0,
-              },
-            },
-          ];
-        } else if (
-          selectedElement &&
-          isTextEditorElement(selectedElement) &&
-          clonedObj instanceof fabric.Textbox
-        ) {
-          store.elements = [
-            ...store.elements,
-            {
-              ...selectedElement,
-              order: store.elements.length,
-              index: store.elements.length,
-              dataUrl,
-              id: id,
-              isFrame: false,
-              properties: {
-                ...selectedElement.properties,
-                text: clonedObj.text || '',
-              },
-              placement: {
-                ...selectedElement.placement,
-                x: clonedObj?.left || 0,
-                y: clonedObj?.top || 0,
-              },
-            },
-          ];
-        }
-        clonedObj.set('id', id);
-        clonedObj.set('zIndex', store.elements.length);
-        clonedObj.setCoords();
-        canvasRef.current?.add(clonedObj);
-        canvasRef.current?.setActiveObject(clonedObj);
+        store.duplicateElement(selectedElement.id, {
+          dataUrl,
+          placement: {
+            ...selectedElement.placement,
+            x: clonedObj?.left || 0,
+            y: clonedObj?.top || 0,
+          },
+          properties:
+            selectedElement && isTextEditorElement(selectedElement) && clonedObj instanceof fabric.Textbox
+              ? {
+                  ...selectedElement.properties,
+                  text: clonedObj.text || '',
+                }
+              : undefined,
+        });
       });
-      const timeFrame = store.elements.find((el: EditorElement) => el.id === target.id)?.timeFrame;
-      const ele = store.elements.find((el: EditorElement) => el.id === target.id);
-      if (!timeFrame || !ele) return;
-      timelineStore.updateEditorElementTimeFrame(ele, timeFrame);
       return true;
     };
     let guideline: AlignGuidelines;
@@ -257,7 +213,6 @@ export const useInitializeCanvas = () => {
     };
     const updateElementState = (modifiedObject: fabric.Object) => {
       if (!modifiedObject?.id) {
-        console.log('object:modified', 'no object found');
         return;
       }
       let dataUrl = '';
@@ -272,30 +227,14 @@ export const useInitializeCanvas = () => {
           multiplier: 0.1,
           format: 'png',
         });
-        store.frames = store.frames.map((frame: any, index) => {
-          if (index === store.currentKeyFrame) {
-            return {
-              ...frame,
-              src: framdeDataUrl,
-            };
-          }
-          return frame;
-        });
+        store.updateCurrentFrameSource(framdeDataUrl);
       }
       if (isFrame) {
         const dataUrl = canvasRef.current?.toDataURL({
           multiplier: 0.1,
           format: 'png',
         });
-        store.frames = store.frames.map((frame: any) => {
-          if (frame.id === modifiedObject.id) {
-            return {
-              ...frame,
-              src: dataUrl,
-            };
-          }
-          return frame;
-        });
+        store.updateFrameSource(modifiedObject.id, dataUrl);
       }
       let shadow: fabric.IShadowOptions | undefined;
       if (typeof modifiedObject.shadow === 'string') {
@@ -365,15 +304,8 @@ export const useInitializeCanvas = () => {
         const hasChanged =
           newSelectedElementIds.length !== currentSelectedIds.length ||
           !newSelectedElementIds.every((id) => currentSelectedIds.includes(id));
-        console.log(
-          'Selection changed!!!!,',
-          newSelectedElementIds,
-          currentSelectedIds,
-          hasChanged,
-        );
         if (hasChanged) {
           store.setSelectedElements(newSelectedElementIds);
-          console.log('Selected elements in handleSelectionChange:', store.selectedElements);
         }
       }, 300);
       canvas.on('object:modified', (e) => {
@@ -434,22 +366,18 @@ export const useInitializeCanvas = () => {
         }, 300),
       );
       canvas.on('selection:created', (e) => {
-        console.log('selectionCreated', e);
         handleSelectionChange(e.selected || []);
       });
       canvas.on('selection:updated', (e) => {
-        console.log('SelectionUpdated', e || []);
         handleSelectionChange(e.selected || []);
       });
       canvas.on('selection:cleared', (e) => {
-        console.log('Selection cleared');
         store.setSelectedElements([]);
       });
       canvas.on('object:selected', (e) => {
         e.target?.set('stroke', 'none');
         const selectedElement = store.selectedElements.find((el) => el.id === e.target?.id);
         if (!selectedElement && e.target?.id) {
-          console.log('OBJECT SELECTED: ', e.target);
           store.setSelectedElements([e.target?.id]);
         }
       });
@@ -480,7 +408,6 @@ export const useInitializeCanvas = () => {
           rect.setCoords();
         });
         canvas.on('mouse:up', (e) => {
-          console.log('mouse:up');
           canvas.off('mouse:move');
           guideline?.clearGuideline();
           const rect = canvas.getObjects().find((obj) => obj.id === 'selection-rectangle');
@@ -491,10 +418,8 @@ export const useInitializeCanvas = () => {
     };
     if (canvasRef.current === null) {
       const isMobile = window.innerWidth < 768;
-      console.log('isMobile', isMobile, window.innerWidth);
       const width = isMobile ? window.innerWidth : canvasStore.width;
       const height = isMobile ? window.innerHeight / 2.5 : canvasStore.height;
-      console.log('Canvas width and height:', width, height);
       const c = new fabric.Canvas('canvas', {
         backgroundColor: canvasStore.backgroundColor,
         hoverCursor: 'pointer',

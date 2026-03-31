@@ -24,7 +24,9 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import imageCompression from 'browser-image-compression';
 import ShinyButton from '@/components/magicui/shiny-button';
-import { DeleteIcon, LucideDelete, RemoveFormattingIcon, Trash2Icon } from 'lucide-react';
+import { ImagePlus, Loader2, Trash2Icon } from 'lucide-react';
+import { CustomProgress } from '@/components/ui/CustomProgress';
+import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
@@ -74,24 +76,70 @@ const ImageResource = observer(() => {
   const store = rootStore.editorStore;
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    for (let i = 0; i < e.target.files.length; i++) {
-      const file = e.target.files[i];
-      try {
+    const files = Array.from(e.target.files);
+    store.setProgressState({
+      active: true,
+      stage: 'optimizing',
+      title: 'Preparing images',
+      message: 'Compressing and loading your images for drag-and-drop editing…',
+      conversion: 5,
+      rendering: 0,
+    });
+
+    const importedImages: string[] = [];
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const compressedFile = await imageCompression(file, {
-          maxSizeMB: 0.5, // Maximum file size
-          maxWidthOrHeight: 1024, // Maximum width or height
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1024,
           useWebWorker: true,
         });
-        const reader = new FileReader();
-        reader.readAsDataURL(compressedFile);
-        reader.onloadend = () => {
-          store.progress.conversion = 0;
-          store.images.push(reader.result as string);
-          store.progress.conversion = 100;
-        };
-      } catch (error) {
-        console.error('Error compressing image:', error);
+
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (typeof reader.result === 'string') {
+              resolve(reader.result);
+              return;
+            }
+            reject(new Error('Failed to read image file as data URL'));
+          };
+          reader.onerror = () => reject(reader.error ?? new Error('Failed to read image file'));
+          reader.readAsDataURL(compressedFile);
+        });
+
+        importedImages.push(dataUrl);
+        const progress = ((i + 1) / files.length) * 100;
+        store.setProgressState({
+          conversion: progress,
+          rendering: progress,
+          message: `Loaded ${i + 1} of ${files.length} images into your resource tray…`,
+        });
       }
+
+      store.appendImageResources(importedImages);
+      store.setProgressState({
+        active: false,
+        stage: 'ready',
+        title: 'Images ready',
+        message:
+          importedImages.length === 1
+            ? '1 image is ready to drag onto the canvas.'
+            : `${importedImages.length} images are ready to drag onto the canvas.`,
+        conversion: 100,
+        rendering: 100,
+      });
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      store.setProgressState({
+        active: false,
+        stage: 'error',
+        title: 'Image import failed',
+        message: 'One or more images could not be prepared. Please try again with smaller files or a different format.',
+        conversion: 0,
+        rendering: 0,
+      });
     }
   };
   const magicContainerRef = React.useRef<HTMLDivElement>(null);
@@ -111,9 +159,11 @@ const ImageResource = observer(() => {
     magicContainerRef.current?.children.length,
   ]);
   const handleDeleteImage = (index: number) => {
-    store.images.splice(index, 1);
+    store.removeImageResourceAt(index);
     // check if it has been added as element already, if so, remove it as well
   };
+  const isImporting = store.progress.active;
+  const showReadyMessage = !isImporting && store.progress.stage === 'ready' && store.progress.message;
   const active = useDndContext().active;
   return (
     <ScrollArea className={cn('h-screen w-full bg-slate-300 dark:bg-slate-900 ')} draggable="false">
@@ -121,7 +171,20 @@ const ImageResource = observer(() => {
         <div className="flex h-[50px] w-full items-center justify-center text-sm font-medium ">
           Upload Images
         </div>
-        <CustomInputFile onChange={handleImageChange} type="image" />
+        <div className="mx-4">
+          <MediaImportStatusCard
+            title={isImporting ? store.progress.title || 'Preparing images' : 'Upload still images'}
+            description={
+              isImporting
+                ? store.progress.message || 'Compressing and loading images…'
+                : 'Upload PNG, JPG, WebP, AVIF, or GIF images. They appear here as draggable assets for the editor canvas.'
+            }
+            icon={isImporting ? Loader2 : ImagePlus}
+            iconClassName={isImporting ? 'animate-spin text-blue-500' : 'text-emerald-500'}
+          />
+        </div>
+        {!isImporting && <CustomInputFile onChange={handleImageChange} type="image" />}
+        <div className="px-4">{(isImporting || showReadyMessage) && <CustomProgress />}</div>
         <Separator orientation={'horizontal'} className="w-full" />
         {fileUploadScrollAreaHeight < 200 && (
           <div style={{}} className={`flex h-full  w-[95%]`} ref={magicContainerRef}>

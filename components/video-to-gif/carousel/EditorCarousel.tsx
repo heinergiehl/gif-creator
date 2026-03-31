@@ -1,6 +1,6 @@
 import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DndContext, DragOverlay, useDndContext } from '@dnd-kit/core';
+import { useDndContext } from '@dnd-kit/core';
 import {
   SortableContext,
   horizontalListSortingStrategy,
@@ -12,7 +12,6 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import Timeline from './Timeline';
 import CarouselDroppable from './CarouselDroppable';
 import { useToast } from '@/components/ui/use-toast';
-import DraggedImagePreview from './DraggedImmagePreview';
 import { EditorElement, Frame } from '@/types';
 import useDragAndDropAndCarousel from './hooks/';
 import { VList } from 'virtua';
@@ -23,10 +22,8 @@ import { throttle } from 'lodash';
 import SelectionArea from '@viselect/vanilla';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { createPortal } from 'react-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 export interface EditorCarouselProps {
   containerWidth: number;
 }
@@ -61,15 +58,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         frames: [...selectedFrames],
         action: 'cut',
       });
-      elementsToCut.forEach((element) => {
-        store.removeElement(element.id);
-        store.removeFrame(element.id);
-      });
-      store.setSelectedElements([]);
-      const selectedFramesStartIndex = store.selectedElements.findIndex(
-        (frame) => frame.id === store.selectedElements[0]?.id,
-      );
-      store.currentKeyFrame = selectedFramesStartIndex !== -1 ? selectedFramesStartIndex : 0;
+      store.deleteFramesByIds(elementsToCut.map((element) => element.id));
       toast({
         title: 'Cut',
         description: 'Elements cut to clipboard',
@@ -98,28 +87,15 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   const handlePaste = useCallback(
     (index: number, pasteBefore: boolean) => {
       if (clipboard && clipboard.elements) {
-        const pastedElements: EditorElement[] = [];
-        const pastedFrames: Frame[] = [];
-        const framesCopy = [...store.frames];
-        clipboard.frames.forEach((frame, idx) => {
-          const id = clipboard.action === 'cut' ? frame.id : getUid();
-          const newFrame = { ...frame, id };
-          framesCopy.splice(pasteBefore ? index + idx : index + idx + 1, 0, newFrame);
-          pastedFrames.push(newFrame);
-        });
-        clipboard.elements.forEach((element) => {
-          const id = clipboard.action === 'cut' ? element.id : getUid();
-          const newElement = {
-            ...element,
-            id,
-            properties: { ...element.properties, elementId: id },
-          };
-          pastedElements.push(newElement as EditorElement);
-        });
-        store.frames = framesCopy;
-        store.elements = store.elements.concat(pastedElements);
+        const insertionIndex = pasteBefore ? index : index + 1;
+        const pastedIds = store.pasteFramesAt(
+          insertionIndex,
+          clipboard.frames,
+          clipboard.elements,
+          clipboard.action,
+        );
         setClipboard(null);
-        store.setSelectedElements([...pastedElements.map((el) => el.id)]);
+        store.setSelectedElements(pastedIds);
       }
     },
     [clipboard, store.frames, store.elements, store.selectedElements],
@@ -138,8 +114,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       const element = document.getElementById(elementId);
       const { left, width } = element?.getBoundingClientRect() ?? { left: 0, width: 0 };
       const pasteBefore = mousePosition!.x < left + width / 2;
-      console.log('PASTE BEFORE', editorStore.selectedElements);
-      handlePaste(selectedElementIndex + (pasteBefore ? 0 : 1), pasteBefore);
+      handlePaste(selectedElementIndex, pasteBefore);
     },
     [store.frames, store.selectedElements, mousePosition],
   );
@@ -169,7 +144,6 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     // check if being on small screen, if so, return
     if (window.innerWidth < 768) {
       selectionRef.current?.cancel();
-      console.log('SMALL SCREEN');
       return;
     }
     if (selectionRef.current === undefined && store.elements.length > 0) {
@@ -220,7 +194,9 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
           //   el.classList.remove('selected');
           // });
           store.setSelectedElements([...selectedIds]);
-          store.currentKeyFrame = store.frames.findIndex((frame) => frame.id === selectedIds[0]);
+          store.setCurrentKeyFrame(
+            store.frames.findIndex((frame) => frame.id === selectedIds[0]),
+          );
         });
       return () => {
         selectionRef.current?.clearSelection();
@@ -228,14 +204,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     }
   }, [store.selectedElements, store.elements, active]);
   const handleDeleteFrame = (index: number): void => {
-    const frameToDelete = store.frames[index];
-    // get the corresponding element to the frame
-    store.elements = store.elements.filter((element) => element.id !== frameToDelete.id);
-    store.frames = store.frames.filter((frame) => frame.id !== store.frames[index].id);
-    if (index === store.currentKeyFrame || index === store.frames.length - 1) {
-      const newSelectedIndex = (index === 0 ? 0 : index - 1) % store.frames.length;
-      store.currentKeyFrame = newSelectedIndex;
-    }
+    store.deleteFrame(index);
   };
   const vListRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -248,11 +217,17 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     }
   }, [store.currentKeyFrame, document.getElementsByClassName('selected')]);
   const over = useDndContext()?.over;
+  const isDraggingResource = active && String(active.id).includes('Resource');
+  const isOverCarousel =
+    isDraggingResource &&
+    (over?.id === 'carousel-container' ||
+      store.frames.some((fr) => fr.id === over?.id));
   const frames = useMemo(() => {
     return store.frames.map((frame, index) => {
       return (
         <Droppable
           id={frame.id}
+          index={index}
           key={index}
           className={cn([
             'selectable relative flex h-[74px] w-full items-center  justify-center  rounded-md border-2  transition-all duration-300 ',
@@ -280,7 +255,6 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
       );
     });
   }, [store.frames, store.currentKeyFrame, calculateTransform, hoverIndex]);
-  console.log('ACTIVE', active?.data?.current?.image);
   return (
     <div
       onPointerDown={() => selectionRef.current?.clearSelection()}
@@ -302,7 +276,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         }}
         draggable="false"
         id="carousel-container"
-        className="relative flex w-screen items-center  justify-start gap-4 overflow-y-hidden rounded-none bg-muted bg-slate-200 dark:bg-slate-900 md:w-full"
+        className={cn([
+          'relative flex w-screen items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted bg-slate-200 transition-all duration-200 dark:bg-slate-900 md:w-full',
+          isOverCarousel && 'ring-2 ring-inset ring-blue-500/60',
+        ])}
         ref={carouselRef}
       >
         {store.frames.length === 0 && <CarouselDroppable />}
@@ -322,20 +299,7 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
             {frames}
           </VList>
         </SortableContext>
-        {createPortal(
-          <DragOverlay
-            modifiers={[restrictToHorizontalAxis]}
-            dropAnimation={{
-              duration: 200,
-              easing: 'ease',
-            }}
-          >
-            {active && store.frames.find((fr) => fr.id === active.id)?.src && (
-              <DraggedImagePreview src={store.frames.find((fr) => fr.id === active.id)?.src!} />
-            )}
-          </DragOverlay>,
-          document.body,
-        )}
+
       </div>
     </div>
   );

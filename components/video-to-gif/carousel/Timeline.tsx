@@ -39,18 +39,9 @@ const Timeline: React.FC<TimelineProps> = observer(
         }
       }
     };
-    const store = useStores().editorStore;
     useEffect(() => {
-      // update the start and end time of each frame based on store.maxTime and store.frames.length andtimePerFrame
-      store.elements.map((element, index) => {
-        if (element.isFrame) {
-          store.updateMaxTime();
-          animationStore.timePerFrameInMs = store.maxTime / store.frames.length;
-          element.timeFrame.start = index * animationStore.timePerFrameInMs;
-          element.timeFrame.end = (index + 1) * animationStore.timePerFrameInMs;
-        }
-      });
-    }, [store.elements, animationStore.fps, store.maxTime, store.frames]);
+      editorStore.syncFramesTimeline();
+    }, [animationStore.timePerFrameInMs, editorStore, editorStore.frames.length]);
     let currentPositionPercent = 0;
     if (editorStore.frames.length > 0) {
       currentPositionPercent = markerWidthPercent * currentFrame;
@@ -67,7 +58,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           onMouseMove={handleMouseMove}
           className="relative flex h-full flex-col items-end justify-center"
           onClick={() => {
-            editorStore.currentKeyFrame = frameNumber - 1;
+            editorStore.setCurrentKeyFrame(frameNumber - 1);
           }}
         >
           {/* display current time */}
