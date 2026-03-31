@@ -57,6 +57,12 @@ jobs:
             cd /var/www/myapps/gif-creator
             git fetch origin
             git reset --hard origin/main
+            echo "Deployed git commit: $(git rev-parse --short HEAD)"
+            git log -1 --pretty=%s
             bun install
             bun run build
-            pm2 reload ecosystem.config.js --only gif-creator --env production
+            pm2 startOrReload ecosystem.config.js --only gif-creator --env production
+            sleep 5
+            pm2 describe gif-creator | sed -n '1,40p'
+            curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/" | grep -q "Learn the workflows behind better GIFs"
+            curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/blog" | grep -q "A practical blog for making better GIFs"
