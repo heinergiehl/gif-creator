@@ -1,70 +1,96 @@
 'use client';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { EditorElement } from '@/types';
 import { observer } from 'mobx-react';
 import DragableView from './DraggableView';
 import { useStores } from '@/store';
 import { useCanvas } from '@/app/components/canvas/canvasContext';
 import { Button } from '../ui/button';
-import { CircleEllipsis, OptionIcon } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
-import { MdRemoveCircleOutline } from 'react-icons/md';
+import { Trash2, Type, ImageIcon, Film, Music, Box } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { CustomTooltip } from '@/app/components/ui/CustomTooltip';
+
+/** Icon for the element type */
+function ElementTypeIcon({ type }: { type: string }) {
+  const cls = 'h-3 w-3 shrink-0 opacity-70';
+  switch (type) {
+    case 'text':
+      return <Type className={cls} />;
+    case 'image':
+      return <ImageIcon className={cls} />;
+    case 'video':
+      return <Film className={cls} />;
+    case 'audio':
+      return <Music className={cls} />;
+    default:
+      return <Box className={cls} />;
+  }
+}
+
 export const TimeFrameView = observer((props: { element: EditorElement }) => {
   const store = useStores().editorStore;
+  const rootStore = useStores();
+  const timelineStore = useStores().timelineStore;
+  const { element } = props;
+
   const framesTotal = store.frames.length;
-  const timeFrame = props.element.timeFrame;
+  const timeFrame = element.timeFrame;
   const maxTime = store.maxTime;
   const timePerFrame = maxTime / framesTotal;
   const frameNumberStart = Math.round(timeFrame.start / timePerFrame) + 1;
-  const frameNumberEnd = Math.round(timeFrame.end / timePerFrame) + 1;
-  const timelineStore = useStores().timelineStore;
-  const { element } = props;
+  const frameNumberEnd = Math.round(timeFrame.end / timePerFrame);
+
   const disabled = element.type === 'audio';
-  const isSelected = store.selectedElements.includes(element) ? true : false;
-  const bgColorOnSelected = isSelected ? 'bg-slate-800' : 'bg-slate-600';
-  const disabledCursor = disabled ? 'cursor-no-drop' : 'cursor-ew-resize';
-  const rootStore = useStores();
-  const canvas = useCanvas().canvasRef.current;
+  const isSelected = store.selectedElements.includes(element);
+  const disabledCursor = disabled ? 'cursor-not-allowed' : 'cursor-ew-resize';
+
+  const handleRemove = useCallback(() => {
+    store.removeElement(element.id);
+  }, [store, element.id]);
+
   return (
     <div
-      onClick={() => {
-        store.setSelectedElements([element.id]);
-      }}
-      onPointerDown={() => {
-        store.setSelectedElements([element.id]);
-      }}
-      onTouchStart={() => {
-        store.setSelectedElements([element.id]);
-      }}
+      onClick={() => store.setSelectedElements([element.id])}
       key={element.id}
-      className={`relative my-2 flex h-[25px]    overflow-hidden ${
-        isSelected ? 'border-2 border-indigo-600 bg-slate-200 dark:bg-slate-500' : ''
-      }`}
+      className={cn(
+        'group relative my-0.5 flex h-7 overflow-hidden rounded-md transition-colors',
+        isSelected
+          ? 'bg-indigo-100 ring-1 ring-indigo-500 dark:bg-indigo-950/40 dark:ring-indigo-400'
+          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700',
+      )}
     >
+      {/* ── Start handle ── */}
       <DragableView
-        className=" z-10"
+        className="z-10"
         value={element.timeFrame.start}
         total={store.maxTime}
         disabled={disabled}
         onChange={(value) => {
+          const minSpan = timePerFrame || 1;
+          const clamped = Math.min(value, element.timeFrame.end - minSpan);
           rootStore.setRerunUseManageFabricObjects(true);
-          timelineStore.updateEditorElementTimeFrame(element, {
-            start: value,
-          });
+          timelineStore.updateEditorElementTimeFrame(element, { start: Math.max(0, clamped) });
         }}
       >
-        {' '}
         <div
-          className={`absolute  mt-[calc(25px/2)] h-[10px] w-[10px] translate-x-[-50%] translate-y-[-50%] transform border-2 border-blue-400 bg-white ${disabledCursor}`}
-        ></div>
+          className={cn(
+            'absolute top-1/2 h-5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors',
+            disabled
+              ? 'cursor-not-allowed bg-slate-300 dark:bg-slate-600'
+              : 'cursor-ew-resize bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-400 dark:hover:bg-indigo-300',
+          )}
+        />
       </DragableView>
+
+      {/* ── Body (draggable range) ── */}
       <DragableView
-        className={disabled ? 'cursor-no-drop' : 'cursor-col-resize'}
+        className={disabled ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}
         value={element.timeFrame.start}
         disabled={disabled}
         style={{
           width: `${((element.timeFrame.end - element.timeFrame.start) / store.maxTime) * 100}%`,
+          minWidth: '40px',
         }}
         total={store.maxTime}
         onChange={(value) => {
@@ -77,54 +103,71 @@ export const TimeFrameView = observer((props: { element: EditorElement }) => {
         }}
       >
         <div
-          className={`${bgColorOnSelected} flex h-full  min-w-[0px] items-center gap-x-4 px-2 text-xs leading-[25px] text-white`}
-        >
-          <span className="left-30 "> {frameNumberStart}</span>
-          <span className="w-full leading-3"> {element.name}</span>
-          {element.dataUrl ? (
-            <Image src={element.dataUrl} alt="element" width={20} height={20} />
-          ) : (
-            <div className="h-5 w-5 shrink-0 rounded bg-slate-500/30" />
+          className={cn(
+            'flex h-full min-w-0 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium leading-7 transition-colors',
+            isSelected
+              ? 'bg-indigo-500 text-white dark:bg-indigo-600'
+              : 'bg-slate-400 text-white dark:bg-slate-600',
           )}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant={'outline'} className="m-0 h-5 w-5 rounded-full p-0">
-                <CircleEllipsis size="20" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="flex w-[300px] flex-col">
-              <span className="text-xs text-gray-500">
-                Do you want to remove this element from the timeline? This action cannot be undone.
-              </span>
-              <Button
-                className=""
-                variant={'destructive'}
-                onClick={() => {
-                  store.removeElement(element.id);
-                }}
-              >
-                <MdRemoveCircleOutline size={20} />
-              </Button>
-            </PopoverContent>
-          </Popover>
-          <span className="w-full text-end">{frameNumberEnd}</span>
+        >
+          {/* Frame start */}
+          <span className="shrink-0 tabular-nums opacity-80">{frameNumberStart}</span>
+
+          {/* Type icon */}
+          <ElementTypeIcon type={element.type} />
+
+          {/* Element preview or name */}
+          {element.dataUrl ? (
+            <Image
+              src={element.dataUrl}
+              alt=""
+              width={18}
+              height={18}
+              className="shrink-0 rounded-sm object-cover"
+            />
+          ) : null}
+          <span className="min-w-0 flex-1 truncate">{element.name}</span>
+
+          {/* Delete button with hotkey tooltip */}
+          <CustomTooltip content="Delete (Del)">
+            <Button
+              variant="ghost"
+              className="m-0 h-5 w-5 shrink-0 rounded-full p-0 text-white/80 opacity-0 transition-opacity hover:bg-red-500/80 hover:text-white group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove();
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </CustomTooltip>
+
+          {/* Frame end */}
+          <span className="shrink-0 tabular-nums opacity-80">{frameNumberEnd}</span>
         </div>
       </DragableView>
+
+      {/* ── End handle ── */}
       <DragableView
-        className="z-10 "
+        className="z-10"
         disabled={disabled}
         value={element.timeFrame.end}
         total={store.maxTime}
         onChange={(value) => {
+          const minSpan = timePerFrame || 1;
+          const clamped = Math.max(value, element.timeFrame.start + minSpan);
           rootStore.setRerunUseManageFabricObjects(true);
-          timelineStore.updateEditorElementTimeFrame(element, {
-            end: value,
-          });
+          timelineStore.updateEditorElementTimeFrame(element, { end: Math.min(store.maxTime, clamped) });
         }}
       >
         <div
-          className={`mt-[calc(25px/2)] h-[10px] w-[10px] translate-x-[-50%] translate-y-[-50%] transform border-2 border-blue-400 bg-white ${disabledCursor}`}
-        ></div>
+          className={cn(
+            'absolute top-1/2 h-5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors',
+            disabled
+              ? 'cursor-not-allowed bg-slate-300 dark:bg-slate-600'
+              : 'cursor-ew-resize bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-400 dark:hover:bg-indigo-300',
+          )}
+        />
       </DragableView>
     </div>
   );

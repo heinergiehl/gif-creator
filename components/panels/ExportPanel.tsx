@@ -10,8 +10,6 @@ import { useToast } from '../ui/use-toast';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
-import { SelectSeparator } from '../ui/select';
-import CustomTextInput from '@/app/components/ui/CustomTextInput';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { ffmpegStore } from '@/store/FFmpegStore';
@@ -109,124 +107,79 @@ const ExportPanel = observer(() => {
         : 'Create GIF';
 
   return (
-    <div className="relative flex h-screen  w-full flex-col dark:bg-slate-900">
-      <span className="flex h-[50px] w-full items-center  justify-center bg-slate-200 text-sm dark:bg-slate-900">
-        Export Your GIF
-      </span>
-      <ScrollArea className="flex h-[90%] flex-col  gap-y-2 px-4 pr-8">
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
-          <div className="text-sm font-semibold text-slate-900 dark:text-white">Export readiness</div>
-          <div className="mt-3 space-y-3">
+    <div className="relative flex h-full w-full flex-col dark:bg-slate-900">
+      <ScrollArea className="flex-1 px-4 pb-4">
+        {/* readiness card */}
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Export readiness</div>
+          <div className="mt-2 space-y-2">
             {exportStatus.map((item) => (
-              <div key={item.label} className="flex items-start gap-3 text-sm">
+              <div key={item.label} className="flex items-start gap-2 text-sm">
                 <span
                   className={cn(
-                    'mt-1 inline-flex h-2.5 w-2.5 rounded-full',
+                    'mt-1.5 inline-flex h-2 w-2 shrink-0 rounded-full',
                     item.ready ? 'bg-emerald-500' : 'bg-amber-500',
                   )}
                 />
                 <div>
-                  <div className="font-medium text-slate-900 dark:text-white">{item.label}</div>
-                  <div className="text-slate-600 dark:text-slate-300">{item.description}</div>
+                  <div className="text-xs font-medium text-slate-800 dark:text-slate-200">{item.label}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{item.description}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <>
-          <Label className="mt-4 flex  flex-col ">
-            <span className="text-xs ">Frames Per Second</span>
-            <div className="flex gap-x-4">
-              <Input
-                min={1}
-                max={24}
-                type="range"
-                value={animtionStore.fps}
-                onChange={(e) => (animtionStore.fps = parseInt(e.target.value, 10))}
-              />
-              <Input
-                className="w-20"
-                min={1}
-                max={24}
-                type="number"
-                value={animtionStore.fps}
-                onChange={(e) => (animtionStore.fps = parseInt(e.target.value, 10))}
-              />
+
+        {/* settings */}
+        <div className="mt-4 space-y-4">
+          <Label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Frames Per Second</span>
+            <div className="flex items-center gap-3">
+              <Input type="range" min={1} max={24} className="flex-1" value={animtionStore.fps} onChange={(e) => (animtionStore.fps = parseInt(e.target.value, 10))} />
+              <Input type="number" className="h-7 w-14 text-xs" min={1} max={24} value={animtionStore.fps} onChange={(e) => (animtionStore.fps = parseInt(e.target.value, 10))} />
             </div>
           </Label>
-        </>
-        <Separator className="my-4" />
-        <>
-          <Label className="flex flex-col   ">
-            <span className="text-xs ">Quality</span>
-            <div className="flex gap-x-4">
-              <Input
-                type="range"
-                min="1"
-                max="10"
-                value={fileStore.gifQuality}
-                onChange={(e) => (fileStore.gifQuality = parseFloat(e.target.value))}
-              />
-              <Input
-                className="w-20"
-                type="number"
-                min="1"
-                max="10"
-                value={fileStore.gifQuality}
-                onChange={(e) => (fileStore.gifQuality = parseFloat(e.target.value))}
-              />
+
+          <Label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Quality</span>
+            <div className="flex items-center gap-3">
+              <Input type="range" min={1} max={10} className="flex-1" value={fileStore.gifQuality} onChange={(e) => (fileStore.gifQuality = parseFloat(e.target.value))} />
+              <Input type="number" className="h-7 w-14 text-xs" min={1} max={10} value={fileStore.gifQuality} onChange={(e) => (fileStore.gifQuality = parseFloat(e.target.value))} />
             </div>
           </Label>
-        </>
-        <Separator className="my-4" />
-        <>
-          <Label className="flex flex-col   ">
-            <span className="text-xs ">Palette Size</span>
-            <div className="flex gap-x-4">
-              <Input
-                type="range"
-                min="8"
-                step="8"
-                max="256"
-                value={fileStore.paletteSize}
-                onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))}
-              />
-              <Input
-                className="w-20"
-                type="number"
-                min="8"
-                step="8"
-                max="256"
-                value={fileStore.paletteSize}
-                onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))}
-              />
+
+          <Label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Palette Size</span>
+            <div className="flex items-center gap-3">
+              <Input type="range" min={8} max={256} step={8} className="flex-1" value={fileStore.paletteSize} onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))} />
+              <Input type="number" className="h-7 w-14 text-xs" min={8} max={256} step={8} value={fileStore.paletteSize} onChange={(e) => (fileStore.paletteSize = parseInt(e.target.value, 10))} />
             </div>
           </Label>
-        </>
-        <Separator className="my-4" />
-        <CanvasOptions />
-        <Separator className="my-4" />
-        {!gifUrl && (
-          <Button onClick={handleCreateGif} disabled={!canExport} size="lg" className="w-full">
-            {createButtonLabel}
-          </Button>
-        )}
-        {!hasFrames && (
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Start by uploading a video, images, or an existing GIF in the source panel. Once frames exist, export becomes available here.
-          </p>
-        )}
-        {gifUrl && (
-          <>
-            <Separator className="my-4" />
-            <Label className="z-10 flex min-h-[16rem] flex-col items-start justify-start ">
-              <span className="py-2 ">Download Gif</span>
+
+          <Separator />
+          <CanvasOptions />
+        </div>
+
+        {/* actions */}
+        <div className="mt-4 space-y-3">
+          {!gifUrl && (
+            <Button onClick={handleCreateGif} disabled={!canExport} size="sm" className="w-full">
+              {createButtonLabel}
+            </Button>
+          )}
+          {!hasFrames && (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Upload a video, images, or GIF frames first, then come back here to export.
+            </p>
+          )}
+          {gifUrl && (
+            <div className="flex flex-col gap-2">
               <div
                 className={cn(
-                  'group  rounded-sm border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800',
+                  'group rounded-md border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800',
                 )}
               >
-                <AnimatedShinyText className="inline-flex items-center justify-center  px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
+                <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1.5 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
                   ✨{' '}
                   <a href={gifUrl} download="animated.gif">
                     Download GIF
@@ -234,9 +187,9 @@ const ExportPanel = observer(() => {
                   <ArrowRightIcon className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                 </AnimatedShinyText>
               </div>
-            </Label>
-          </>
-        )}
+            </div>
+          )}
+        </div>
       </ScrollArea>
     </div>
   );
@@ -256,53 +209,49 @@ const CanvasOptions = observer(() => {
   useEffect(() => {
     applyChanges();
   }, [applyChanges]);
+
   return (
-    <>
-      <div className="flex flex-wrap  gap-x-2">
-        <Label>
-          <div className="flex flex-col gap-y-2">
-            Width
-            <CustomTextInput
-              onChange={(value) => {
-                canvasOptionsStore.setWidth(parseInt(value));
-              }}
-              className="w-20"
-              name="width"
-              inputTooltip="Adjust the width of the canvas"
-              value={String(canvasOptionsStore.width)}
-            />
-          </div>
+    <div className="space-y-3">
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        Canvas Size
+      </h4>
+      <div className="grid grid-cols-2 gap-3">
+        <Label className="flex flex-col gap-1">
+          <span className="text-xs text-slate-600 dark:text-slate-400">Width</span>
+          <Input
+            type="number"
+            className="h-7 text-xs"
+            value={canvasOptionsStore.width}
+            onChange={(e) => canvasOptionsStore.setWidth(parseInt(e.target.value))}
+          />
         </Label>
-        <Label>
-          <div className="flex flex-col gap-y-2">
-            <span> Height</span>
-            <CustomTextInput
-              onChange={(value) => {
-                canvasOptionsStore.setHeight(parseInt(value));
-              }}
-              className=" w-20"
-              name="height"
-              inputTooltip="Adjust the height of the canvas"
-              value={String(canvasOptionsStore.height)}
-            />
-          </div>
+        <Label className="flex flex-col gap-1">
+          <span className="text-xs text-slate-600 dark:text-slate-400">Height</span>
+          <Input
+            type="number"
+            className="h-7 text-xs"
+            value={canvasOptionsStore.height}
+            onChange={(e) => canvasOptionsStore.setHeight(parseInt(e.target.value))}
+          />
         </Label>
       </div>
-      <SelectSeparator className="my-4" />
-      <Label>
-        <div className="flex flex-col gap-y-2">
-          <span>Background Color</span>
-          <Input
+      <Label className="flex flex-col gap-1">
+        <span className="text-xs text-slate-600 dark:text-slate-400">Background</span>
+        <div className="flex items-center gap-2">
+          <input
             type="color"
-            name="backgroundColor"
-            onChange={(e) => {
-              canvasOptionsStore.setBackgroundColor(e.target.value);
-            }}
+            className="h-7 w-7 cursor-pointer rounded border-none bg-transparent p-0"
             value={canvasOptionsStore.backgroundColor}
+            onChange={(e) => canvasOptionsStore.setBackgroundColor(e.target.value)}
+          />
+          <Input
+            className="h-7 flex-1 font-mono text-xs"
+            value={canvasOptionsStore.backgroundColor}
+            onChange={(e) => canvasOptionsStore.setBackgroundColor(e.target.value)}
           />
         </div>
       </Label>
-    </>
+    </div>
   );
 });
 export default ExportPanel;

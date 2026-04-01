@@ -10,212 +10,143 @@ import {
   AlignEndVertical,
   AlignStartHorizontal,
   AlignStartVertical,
-  AlignVerticalSpaceAround,
-  AlignVerticalSpaceAroundIcon,
   AlignHorizontalDistributeEnd,
   AlignVerticalDistributeEnd,
   AlignCenterVerticalIcon,
   AlignCenterHorizontalIcon,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUp,
+  ChevronsDown,
 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+
 interface EditOptionsPanelProps {}
+
 export const EditOptionsPanel: React.FC<EditOptionsPanelProps> = observer(
   function EditOptionsPanel() {
     const { canvasRef } = useCanvas();
     const store = useStores().editorStore;
     const selectedElements = store.selectedElements;
-    if (selectedElements.length === 0) return <div>No Selected Element</div>;
+    if (selectedElements.length === 0)
+      return (
+        <div className="flex h-24 items-center justify-center text-sm text-slate-500">
+          No element selected
+        </div>
+      );
     const canvas = canvasRef.current;
-    if (!canvas) return <div>No Canvas</div>;
+    if (!canvas)
+      return (
+        <div className="flex h-24 items-center justify-center text-sm text-slate-500">
+          No canvas
+        </div>
+      );
     const frameElements = store.elements.filter(
       (el) => el.timeFrame.start === selectedElements[0].timeFrame.start,
     );
     const maxZIndex = frameElements.length - 1;
-    const isAtFront = selectedElements.every((element) => element.placement.zIndex === maxZIndex);
-    const isAtBack = selectedElements.every((element) => element.placement.zIndex === 0);
+    const isAtFront = selectedElements.every((el) => el.placement.zIndex === maxZIndex);
+    const isAtBack = selectedElements.every((el) => el.placement.zIndex === 0);
+    const canDistribute = selectedElements.length > 1;
+
     return (
-      <div className="flex w-full flex-col items-center justify-start">
-        {/* <div className="my-4">Arrange</div>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => store.increaseZIndexOfSelectedElements(canvas)}
-            disabled={isAtFront}
-          >
-            <div className="flex items-center justify-center gap-x-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12.75 5.82v8.43a.75.75 0 1 1-1.5 0V5.81L8.99 8.07A.75.75 0 1 1 7.93 7l2.83-2.83a1.75 1.75 0 0 1 2.47 0L16.06 7A.75.75 0 0 1 15 8.07l-2.25-2.25zM15 10.48l6.18 3.04a1 1 0 0 1 0 1.79l-7.86 3.86a3 3 0 0 1-2.64 0l-7.86-3.86a1 1 0 0 1 0-1.8L9 10.49v1.67L4.4 14.4l6.94 3.42c.42.2.9.2 1.32 0l6.94-3.42-4.6-2.26v-1.67z"
-                ></path>
-              </svg>
-              Forward
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => store.decreaseZIndexOfSelectedElements(canvas)}
-            disabled={isAtBack}
-          >
-            <div className="flex items-center justify-center gap-x-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12.75 18.12V9.75a.75.75 0 1 0-1.5 0v8.37l-2.26-2.25a.75.75 0 0 0-1.06 1.06l2.83 2.82c.68.69 1.79.69 2.47 0l2.83-2.82A.75.75 0 0 0 15 15.87l-2.25 2.25zM15 11.85v1.67l6.18-3.04a1 1 0 0 0 0-1.79l-7.86-3.86a3 3 0 0 0-2.64 0L2.82 8.69a1 1 0 0 0 0 1.8L9 13.51v-1.67L4.4 9.6l6.94-3.42c.42-.2.9-.2 1.32 0L19.6 9.6 15 11.85z"
-                ></path>
-              </svg>
-              Backward
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => store.bringToFrontSelectedElements(canvas)}
-            disabled={isAtFront}
-          >
-            <div className="flex items-center justify-center gap-x-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12.75 18.12V9.75a.75.75 0 1 0-1.5 0v8.37l-2.26-2.25a.75.75 0 0 0-1.06 1.06l2.83 2.82c.68.69 1.79.69 2.47 0l2.83-2.82A.75.75 0 0 0 15 15.87l-2.25 2.25zM15 11.85v1.67l6.18-3.04a1 1 0 0 0 0-1.79l-7.86-3.86a3 3 0 0 0-2.64 0L2.82 8.69a1 1 0 0 0 0 1.8L9 13.51v-1.67L4.4 9.6l6.94-3.42c.42-.2.9-.2 1.32 0L19.6 9.6 15 11.85z"
-                ></path>
-              </svg>
-              To Front
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => store.sendToBackSelectedElements(canvas)}
-            disabled={isAtBack}
-          >
-            <div className="flex items-center justify-center gap-x-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12.75 18.12V9.75a.75.75 0 1 0-1.5 0v8.37l-2.26-2.25a.75.75 0 0 0-1.06 1.06l2.83 2.82c.68.69 1.79.69 2.47 0l2.83-2.82A.75.75 0 0 0 15 15.87l-2.25 2.25zM15 11.85v1.67l6.18-3.04a1 1 0 0 0 0-1.79l-7.86-3.86a3 3 0 0 0-2.64 0L2.82 8.69a1 1 0 0 0 0 1.8L9 13.51v-1.67L4.4 9.6l6.94-3.42c.42-.2.9-.2 1.32 0L19.6 9.6 15 11.85z"
-                ></path>
-              </svg>
-              To Back
-            </div>
-          </Button>
-        </div> */}
-        {selectedElements.every((el) => el.type === 'text') && (
-          <div className="flex w-full flex-col items-center justify-center gap-4">
-            {/* <Separator className="my-4" /> */}
-            <span className="my-auto flex h-[50px] w-full items-center  justify-center bg-slate-300 text-sm font-medium dark:bg-slate-900">
-              Align Object To Canvas
-            </span>
-            <div className="flex flex-col items-center justify-center">
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <ToggleGroup type="multiple" className="flex flex-wrap items-center justify-center">
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'top', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    aria-label="top"
-                    value="top"
-                    onClick={() => store.alignSelectedElements('top', canvas)}
-                  >
-                    <AlignStartHorizontal size={20} />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'left', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    aria-label="left"
-                    value="left"
-                    onClick={() => store.alignSelectedElements('left', canvas)}
-                  >
-                    <AlignStartVertical size={20} />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'middle', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    value="middle"
-                    onClick={() => store.alignSelectedElements('middle', canvas)}
-                  >
-                    <AlignCenterVerticalIcon size={20} />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'center', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    value="center"
-                    onClick={() => store.alignSelectedElements('center', canvas)}
-                  >
-                    <AlignCenterHorizontalIcon size={20} />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'bottom', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    aria-label="bottom"
-                    value="bottom"
-                    onClick={() => store.alignSelectedElements('bottom', canvas)}
-                  >
-                    <AlignEndHorizontal size={20} />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    data-state={
-                      selectedElements.every((element) =>
-                        store.isElementAligned(element, 'right', canvas),
-                      )
-                        ? 'on'
-                        : 'off'
-                    }
-                    aria-label="right"
-                    value="right"
-                    onClick={() => store.alignSelectedElements('right', canvas)}
-                  >
-                    <AlignEndVertical size={20} />
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </div>
-            <Separator className="" />
-            <span>Distribute Objects</span>
-            <Separator className="w-full" />
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="flex w-full items-center justify-center gap-2">
-                <Button
-                  className="p-1"
-                  variant="outline"
-                  onClick={() => store.distributeElements('horizontal', canvas)}
-                >
-                  <AlignHorizontalDistributeEnd size={15} />
-                  <span className="text-xs"> Horizontal</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => store.distributeElements('vertical', canvas)}
-                >
-                  <AlignVerticalDistributeEnd size={15} />
-                  <span className="text-xs"> Vertical</span>
-                </Button>
-              </div>
-            </div>
+      <div className="flex w-full flex-col gap-4 p-4">
+        {/* ── Z-order ── */}
+        <div>
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Layer Order
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            <Button size="sm" variant="outline" onClick={() => store.increaseZIndexOfSelectedElements(canvas)} disabled={isAtFront}>
+              <ArrowUp size={14} className="mr-1" /> Forward
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => store.decreaseZIndexOfSelectedElements(canvas)} disabled={isAtBack}>
+              <ArrowDown size={14} className="mr-1" /> Backward
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => store.bringToFrontSelectedElements(canvas)} disabled={isAtFront}>
+              <ChevronsUp size={14} className="mr-1" /> To Front
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => store.sendToBackSelectedElements(canvas)} disabled={isAtBack}>
+              <ChevronsDown size={14} className="mr-1" /> To Back
+            </Button>
           </div>
-        )}
+        </div>
+
+        <Separator />
+
+        {/* ── Alignment ── */}
+        <div>
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Align to Canvas
+          </h4>
+          <ToggleGroup type="multiple" className="flex flex-wrap justify-center gap-1">
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'top', canvas)) ? 'on' : 'off'}
+              aria-label="top"
+              value="top"
+              onClick={() => store.alignSelectedElements('top', canvas)}
+            >
+              <AlignStartHorizontal size={16} />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'left', canvas)) ? 'on' : 'off'}
+              aria-label="left"
+              value="left"
+              onClick={() => store.alignSelectedElements('left', canvas)}
+            >
+              <AlignStartVertical size={16} />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'middle', canvas)) ? 'on' : 'off'}
+              value="middle"
+              onClick={() => store.alignSelectedElements('middle', canvas)}
+            >
+              <AlignCenterVerticalIcon size={16} />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'center', canvas)) ? 'on' : 'off'}
+              value="center"
+              onClick={() => store.alignSelectedElements('center', canvas)}
+            >
+              <AlignCenterHorizontalIcon size={16} />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'bottom', canvas)) ? 'on' : 'off'}
+              aria-label="bottom"
+              value="bottom"
+              onClick={() => store.alignSelectedElements('bottom', canvas)}
+            >
+              <AlignEndHorizontal size={16} />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              data-state={selectedElements.every((el) => store.isElementAligned(el, 'right', canvas)) ? 'on' : 'off'}
+              aria-label="right"
+              value="right"
+              onClick={() => store.alignSelectedElements('right', canvas)}
+            >
+              <AlignEndVertical size={16} />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        <Separator />
+
+        {/* ── Distribution ── */}
+        <div>
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Distribute
+          </h4>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="flex-1" onClick={() => store.distributeElements('horizontal', canvas)} disabled={!canDistribute}>
+              <AlignHorizontalDistributeEnd size={14} className="mr-1" />
+              <span className="text-xs">Horizontal</span>
+            </Button>
+            <Button size="sm" variant="outline" className="flex-1" onClick={() => store.distributeElements('vertical', canvas)} disabled={!canDistribute}>
+              <AlignVerticalDistributeEnd size={14} className="mr-1" />
+              <span className="text-xs">Vertical</span>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   },

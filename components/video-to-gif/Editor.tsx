@@ -38,6 +38,7 @@ import { MenuOption } from '@/types';
 import { EditorEmptyState } from './EditorEmptyState';
 import { getEditorModeConfig, getEditorRouteMode } from './editor-mode';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { Undo2, Redo2 } from 'lucide-react';
 // make sure the getActiveObject return type is correct and includes the id
 declare module 'fabric' {
   interface Canvas {
@@ -103,9 +104,30 @@ const Editor = React.memo(
       const overIndex = store.frames.findIndex((frame) => frame.id === overId);
       // Move within frames if the active item is found in frames
       if (activeIndex !== -1) {
+        // Check if a frame was dropped on the canvas → convert to overlay
+        const droppedOnCanvas = over?.id === 'canvas' || store.imageType === 'ObjectInFrame';
+        if (droppedOnCanvas && store.frames.length > 0) {
+          const frame = store.frames[activeIndex];
+          if (frame) {
+            const newId = String(getUid());
+            store.addImage(store.elements.length, frame.src, false, newId);
+            store.setSelectedElements([newId]);
+          }
+          setActiveDrag(null);
+          store.setInsertIndex(-1);
+          store.isDragging = false;
+          setTouchAction(true);
+          return;
+        }
+        // Normal frame reorder within carousel
         if (overIndex !== -1) {
           store.reorderFrames(activeIndex, overIndex);
         }
+        // Clean up drag state even for frame reorder
+        setActiveDrag(null);
+        store.setInsertIndex(-1);
+        store.isDragging = false;
+        setTouchAction(true);
         return;
       }
       const resourceType = String(active.id).split('-')[0];
@@ -122,6 +144,16 @@ const Editor = React.memo(
           (over?.id === 'carousel-container' ||
             store.imageType === 'Frame' ||
             store.frames.some((fr) => fr.id === overId)));
+
+      // ── Discard: if dropped outside any valid target, silently cancel ──
+      if (!isCarousel && !isCanvas) {
+        setActiveDrag(null);
+        store.setInsertIndex(-1);
+        store.imageType = 'None';
+        store.isDragging = false;
+        setTouchAction(true);
+        return;
+      }
 
       if (isCarousel) {
         // Use insertIndex from handleDragMove (already tracks left/right of hovered frame)
@@ -274,6 +306,22 @@ const Editor = React.memo(
           }
         }
       }
+      // Check if pointer is over the canvas container (generous detection)
+      const canvasEl = document.getElementById('grid-canvas-container');
+      if (canvasEl && initEvent && 'clientX' in initEvent) {
+        const pointerX = initEvent.clientX + (event.delta?.x ?? 0);
+        const pointerY = initEvent.clientY + (event.delta?.y ?? 0);
+        const cRect = canvasEl.getBoundingClientRect();
+        if (
+          pointerX >= cRect.left &&
+          pointerX <= cRect.right &&
+          pointerY >= cRect.top &&
+          pointerY <= cRect.bottom
+        ) {
+          store.imageType = 'ObjectInFrame';
+          return;
+        }
+      }
       if (event.over?.id === 'canvas') {
         store.imageType = 'ObjectInFrame';
       } else if (
@@ -363,6 +411,26 @@ const Editor = React.memo(
       { enableOnFormTags: false },
     );
 
+    // ── Undo / Redo ──
+    useHotkeys(
+      'ctrl+z,meta+z',
+      (e) => {
+        e.preventDefault();
+        rootStore.historyStore.undo();
+        rootStore.setRerunUseManageFabricObjects(true);
+      },
+      { enableOnFormTags: false },
+    );
+    useHotkeys(
+      'ctrl+shift+z,meta+shift+z',
+      (e) => {
+        e.preventDefault();
+        rootStore.historyStore.redo();
+        rootStore.setRerunUseManageFabricObjects(true);
+      },
+      { enableOnFormTags: false },
+    );
+
     return (
       <>
       <DndContext
@@ -386,84 +454,109 @@ const Editor = React.memo(
               <Resources />
             </div>
           </div>
-          <div className=" flex h-screen w-screen flex-col  items-center justify-center bg-slate-100 dark:bg-slate-800">
+          {/* ── main content column ── */}
+          <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-100 dark:bg-slate-800">
+            {/* top edit bar */}
             <EditResource />
-            <div
-              className="flex h-full flex-col items-center justify-center  md:h-[calc(100svh-50px)] md:w-full md:max-w-[900px]"
-              id="editor-container"
-            >
-              <CustomAlertDialog />
-              <div
-                className="z-1 relative  flex h-full   flex-col items-start justify-start  md:h-[calc(100dvh-50px)] md:w-full md:items-center   md:justify-center"
-                draggable="false"
-              >
-                <ScrollArea className="m-auto flex h-full w-screen flex-col items-center justify-center gap-y-2  rounded-none md:h-[calc(100svh-50px)] md:w-full md:flex-row">
-                  <div className="flex w-full flex-col items-center justify-center gap-4  md:flex-row md:justify-start">
-                    <ScrollArea className="h-[35dvh] w-screen md:h-full md:w-full">
-                      {hasFrames ? (
-                        <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row">
-                          <div className="flex flex-row items-center justify-center gap-4  md:flex-col">
-                            <div className="flex flex-row items-center  justify-center gap-2 md:flex-col">
-                              <label htmlFor="speed" className="flex flex-col font-semibold ">
-                                <span className="text-sm text-gray-600">FPS of your GIF</span>
-                                <span className="text-xs text-gray-700">{animationStore.fps}fps</span>
-                                <input
-                                  id="speed"
-                                  onChange={(e) => {
-                                    animationStore.fps = parseFloat(e.target.value);
-                                    if (timelineStore) timelineStore.formatCurrentTime();
-                                  }}
-                                  type="range"
-                                  min="1"
-                                  max="30"
-                                />
-                              </label>
-                              <button
-                                onClick={() => {
-                                  if (store.isPlaying) store.isPaused = !store.isPaused;
-                                  if (timelineStore) timelineStore.playSequence();
-                                }}
-                                className="play-button "
-                              >
-                                {store.isPlaying ? (
-                                  <FaStopCircle size={54} className="" />
-                                ) : (
-                                  <FaPlayCircle size={54} />
-                                )}
-                              </button>{' '}
-                              <CanvasSettings />
-                            </div>
-                          </div>
-                          <CanvasComponent containerWidth={containerWidth} />
-                        </div>
-                      ) : (
-                        <EditorEmptyState
-                          config={modeConfig}
-                          selectedMenuOption={rootStore.uiStore.selectedMenuOption}
-                          onSelectMenuOption={(option) => rootStore.uiStore.setSelectedMenuOption(option)}
-                        />
-                      )}
-                    </ScrollArea>
-                  </div>
-                  {hasFrames && (
-                    <ScrollArea className="h-[25dvh] w-screen md:h-full md:w-full" draggable="false">
-                      <EditorCarousel containerWidth={containerWidth} />
-                      <ScrollBar orientation="vertical" />
-                    </ScrollArea>
+
+            {/* canvas toolbar — compact FPS / play / settings + undo/redo */}
+            {hasFrames && (
+              <div className="flex w-full shrink-0 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 py-1.5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
+                {/* Undo / Redo */}
+                <div className="flex items-center gap-0.5">
+                  <button
+                    onClick={() => {
+                      rootStore.historyStore.undo();
+                      rootStore.setRerunUseManageFabricObjects(true);
+                    }}
+                    disabled={!rootStore.historyStore.canUndo}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                    title="Undo (Ctrl+Z)"
+                  >
+                    <Undo2 size={15} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      rootStore.historyStore.redo();
+                      rootStore.setRerunUseManageFabricObjects(true);
+                    }}
+                    disabled={!rootStore.historyStore.canRedo}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                    title="Redo (Ctrl+Shift+Z)"
+                  >
+                    <Redo2 size={15} />
+                  </button>
+                </div>
+
+                <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+
+                <button
+                  onClick={() => {
+                    if (store.isPlaying) store.isPaused = !store.isPaused;
+                    if (timelineStore) timelineStore.playSequence();
+                  }}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  title={store.isPlaying ? 'Stop' : 'Play'}
+                >
+                  {store.isPlaying ? (
+                    <FaStopCircle size={16} />
+                  ) : (
+                    <FaPlayCircle size={16} />
                   )}
-                  {/* RESOURCES */}{' '}
-                  <ScrollArea className="h-[35dvh] w-full md:hidden">
-                    <Resources />
-                    <ScrollBar orientation="vertical" />
-                  </ScrollArea>
-                  <div className="z-999999  relative  w-screen md:hidden">
-                    <Sidebar />
-                  </div>
-                  <ScrollBar orientation="vertical" />
-                </ScrollArea>
+                </button>
+                <label className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  <span className="tabular-nums">{animationStore.fps} fps</span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="30"
+                    value={animationStore.fps}
+                    onChange={(e) => {
+                      animationStore.fps = parseFloat(e.target.value);
+                      if (timelineStore) timelineStore.formatCurrentTime();
+                    }}
+                    className="h-1 w-24 cursor-pointer accent-slate-800 dark:accent-slate-300"
+                  />
+                </label>
+                <CanvasSettings />
+              </div>
+            )}
+
+            {/* scrollable canvas + carousel area */}
+            <div className="flex min-h-0 flex-1 flex-col" id="editor-container">
+              <CustomAlertDialog />
+
+              <ScrollArea className="flex-1" draggable="false">
+                <div className="flex min-h-full flex-col items-center justify-center p-4">
+                  {hasFrames ? (
+                    <CanvasComponent containerWidth={containerWidth} />
+                  ) : (
+                    <EditorEmptyState
+                      config={modeConfig}
+                      selectedMenuOption={rootStore.uiStore.selectedMenuOption}
+                      onSelectMenuOption={(option) => rootStore.uiStore.setSelectedMenuOption(option)}
+                    />
+                  )}
+                </div>
+                <ScrollBar orientation="vertical" />
+              </ScrollArea>
+
+              {/* carousel / timeline */}
+              {hasFrames && (
+                <div className="w-full shrink-0 border-t border-slate-200 dark:border-slate-700" draggable="false">
+                  <EditorCarousel containerWidth={containerWidth} />
+                </div>
+              )}
+
+              {/* mobile resources + sidebar */}
+              <ScrollArea className="h-[35dvh] w-full md:hidden">
+                <Resources />
+                <ScrollBar orientation="vertical" />
+              </ScrollArea>
+              <div className="relative z-50 w-screen md:hidden">
+                <Sidebar />
               </div>
             </div>
-            {/* <ElementsHistoryPanel /> */}
           </div>
         </div>
         {/* Hidden DragOverlay — keeps @dnd-kit collision detection working */}

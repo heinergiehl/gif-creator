@@ -41,14 +41,20 @@ export class HistoryStore {
     });
     this.currentIndex++;
   }
+  get canUndo(): boolean {
+    return this.currentIndex > 0;
+  }
+  get canRedo(): boolean {
+    return this.currentIndex < this.history.length - 1;
+  }
   undo() {
-    if (this.currentIndex > 0) {
+    if (this.canUndo) {
       this.currentIndex--;
       this.restoreState();
     }
   }
   redo() {
-    if (this.currentIndex < this.history.length - 1) {
+    if (this.canRedo) {
       this.currentIndex++;
       this.restoreState();
     }
@@ -85,6 +91,8 @@ export class HistoryStore {
       this.rootStore.editorStore.currentTimeInMs = state.currentTimeInMs;
       this.rootStore.editorStore.setSelectedElements(state.selectedElementIds);
       this.rootStore.animationStore.animations = JSON.parse(JSON.stringify(state.animations));
+      // Force canvas objects to re-sync with restored state
+      this.rootStore.setRerunUseManageFabricObjects(true);
     }
   }
 }

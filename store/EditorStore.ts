@@ -265,8 +265,10 @@ export class EditorStore {
     this.elements.push(element);
   }
   removeFrame(id: string) {
-    this.frames = this.frames.filter((frame) => frame.id !== id);
-    this.syncFramesTimeline();
+    this.runDocumentCommand(() => {
+      this.frames = this.frames.filter((frame) => frame.id !== id);
+      this.syncFramesTimeline();
+    });
   }
   setCopiedElements(elements: EditorElement[]) {
     this.copiedElements = elements;
@@ -1371,7 +1373,9 @@ export class EditorStore {
     this.addEditorElement({ ...text });
   }
   addEditorElement(editorElement: EditorElement) {
-    this.elements.push(editorElement);
+    this.runDocumentCommand(() => {
+      this.elements.push(editorElement);
+    });
   }
   addImages() {
     // if there are already, adjust the index
@@ -1397,10 +1401,12 @@ export class EditorStore {
     });
   }
   removeElement(id: string): void {
-    this.elements = this.elements.filter((el) => el.id !== id).slice();
-    // animations that are related to this element should be removed
-    // this.animationStore?.removeAnimationsByTargetId(id);
-    this.selectedElements = this.selectedElements.filter((el) => el.id !== id);
+    this.runDocumentCommand(() => {
+      this.elements = this.elements.filter((el) => el.id !== id).slice();
+      // animations that are related to this element should be removed
+      // this.animationStore?.removeAnimationsByTargetId(id);
+      this.selectedElements = this.selectedElements.filter((el) => el.id !== id);
+    });
   }
   deleteFrame(index: number) {
     const frameToDelete = this.frames[index];

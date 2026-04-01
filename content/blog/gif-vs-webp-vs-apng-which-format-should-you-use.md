@@ -1,5 +1,5 @@
 ---
-title: "GIF vs WebP vs APNG: Which Format Should You Use?"
+title: 'GIF vs WebP vs APNG: Which Format Should You Use?'
 description: Compare GIF, animated WebP, and APNG for transparency, quality, compatibility, and file size so you can choose the right output format.
 date: 2026-04-01
 updated: 2026-04-01

@@ -4,10 +4,12 @@ import { CSS } from '@dnd-kit/utilities';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { XIcon } from 'lucide-react';
+import { Copy, Trash2, Layers, CopyPlus } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/store';
+import { CustomTooltip } from '@/app/components/ui/CustomTooltip';
+import { getUid } from '@/utils';
 interface SortableItemProps {
   id: string;
   src: string;
@@ -37,13 +39,30 @@ const SortableItem: React.FC<SortableItemProps> = observer(
       transition,
     };
     const [imageLoaded, setImageLoaded] = useState(false);
-    const handleImageLoad = () => {
-      setImageLoaded(true);
-    };
-    const handleImageError = () => {
-      // image load failure handled silently
-    };
     const store = useStores().editorStore;
+
+    const handleDuplicate = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const frame = store.frames[index];
+      if (!frame) return;
+      const newId = String(getUid());
+      const newFrame = { id: newId, src: frame.src };
+      store.frames.splice(index + 1, 0, newFrame);
+      store.addImage(index + 1, frame.src, true, newId);
+      store.syncFramesTimeline();
+    };
+
+    const handleCopyToCanvas = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const frame = store.frames[index];
+      if (!frame || store.frames.length === 0) return;
+      const newId = String(getUid());
+      store.addImage(store.elements.length, frame.src, false, newId);
+      store.setSelectedElements([newId]);
+    };
+
     return (
       <div
         key={id}
@@ -52,58 +71,80 @@ const SortableItem: React.FC<SortableItemProps> = observer(
         {...attributes}
         {...listeners}
         className={cn([
-          'flex  w-full  cursor-pointer  select-none items-center justify-center p-0 transition-colors duration-200  ease-in-out ',
+          'flex w-full cursor-pointer select-none items-center justify-center p-0 transition-colors duration-200 ease-in-out',
         ])}
         onPointerDown={() => onFrameSelect(id)}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >
-        <Card className="relative flex  items-center justify-center rounded-lg">
+        <Card className="group relative flex items-center justify-center rounded-md border-0 shadow-sm">
+          {/* Selection ring */}
           <div
             className={cn([
-              'group absolute inset-0   rounded-lg opacity-50 transition-all duration-300  dark:hover:bg-slate-700',
-              isSelected && 'border-2 border-accent-foreground bg-slate-600 dark:bg-slate-900',
+              'absolute inset-0 z-10 rounded-md transition-all duration-200',
+              isSelected && 'bg-indigo-500/20 ring-2 ring-inset ring-indigo-500',
             ])}
-          >
-            <span
-              className={cn([
-                'absolute text-xs opacity-0 transition-opacity duration-500 group-hover:opacity-100',
-              ])}
-            >{`${index + 1}`}</span>
-          </div>
-          <CardContent className="flex   items-center justify-center  rounded-lg p-0  ">
+          />
+
+          <CardContent className="flex items-center justify-center rounded-md p-0">
             <Suspense fallback={<SkeletonLoader />}>
               <Image
-                className="h-[70px] w-[70px] rounded-lg"
+                className="h-[68px] w-[68px] rounded-md object-cover"
                 loading="eager"
                 src={src}
                 alt={`Frame ${index + 1}`}
                 id={id}
-                width={70}
-                height={70}
-                style={{
-                  display: imageLoaded ? 'block' : 'none',
-                }}
+                width={68}
+                height={68}
+                style={{ display: imageLoaded ? 'block' : 'none' }}
                 onLoad={() => setImageLoaded(true)}
               />
-              {!imageLoaded && (
-                <div className="skeleton-loader h-[70px] w-[70px] animate-pulse rounded-lg bg-gray-300"></div>
-              )}
-              <Button
-                variant={'outline'}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  onFrameDelete(index);
-                }}
-                className={cn([
-                  'absolute right-1 top-1 z-20 m-0 h-5 w-5 rounded-full p-0 transition duration-500',
-                ])}
-              >
-                <XIcon size={10} />
-              </Button>
+              {!imageLoaded && <SkeletonLoader />}
             </Suspense>
           </CardContent>
+
+          {/* ── Hover overlay ── */}
+          <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-between rounded-md bg-black/0 p-1 opacity-0 transition-all duration-200 group-hover:bg-black/40 group-hover:opacity-100">
+            {/* Top: frame number */}
+            <span className="self-start rounded bg-black/50 px-1 py-0.5 text-[9px] font-semibold tabular-nums text-white">
+              {index + 1}
+            </span>
+
+            {/* Bottom: action buttons */}
+            <div className="pointer-events-auto flex gap-1">
+              <CustomTooltip content="Duplicate frame">
+                <Button
+                  variant="ghost"
+                  className="h-5 w-5 rounded-full bg-white/80 p-0 text-slate-700 shadow-sm hover:bg-white hover:text-indigo-600 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+                  onMouseDown={handleDuplicate}
+                >
+                  <CopyPlus className="h-3 w-3" />
+                </Button>
+              </CustomTooltip>
+              <CustomTooltip content="Copy as overlay">
+                <Button
+                  variant="ghost"
+                  className="h-5 w-5 rounded-full bg-white/80 p-0 text-slate-700 shadow-sm hover:bg-white hover:text-indigo-600 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+                  onMouseDown={handleCopyToCanvas}
+                >
+                  <Layers className="h-3 w-3" />
+                </Button>
+              </CustomTooltip>
+              <CustomTooltip content="Delete frame (Del)">
+                <Button
+                  variant="ghost"
+                  className="h-5 w-5 rounded-full bg-white/80 p-0 text-slate-700 shadow-sm hover:bg-red-500 hover:text-white dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-red-500"
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    onFrameDelete(index);
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </CustomTooltip>
+            </div>
+          </div>
         </Card>
       </div>
     );
@@ -111,5 +152,5 @@ const SortableItem: React.FC<SortableItemProps> = observer(
 );
 export default React.memo(SortableItem);
 const SkeletonLoader = () => (
-  <div className="skeleton-loader h-[70px] w-[70px] animate-pulse rounded-lg bg-gray-300"></div>
+  <div className="h-[68px] w-[68px] animate-pulse rounded-md bg-slate-300 dark:bg-slate-700" />
 );

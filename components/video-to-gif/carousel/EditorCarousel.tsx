@@ -121,6 +121,34 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
   useHotkeys('ctrl+c', handleCopy);
   useHotkeys('ctrl+x', handleCut);
   useHotkeys('ctrl+v', handlePasteHotkey);
+
+  // ── Delete selected frames via hotkey ──
+  const handleDeleteSelectedFrames = useCallback(() => {
+    const selectedIds = store.selectedElements.map((el) => el.id);
+    if (selectedIds.length === 0) return;
+    store.deleteFramesByIds(selectedIds);
+  }, [store.selectedElements]);
+  useHotkeys('delete,backspace', handleDeleteSelectedFrames, { enableOnFormTags: false });
+
+  // ── Mouse wheel → horizontal scroll on carousel ──
+  const carouselContainerRef = useRef<HTMLDivElement>(null);
+  // Merge carouselRef (from hook, used by gsap/dnd) and carouselContainerRef (for wheel scroll)
+  const mergedCarouselRef = useCallback((node: HTMLDivElement | null) => {
+    (carouselRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    carouselContainerRef.current = node;
+  }, [carouselRef]);
+  const handleCarouselWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    // The VList renders a scrollable div inside carousel-container — find it
+    const container = carouselContainerRef.current;
+    if (!container) return;
+    // VList puts its scrollable element as the first child div with overflow
+    const scrollable = container.querySelector('[style*="overflow"]') as HTMLElement
+      ?? container.firstElementChild as HTMLElement;
+    if (scrollable && e.deltaY !== 0) {
+      e.preventDefault();
+      scrollable.scrollLeft += e.deltaY;
+    }
+  }, []);
   const handleMouseEnter = (index: number) => {
     setPasteIndicatorPosition(index);
   };
@@ -259,28 +287,25 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
     <div
       onPointerDown={() => selectionRef.current?.clearSelection()}
       draggable="false"
-      className="flex w-screen select-none flex-col  items-center justify-center gap-y-4 dark:bg-slate-800 md:w-full md:max-w-[900px] md:items-start"
+      className="flex w-full select-none flex-col items-stretch gap-y-1 px-2 py-1 dark:bg-slate-800"
       onMouseMove={debouncedHandleMouseMove}
     >
       <Timeline
-        maxWidth={containerWidth + 100}
-        minWidth={containerWidth + 100}
+        maxWidth={containerWidth}
+        minWidth={containerWidth}
         currentFrame={store.currentKeyFrame}
         onSelectFrame={() => handleSelectFrame(store.frames[store.currentKeyFrame].id)}
         totalFrames={store.frames.length}
       />
       <div
-        style={{
-          width,
-          minWidth: width,
-        }}
         draggable="false"
         id="carousel-container"
         className={cn([
-          'relative flex w-screen items-center justify-start gap-4 overflow-y-hidden rounded-lg bg-muted bg-slate-200 transition-all duration-200 dark:bg-slate-900 md:w-full',
+          'relative flex w-full items-center justify-start overflow-y-hidden rounded-lg bg-slate-200 transition-all duration-200 dark:bg-slate-900',
           isOverCarousel && 'ring-2 ring-inset ring-blue-500/60',
         ])}
-        ref={carouselRef}
+        ref={mergedCarouselRef}
+        onWheel={handleCarouselWheel}
       >
         {store.frames.length === 0 && <CarouselDroppable />}
         <SortableContext
@@ -289,11 +314,10 @@ const EditorCarousel: React.FC<EditorCarouselProps> = observer(({ containerWidth
         >
           <VList
             style={{
-              width: containerWidth,
-              height: 140,
-              padding: '25px ',
+              width: '100%',
+              height: 120,
+              padding: '16px 8px',
             }}
-            className=""
             horizontal
           >
             {frames}

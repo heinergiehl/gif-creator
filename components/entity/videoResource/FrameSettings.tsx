@@ -25,11 +25,9 @@ const FrameSettings: React.FC<FrameSettingsProps> = ({
           className=""
         />
       </Label>
-      <Label className="w-full max-w-xs space-y-4">
-        <div className="label flex flex-col items-start space-y-4">
-          <span>Resolution scale (1 for full, 0.5 for half, etc.):</span>
-          <span className="font-semibold">{quality}</span>
-        </div>
+      <Label className="flex w-full max-w-xs flex-col gap-y-4">
+        <span>Resolution scale (1 for full, 0.5 for half, etc.):</span>
+        <span className="font-semibold">{quality}</span>
         <Input
           type="range"
           step="0.1"

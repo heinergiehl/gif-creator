@@ -83,14 +83,15 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
       });
     }
   }, [window.innerWidth, window.innerHeight, store.currentKeyFrame]);
+  const showDropHighlight = isOver || (store.isDragging && store.imageType === 'ObjectInFrame');
   return (
     <div
       id="grid-canvas-container"
       ref={setNodeRef}
       className={cn([
         'relative flex items-center justify-center rounded-lg transition-all duration-200',
-        isOver && hasAlreadyFrames && 'ring-4 ring-blue-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
-        isOver && !hasAlreadyFrames && 'ring-4 ring-red-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
+        showDropHighlight && hasAlreadyFrames && 'ring-4 ring-blue-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
+        showDropHighlight && !hasAlreadyFrames && 'ring-4 ring-red-500/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800',
       ])}
     >
       <canvas
@@ -152,23 +153,17 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
           </div>
         </>
       )}
-      {/* Drop zone labels — always mounted, toggled via opacity to avoid Fabric.js DOM conflicts */}
-      <div
-        className={cn([
-          'pointer-events-none absolute -top-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-white shadow-lg transition-opacity duration-150',
-          isOver && hasAlreadyFrames ? 'bg-blue-600 opacity-100' : 'opacity-0',
-        ])}
-      >
-        Drop to add as overlay
-      </div>
-      <div
-        className={cn([
-          'pointer-events-none absolute -top-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-white shadow-lg transition-opacity duration-150',
-          isOver && !hasAlreadyFrames ? 'bg-red-600 opacity-100' : 'opacity-0',
-        ])}
-      >
-        Add frames first
-      </div>
+      {/* Drop zone labels — inside container, only rendered while dragging over */}
+      {showDropHighlight && (
+        <div
+          className={cn([
+            'pointer-events-none absolute left-1/2 top-2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-white shadow-lg',
+            hasAlreadyFrames ? 'bg-blue-600' : 'bg-red-600',
+          ])}
+        >
+          {hasAlreadyFrames ? 'Drop to add as overlay' : 'Add frames first'}
+        </div>
+      )}
     </div>
   );
 });
@@ -208,7 +203,7 @@ export const CanvasSettings = observer(() => {
       </PopoverTrigger>
       <PopoverContent className="grid w-full grid-cols-2 items-center justify-center gap-4">
         <Label>
-          <div className="flex flex-col gap-y-2">
+          <span className="flex flex-col gap-y-2">
             Width
             <CustomTextInput
               onChange={(value) => {
@@ -219,10 +214,10 @@ export const CanvasSettings = observer(() => {
               inputTooltip="Adjust the width of the canvas"
               value={String(canvasStore.width)}
             />
-          </div>
+          </span>
         </Label>
         <Label>
-          <div className="flex flex-col gap-y-2">
+          <span className="flex flex-col gap-y-2">
             <span> Height</span>
             <CustomTextInput
               onChange={(value) => {
@@ -233,11 +228,11 @@ export const CanvasSettings = observer(() => {
               inputTooltip="Adjust the height of the canvas"
               value={String(canvasStore.height)}
             />
-          </div>
+          </span>
         </Label>
         <SelectSeparator className="col-span-2" />
         <Label>
-          <div className="flex flex-col gap-y-2">
+          <span className="flex flex-col gap-y-2">
             <span>Background Color</span>
             <Input
               type="color"
@@ -247,7 +242,7 @@ export const CanvasSettings = observer(() => {
               }}
               value={backgroundColor}
             />
-          </div>
+          </span>
         </Label>
         <SelectSeparator className="col-span-2" />
         <Button onClick={applyChanges} variant="outline">

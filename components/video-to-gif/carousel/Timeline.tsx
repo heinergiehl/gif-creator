@@ -31,7 +31,7 @@ const Timeline: React.FC<TimelineProps> = observer(
           x: event.clientX - left,
           y: event.clientY,
         });
-        const mouseXRelativeToTimeline = event.clientX - left; // Mouse X position relative to the timeline start
+        const mouseXRelativeToTimeline = event.clientX - left;
         const frameNumber = Math.ceil((mouseXRelativeToTimeline / width) * totalFrames);
         if (frameNumber) {
           setTooltipContent(`Frame: ${frameNumber}`);
@@ -50,80 +50,69 @@ const Timeline: React.FC<TimelineProps> = observer(
     }
     const tooltip = useRef<HTMLDivElement>(null);
     const width = `${maxWidth - 100}px`;
+    const hasNonFrameElements = editorStore.elements.some((el) => !el.isFrame);
     return (
-      <>
+      <div className="flex w-full flex-col">
+        {/* ── Scrubber ── */}
         <div
           id="timeline"
-          style={{ width }}
+          style={{ width: '100%' }}
           onMouseMove={handleMouseMove}
-          className="relative flex h-full flex-col items-end justify-center"
+          className="relative flex flex-col items-stretch justify-center"
           onClick={() => {
             editorStore.setCurrentKeyFrame(frameNumber - 1);
           }}
         >
-          {/* display current time */}
-          <div className="mr-20 flex space-x-4">
-            <div className="text-sm font-semibold text-gray-500">
+          {/* time + frame counter */}
+          <div className="flex items-center justify-end gap-3 px-2 py-0.5">
+            <span className="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
               {timelineStore && timelineStore?.formatCurrentTime()}
-            </div>
-            {/* display of current frame / total frames */}
-            <div className="text-sm font-semibold text-gray-500">
+            </span>
+            <span className="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
               {editorStore.frames.length ? editorStore.currentKeyFrame + 1 : 0} / {totalFrames}
-            </div>
+            </span>
           </div>
           <div
             ref={tooltip}
             data-tip={tooltipContent}
-            // make sure the tooltips is being displayed, where the mouse is on the x-axis
             style={{ left: `${mousePosition.x}px` }}
             className="tooltip absolute z-[100] h-20 w-20"
           />
           <div
             ref={timelineRef}
-            className="relative z-10 flex h-4 w-full items-center justify-center bg-gray-300 "
+            className="relative z-10 flex h-2.5 w-full cursor-pointer items-center rounded-full bg-slate-200 dark:bg-slate-700"
             onClick={onSelectFrame}
           >
             <div
-              className="absolute left-0 z-10 h-2 rounded-lg bg-blue-500"
+              className="absolute left-0 z-10 h-full rounded-full bg-indigo-500 transition-[width] duration-75"
               style={{ width: `${currentPositionPercent}%` }}
-            ></div>
+            />
             <div
-              className="absolute z-[30] h-2 w-2 rounded-full bg-red-500"
-              style={{ left: `calc(${currentPositionPercent}% - 5px)` }}
-            ></div>
+              className="absolute z-30 h-3.5 w-3.5 rounded-full border-2 border-white bg-indigo-500 shadow-sm transition-[left] duration-75 dark:border-slate-800"
+              style={{ left: `calc(${currentPositionPercent}% - 7px)` }}
+            />
           </div>
         </div>
-        {editorStore.elements.find((el) => el.isFrame === false) && (
+
+        {/* ── Object tracks ── */}
+        {hasNonFrameElements && (
           <ScrollArea
             type="always"
-            className="flex h-[100px] items-center justify-center overflow-visible rounded-none border bg-slate-100
-          dark:bg-slate-900
-          "
-            style={{
-              minWidth: width,
-              width,
-              height: '100px',
-            }}
+            className="mt-1 rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+            style={{ width: '100%', maxHeight: '120px' }}
           >
-            <div
-              className="flex h-full w-full flex-col overflow-visible py-2"
-              style={{
-                minWidth: width,
-                width,
-              }}
-            >
+            <div className="flex flex-col gap-0.5 p-1">
               {editorStore.elements.map(
                 (obj, index) =>
                   !obj.isFrame && (
-                    <CustomTooltip content={obj.name} key={index}>
-                      <TimeFrameView element={obj} />
-                    </CustomTooltip>
+                    <TimeFrameView element={obj} key={obj.id || index} />
                   ),
               )}
             </div>
+            <ScrollBar orientation="vertical" />
           </ScrollArea>
         )}
-      </>
+      </div>
     );
   },
 );

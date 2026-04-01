@@ -311,6 +311,7 @@ export const useInitializeCanvas = () => {
       canvas.on('object:modified', (e) => {
         if (!e?.target) return;
         updateElementState(e.target);
+        rootStore.historyStore.addState();
       });
       canvas.on('object:moving', (e) => {
         const activeObject = e.target;
