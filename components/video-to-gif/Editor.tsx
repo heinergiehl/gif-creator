@@ -35,6 +35,7 @@ import { fabric } from 'fabric';
 import { cn } from '@/lib/utils';
 import LoadingOverlay from './LoadingOverlay';
 import { MenuOption } from '@/types';
+import { renderShapeToDataURL, ShapeConfig } from '@/components/panels/ShapesPanel';
 import { EditorEmptyState } from './EditorEmptyState';
 import { getEditorModeConfig, getEditorRouteMode } from './editor-mode';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -172,6 +173,27 @@ const Editor = React.memo(
             store.frames.splice(insertIndex, 0, newFrame);
             store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
           }
+        } else if (resourceType.startsWith('shapeResource')) {
+          const getConfig = active?.data?.current?.getShapeConfig;
+          const baseConfig: ShapeConfig | null = typeof getConfig === 'function' ? getConfig() : null;
+          if (!baseConfig) return;
+          // Always use the shapeType from the dragged tile, not the panel selection
+          const draggedType = active?.data?.current?.shapeType ?? baseConfig.shapeType;
+          const shapeConfig: ShapeConfig = { ...baseConfig, shapeType: draggedType };
+          const canvasW = rootStore.canvasOptionsStore.width || 400;
+          const canvasH = rootStore.canvasOptionsStore.height || 400;
+          const size = Math.min(canvasW, canvasH) * 0.3;
+          const src = renderShapeToDataURL(shapeConfig, size);
+          if (!src) return;
+          const frameId = getUid();
+          const newFrame = { id: frameId, src };
+          if (insertIndex === 0 && store.frames.length > 0) {
+            store.frames.unshift(newFrame);
+            store.addImage(-1, src, true, frameId);
+          } else {
+            store.frames.splice(insertIndex, 0, newFrame);
+            store.addImage(insertIndex, src, true, frameId);
+          }
         } else if (resourceType.startsWith('textResource')) {
           const textContent = active?.data?.current?.text;
           if (!textContent) return;
@@ -220,12 +242,28 @@ const Editor = React.memo(
           return;
         }
         if (resourceType.startsWith('imageResource')) {
+          const newId = String(getUid());
           store.addImage(
             store.elements.length,
             active.data.current?.image,
             false,
-            String(getUid()),
+            newId,
           );
+          store.setSelectedElements([newId]);
+        } else if (resourceType.startsWith('shapeResource')) {
+          const getConfig = active?.data?.current?.getShapeConfig;
+          const baseConfig: ShapeConfig | null = typeof getConfig === 'function' ? getConfig() : null;
+          if (!baseConfig) return;
+          const draggedType = active?.data?.current?.shapeType ?? baseConfig.shapeType;
+          const shapeConfig: ShapeConfig = { ...baseConfig, shapeType: draggedType };
+          const canvasW = rootStore.canvasOptionsStore.width || 400;
+          const canvasH = rootStore.canvasOptionsStore.height || 400;
+          const size = Math.min(canvasW, canvasH) * 0.3;
+          const src = renderShapeToDataURL(shapeConfig, size);
+          if (!src) return;
+          const newId = String(getUid());
+          store.addImage(store.elements.length, src, false, newId);
+          store.setSelectedElements([newId]);
         } else if (resourceType.startsWith('textResource')) {
           const textContent = active?.data?.current?.text;
           if (!textContent) {
@@ -443,19 +481,19 @@ const Editor = React.memo(
       >
         <div
           className={cn([
-            'relative  flex h-full w-screen  flex-col items-center justify-center   overflow-hidden md:h-screen md:flex-row',
+            'relative flex h-full w-full flex-col items-center justify-center overflow-hidden md:h-screen md:flex-row',
           ])}
           draggable="false"
         >
           <LoadingOverlay />
-          <div className="z-1 hidden  flex-row md:flex md:h-screen md:flex-col">
+          <div className="z-[1] hidden shrink-0 flex-row md:flex md:h-screen md:flex-col">
             <Sidebar />
-            <div className="relative hidden h-full w-[350px]  md:ml-[90px] md:flex">
+            <div className="relative hidden h-full w-[350px] md:ml-[76px] md:flex">
               <Resources />
             </div>
           </div>
           {/* ── main content column ── */}
-          <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-100 dark:bg-slate-800">
+          <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden bg-slate-100 dark:bg-slate-800">
             {/* top edit bar */}
             <EditResource />
 
@@ -535,6 +573,7 @@ const Editor = React.memo(
                       config={modeConfig}
                       selectedMenuOption={rootStore.uiStore.selectedMenuOption}
                       onSelectMenuOption={(option) => rootStore.uiStore.setSelectedMenuOption(option)}
+                      onCreateBlankFrame={() => store.addBlankFrame()}
                     />
                   )}
                 </div>

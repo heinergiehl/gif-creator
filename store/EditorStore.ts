@@ -1376,6 +1376,9 @@ export class EditorStore {
     this.runDocumentCommand(() => {
       this.elements.push(editorElement);
     });
+    // Force canvas re-sync — MobX array.push doesn't change the reference,
+    // so React useEffect deps don't detect the mutation on their own
+    this.rootStore.setRerunUseManageFabricObjects(true);
   }
   addImages() {
     // if there are already, adjust the index
@@ -1391,7 +1394,7 @@ export class EditorStore {
     this.syncFramesTimeline();
     const firstFrameId = this.frames[0]?.id;
     if (firstFrameId) {
-      this.setSelectedElements([firstFrameId]);
+      this.setSelectedElements([]);
       this.setCurrentKeyFrame(0);
     }
   }
@@ -1412,5 +1415,55 @@ export class EditorStore {
     const frameToDelete = this.frames[index];
     if (!frameToDelete) return;
     this.deleteFramesByIds([frameToDelete.id]);
+  }
+
+  /** Update both the frame thumbnail and the corresponding element's source */
+  updateCurrentFrameImageAndElement(src: string) {
+    const currentFrame = this.frames[this.currentKeyFrame];
+    if (!currentFrame) return;
+    this.updateFrameSource(currentFrame.id, src);
+    const element = this.elements.find((el) => el.id === currentFrame.id);
+    if (element) {
+      this.updateElement(element.id, {
+        dataUrl: src,
+        properties: { ...element.properties, src } as any,
+      });
+    }
+  }
+
+  /** Add a blank colored frame at the end of the timeline */
+  addBlankFrame(backgroundColor?: string) {
+    const w = this.rootStore.canvasOptionsStore?.width || 400;
+    const h = this.rootStore.canvasOptionsStore?.height || 400;
+    const canvasEl = document.createElement('canvas');
+    canvasEl.width = w;
+    canvasEl.height = h;
+    const ctx = canvasEl.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle =
+        backgroundColor || this.rootStore.canvasOptionsStore?.backgroundColor || '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+    }
+    const src = canvasEl.toDataURL('image/png');
+    const frameId = getUid();
+    this.frames.push({ id: frameId, src });
+    this.addImage(this.elements.length, src, true, frameId);
+    this.syncFramesTimeline();
+    this.setCurrentKeyFrame(this.frames.length - 1);
+    this.setSelectedElements([]);
+  }
+
+  /** Duplicate the currently displayed frame (inserted right after it) */
+  duplicateCurrentFrame() {
+    const currentFrame = this.frames[this.currentKeyFrame];
+    if (!currentFrame) return;
+    const frameId = getUid();
+    const newFrame = { id: frameId, src: currentFrame.src };
+    const insertIdx = this.currentKeyFrame + 1;
+    this.frames.splice(insertIdx, 0, newFrame);
+    this.addImage(this.elements.length, currentFrame.src, true, frameId);
+    this.syncFramesTimeline();
+    this.setCurrentKeyFrame(insertIdx);
+    this.setSelectedElements([]);
   }
 }

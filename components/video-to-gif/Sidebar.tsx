@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useStores } from '@/store';
+import { RootStore, useStores } from '@/store';
 import { observer } from 'mobx-react';
 import {
   MdDownload,
@@ -8,8 +8,9 @@ import {
   MdImage,
   MdTransform,
   MdTitle,
+  MdBrush,
+  MdCategory,
 } from 'react-icons/md';
-import { usePathname } from 'next/navigation';
 import { UIStore } from '@/store/UIStore';
 import { cn } from '@/lib/utils';
 import {
@@ -19,87 +20,164 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+/* ── Group definitions ─────────────────────────────────────── */
+type SidebarGroup = {
+  label: string;
+  items: SidebarItem[];
+};
+
+type SidebarItem = {
+  name: string;
+  icon: React.ComponentType<{ size?: string | number }>;
+  tooltip: string;
+  action: (store: UIStore) => void;
+};
+
+const SIDEBAR_GROUPS: SidebarGroup[] = [
+  {
+    label: 'Import',
+    items: [
+      {
+        name: 'Video',
+        icon: MdVideoLibrary,
+        tooltip: 'Import video',
+        action: (store) => store.setSelectedMenuOption('Video'),
+      },
+      {
+        name: 'Image',
+        icon: MdImage,
+        tooltip: 'Add images',
+        action: (store) => store.setSelectedMenuOption('Image'),
+      },
+      {
+        name: 'Gif',
+        icon: MdTransform,
+        tooltip: 'Import GIF',
+        action: (store) => store.setSelectedMenuOption('Gif'),
+      },
+    ],
+  },
+  {
+    label: 'Create',
+    items: [
+      {
+        name: 'Text',
+        icon: MdTitle,
+        tooltip: 'Add text',
+        action: (store) => store.setSelectedMenuOption('Text'),
+      },
+      {
+        name: 'Draw',
+        icon: MdBrush,
+        tooltip: 'Freehand draw',
+        action: (store) => store.setSelectedMenuOption('Draw'),
+      },
+      {
+        name: 'Shapes',
+        icon: MdCategory,
+        tooltip: 'Add shapes',
+        action: (store) => store.setSelectedMenuOption('Shapes'),
+      },
+    ],
+  },
+  {
+    label: 'Output',
+    items: [
+      {
+        name: 'Export',
+        icon: MdDownload,
+        tooltip: 'Export GIF',
+        action: (store) => store.setSelectedMenuOption('Export'),
+      },
+    ],
+  },
+];
+
+/* ── Sidebar button ──────────────────────────────────────── */
+const SidebarButton = observer(
+  ({ item, isSelected, store, rootStore }: { item: SidebarItem; isSelected: boolean; store: UIStore; rootStore: RootStore }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => {
+            // Auto-disable drawing mode when switching away from Draw tab
+            if (item.name !== 'Draw') {
+              const canvas = rootStore.canvasRef.current;
+              if (canvas?.isDrawingMode) {
+                canvas.isDrawingMode = false;
+                canvas.discardActiveObject();
+                canvas.renderAll();
+              }
+            }
+            item.action(store);
+          }}
+          className={cn(
+            'flex h-[52px] w-[52px] flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-150',
+            isSelected
+              ? 'bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:bg-blue-600 dark:bg-blue-500 dark:shadow-blue-500/20'
+              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-200',
+          )}
+        >
+          <item.icon size="18" />
+          <span className="text-[9px] font-medium leading-none">{item.name}</span>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right" className="px-2.5 py-1.5">
+        <p className="text-xs font-medium">{item.tooltip}</p>
+      </TooltipContent>
+    </Tooltip>
+  ),
+);
+
+/* ── Main sidebar ────────────────────────────────────────── */
 export const Sidebar = observer(() => {
-  const store = useStores().uiStore;
+  const rootStore = useStores();
+  const store = rootStore.uiStore;
   return (
     <TooltipProvider delayDuration={300}>
+      {/* ── Desktop sidebar ── */}
       <div
         id="sidebar"
-        className="absolute bottom-0 left-0 flex w-screen items-center justify-between bg-slate-200 dark:bg-gray-800 md:top-0 md:h-screen md:w-[90px] md:flex-col md:justify-start md:pt-[50px]"
+        className="absolute bottom-0 left-0 hidden w-[76px] flex-col items-center bg-slate-50 pt-3 dark:bg-gray-900 md:top-0 md:flex md:h-screen"
       >
-        {MENU_OPTIONS.map((option) => {
-          const isSelected = store.selectedMenuOption === option.name;
-          return (
-            <Tooltip key={option.name}>
-              <TooltipTrigger asChild>
-                <li
-                  className="relative m-1 flex h-[72px] w-[72px] flex-col items-center justify-center rounded-lg"
-                >
-                  <button
-                    onClick={() => option.action(store)}
-                    className={cn([
-                      'flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-lg transition-colors',
-                      isSelected
-                        ? 'bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-600'
-                        : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-200',
-                    ])}
-                  >
-                    <option.icon size="20" />
-                    <div className="text-[0.6rem] font-medium leading-tight">{option.name}</div>
-                  </button>
-                </li>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-[180px]">
-                <p className="text-xs font-semibold">{option.name}</p>
-                <p className="text-[10px] text-muted-foreground">{option.tooltip}</p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
+        {SIDEBAR_GROUPS.map((group, gi) => (
+          <React.Fragment key={group.label}>
+            {/* Group items */}
+            <div className="flex flex-col items-center gap-0.5 py-1">
+              {group.items.map((item) => (
+                <SidebarButton
+                  key={item.name}
+                  item={item}
+                  isSelected={store.selectedMenuOption === item.name}
+                  store={store}
+                  rootStore={rootStore}
+                />
+              ))}
+            </div>
+
+            {/* Separator between groups */}
+            {gi < SIDEBAR_GROUPS.length - 1 && (
+              <div className="mx-auto h-px w-8 bg-slate-200/80 dark:bg-slate-700/40" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* ── Mobile bottom bar — flat row, no group labels ── */}
+      <div
+        id="sidebar-mobile"
+        className="flex w-screen items-center justify-around bg-slate-50 py-1 dark:bg-gray-900 md:hidden"
+      >
+        {SIDEBAR_GROUPS.flatMap((g) => g.items).map((item) => (
+          <SidebarButton
+            key={item.name}
+            item={item}
+            isSelected={store.selectedMenuOption === item.name}
+            store={store}
+            rootStore={rootStore}
+          />
+        ))}
       </div>
     </TooltipProvider>
   );
 });
-
-const MENU_OPTIONS = [
-  {
-    name: 'Video',
-    icon: MdVideoLibrary,
-    tooltip: 'Import a video clip and extract frames for your GIF',
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Video');
-    },
-  },
-  {
-    name: 'Image',
-    icon: MdImage,
-    tooltip: 'Upload images or search Pixabay for drag-and-drop assets',
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Image');
-    },
-  },
-  {
-    name: 'Gif',
-    icon: MdTransform,
-    tooltip: 'Upload an existing GIF to edit, optimize, or restyle',
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Gif');
-    },
-  },
-  {
-    name: 'Text',
-    icon: MdTitle,
-    tooltip: 'Add text overlays, captions, and titles to your frames',
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Text');
-    },
-  },
-  {
-    name: 'Export',
-    icon: MdDownload,
-    tooltip: 'Configure export settings and download your final GIF',
-    action: (store: UIStore) => {
-      store.setSelectedMenuOption('Export');
-    },
-  },
-];

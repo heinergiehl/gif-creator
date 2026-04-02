@@ -19,7 +19,6 @@ import CustomColorPicker from '../ui/CustomColorPicker';
 import { Input } from '@/components/ui/input';
 import { fabric } from 'fabric';
 import { useMousePosition } from './useMousePosition';
-import { Card, CardContent } from '@/components/ui/card';
 import { FabricObjectFactory } from '@/utils/fabric-utils';
 interface CanvasProps {
   containerWidth: number;
@@ -102,7 +101,7 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
       />
       {activeObject && objectCenter && (
         <>
-          {/* Card for displaying size */}
+          {/* Compact overlay badge for size + angle */}
           <div
             id="size-overlay"
             style={{
@@ -111,46 +110,21 @@ const CanvasComponent: React.FC<CanvasProps> = observer(function CanvasComponent
               left: objectCenter.x - 20,
               pointerEvents: 'none',
             }}
-            className={cn(['flex'])}
+            className={cn([
+              'flex',
+              canvasRef.current?.getActiveObjects().length === 0 ? 'hidden' : 'visible',
+            ])}
           >
-            <Card
-              className={cn([
-                'rounded-sm',
-                canvasRef.current?.getActiveObjects().length === 0 ? 'hidden' : 'visible',
-              ])}
-            >
-              <CardContent className="flex h-full w-full items-center justify-center px-1 py-0">
-                <span className="flex items-center justify-center text-center" id="widthAndHeight">
-                  {Math.round(activeObject.getScaledWidth() ?? 0)} x{' '}
-                  {Math.round(activeObject.getScaledHeight() ?? 0)}
-                </span>
-              </CardContent>
-            </Card>
+            <div className="rounded-md bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white shadow-md backdrop-blur-sm">
+              <span id="angle" className="inline-block">{Math.round(activeObject.angle ?? 0)}°</span>
+              <span className="mx-1 opacity-40">|</span>
+              <span id="widthAndHeight" className="inline-block">
+                {Math.round(activeObject.getScaledWidth() ?? 0)} × {Math.round(activeObject.getScaledHeight() ?? 0)}
+              </span>
+            </div>
           </div>
-          {/* Card for displaying angle */}
-          <div
-            id="angle-overlay"
-            style={{
-              position: 'absolute',
-              top: objectCenter.y,
-              left: objectCenter.x - 20,
-              pointerEvents: 'none',
-            }}
-            className={cn(['flex'])}
-          >
-            <Card
-              className={cn([
-                'rounded-sm',
-                canvasRef.current?.getActiveObjects().length === 0 ? 'hidden' : 'visible',
-              ])}
-            >
-              <CardContent className="flex h-full w-full items-center justify-center px-1 py-0">
-                <span className="flex items-center justify-center text-center" id="angle">
-                  {Math.round(activeObject.angle ?? 0)}°
-                </span>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Hidden angle-overlay div — still needed by event handlers that update its position */}
+          <div id="angle-overlay" style={{ position: 'absolute', top: objectCenter.y, left: objectCenter.x - 20, pointerEvents: 'none' }} className="hidden" />
         </>
       )}
       {/* Drop zone labels — inside container, only rendered while dragging over */}

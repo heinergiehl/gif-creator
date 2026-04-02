@@ -26,7 +26,7 @@ interface ImageResourceClientProps {
 }
 const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = memo(
   ({ image, index }) => {
-    const { attributes, listeners, setNodeRef, transform, setActivatorNodeRef } = useDraggable({
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id: `imageResource-${index}`,
       data: {
         type: 'image',
@@ -72,32 +72,19 @@ const DraggableImage: React.FC<{ image: ImageProps; index: number | string }> = 
       <div
         id={'imageResource-' + index}
         ref={setNodeRef}
-        className="group h-[100px] w-[100px] touch-none rounded-md  bg-inherit bg-slate-400 text-inherit opacity-100 transition-colors duration-500 ease-in-out hover:opacity-100 dark:bg-slate-700 dark:hover:bg-slate-900"
+        {...attributes}
+        {...listeners}
+        className="group h-[100px] w-[100px] cursor-grab touch-none rounded-lg bg-slate-100 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-400/40 active:cursor-grabbing dark:bg-slate-700 dark:hover:ring-blue-400/40"
       >
-        {/* drag handle, nice looking */}
-        <div {...attributes} {...listeners} ref={setActivatorNodeRef} className="relative">
-          <Button
-            style={{
-              cursor: isDragging ? 'grabbing' : 'grab',
-            }}
-            className={`absolute left-1/2 flex h-4 w-full translate-x-[-50%] items-center justify-center rounded-none transition-opacity duration-300 dark:bg-slate-800 ${
-              window.innerWidth < 768 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}
-          >
-            {/* gray thick div symbolizing drag handle */}
-            <div className="h-1 w-6 rounded-lg bg-gray-500" />
-          </Button>
-        </div>
-        <div className="relative m-2 border-b" />
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center p-1.5">
           <Image
             src={image.webformatURL}
             width={70}
             height={70}
             objectFit="cover"
             alt={'Resource'}
-            className=" h-[70px] w-[70px] touch-none rounded-lg object-fill "
-            draggable={false} // It's important to disable the native HTML drag and drop
+            className="h-[85px] w-[85px] touch-none rounded-md object-fill"
+            draggable={false}
             crossOrigin="anonymous"
           />
         </div>

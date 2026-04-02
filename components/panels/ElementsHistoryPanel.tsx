@@ -1,75 +1,120 @@
 'use client';
 import React from 'react';
 import { observer } from 'mobx-react';
-import { MdImage, MdTextFields } from 'react-icons/md';
 import { useStores } from '@/store';
-import { MagicCard, MagicContainer } from '../magicui/magic-card';
 import { Button } from '../ui/button';
-import { DeleteIcon, RemoveFormattingIcon, XIcon } from 'lucide-react';
-import { Separator } from '../ui/separator';
+import { XIcon, Type, ImageIcon, Film, Box, Layers } from 'lucide-react';
 import { EditorElement } from '@/types';
 import Image from 'next/image';
 import { useCanvas } from '@/app/components/canvas/canvasContext';
 import { ScrollArea } from '../ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { CustomTooltip } from '@/app/components/ui/CustomTooltip';
+
+function ElementIcon({ type }: { type: string }) {
+  const cls = 'h-3.5 w-3.5 shrink-0 text-slate-400';
+  switch (type) {
+    case 'text': return <Type className={cls} />;
+    case 'image': return <ImageIcon className={cls} />;
+    case 'video': return <Film className={cls} />;
+    default: return <Box className={cls} />;
+  }
+}
+
 const ElementsHistoryPanel = observer(() => {
-  // display all the nested elements of the current gif frame in the history panel
   const rootStore = useStores();
   const store = rootStore.editorStore;
   const canvasRef = useCanvas().canvasRef;
+
+  const handleRemove = (elementId: string) => {
+    store.removeElement(elementId);
+    const objectToRemove = canvasRef.current
+      ?.getObjects()
+      .find((obj) => obj.id === elementId);
+    if (!objectToRemove) return;
+    canvasRef.current?.remove(objectToRemove);
+    canvasRef.current?.renderAll();
+  };
+
   return (
     <div className="flex w-full flex-col" id="history">
-      <div className="dark:bg-slate-900">
-        <span className="flex h-[50px] items-center justify-center text-sm">Elements History</span>
+      <div className="flex h-[42px] items-center justify-center border-b border-slate-200 dark:border-slate-800">
+        <span className="text-sm font-medium">Objects</span>
       </div>
       <ScrollArea className="h-screen">
-        <MagicContainer className="flex-start m-4 flex  flex-wrap justify-stretch  gap-4">
+        <div className="flex flex-col gap-1 p-3">
+          {store.elementsInCurrentFrame?.length === 0 && (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <Box className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+              <span className="text-xs text-slate-400 dark:text-slate-500">
+                No objects in this frame
+              </span>
+            </div>
+          )}
           {store.elementsInCurrentFrame?.map((element) => (
-            <MagicCard
-              onClick={() => {
-                store.setSelectedElements([element.id]);
-              }}
+            <div
               key={element.id}
-              className="relative flex h-[90px] w-[80%] max-w-[200px] cursor-pointer flex-col items-start justify-center overflow-hidden shadow-2xl"
+              onClick={() => store.setSelectedElements([element.id])}
+              className={cn(
+                'group flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 transition-all',
+                store.selectedElements.includes(element)
+                  ? 'border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/40'
+                  : 'border-transparent hover:border-slate-200 hover:bg-slate-50 dark:hover:border-slate-700 dark:hover:bg-slate-800/50',
+              )}
             >
-              <div className="absolute left-[82%] top-[2%]    ">
-                <Button
-                  variant={'destructive'}
-                  className="h-5 w-5 rounded-full px-0 py-0"
-                  onClick={() => {
-                    store.removeElement(element.id);
-                    const objectToRemove = canvasRef.current
-                      ?.getObjects()
-                      .find((obj) => obj.id === element.id);
-                    if (!objectToRemove) return;
-                    canvasRef.current?.remove(objectToRemove);
-                    canvasRef.current?.renderAll();
-                  }}
-                >
-                  <XIcon size={10} />
-                </Button>
-              </div>
-              <div className="ml-4 text-xs first-letter:uppercase ">{element.type}</div>
-              <Separator orientation={'horizontal'} className=" my-1 mt-2 w-full" />
-              <p className="z-10 ml-4 whitespace-nowrap text-4xl font-medium text-gray-800 dark:text-gray-200">
+              {/* Preview */}
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800">
                 <Content element={element} />
-              </p>
-              <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-            </MagicCard>
+              </div>
+
+              {/* Info */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <ElementIcon type={element.type} />
+                  <span className="truncate text-xs font-medium text-slate-700 dark:text-slate-200">
+                    {element.name || element.type}
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <CustomTooltip content="Delete">
+                  <Button
+                    variant="ghost"
+                    className="h-6 w-6 rounded-full p-0 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(element.id);
+                    }}
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </Button>
+                </CustomTooltip>
+              </div>
+            </div>
           ))}
-        </MagicContainer>
+        </div>
       </ScrollArea>
     </div>
   );
 });
 export default ElementsHistoryPanel;
+
 const Content = observer(({ element }: { element: EditorElement }) => {
-  // depends on the type of element: if text, display the text, if image, display the image
   switch (element.type) {
     case 'text':
-      return <div className="max-w-[180px] truncate">{element.properties.text}</div>;
+      return (
+        <span
+          className="max-w-[36px] truncate text-[10px] font-medium text-slate-600 dark:text-slate-300"
+          style={{ fontFamily: element.properties.fontFamily }}
+        >
+          {element.properties.text}
+        </span>
+      );
     case 'image':
-      return <Image src={element.properties.src} height={50} width={50} alt="item" />;
+      return <Image src={element.properties.src} height={36} width={36} alt="item" className="object-cover" />;
     default:
-      return 'Text';
+      return <Box className="h-4 w-4 text-slate-400" />;
   }
 });

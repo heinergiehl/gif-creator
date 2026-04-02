@@ -18,6 +18,7 @@ export const useManageFabricObjects = () => {
     const syncCanvasObjects = async () => {
       // If another sync was triggered while we were queued, bail
       if (currentSyncId !== syncIdRef.current) return;
+
       FabricObjectFactory.setCanvas(canvas);
       const selectedFrame = store.frames[store.currentKeyFrame];
       const frame = selectedFrame
@@ -48,17 +49,21 @@ export const useManageFabricObjects = () => {
 
       try {
         // Remove stale objects IMMEDIATELY (before async load) to prevent
-        // old content flashing during frame transitions
-        const staleCanvasObjects = canvas
-          .getObjects()
-          .filter(
-            (object) =>
-              object.id !== 'selection-rectangle' && object.id && !desiredIds.has(object.id),
-          );
-        staleCanvasObjects.forEach((object) => {
-          canvas.remove(object);
-        });
-        canvas.requestRenderAll();
+        // old content flashing during frame transitions.
+        // During drawing mode, preserve untracked drawing paths (empty id)
+        // so in-progress / un-flattened strokes stay visible.
+        if (!canvas.isDrawingMode) {
+          const staleCanvasObjects = canvas
+            .getObjects()
+            .filter(
+              (object) =>
+                object.id !== 'selection-rectangle' && object.id && !desiredIds.has(object.id),
+            );
+          staleCanvasObjects.forEach((object) => {
+            canvas.remove(object);
+          });
+          canvas.requestRenderAll();
+        }
 
         const fabricObjects = (
           await Promise.all(
@@ -83,6 +88,15 @@ export const useManageFabricObjects = () => {
             canvas.add(object);
           }
           const targetObject = existingObject || object;
+
+          // Frame background images must never be selectable or evented
+          const element = store.elements.find((el) => el.id === targetObject.id);
+          if (element?.isFrame) {
+            targetObject.selectable = false;
+            targetObject.evented = false;
+            targetObject.hoverCursor = 'default';
+          }
+
           if (typeof targetObject.moveTo === 'function') {
             targetObject.moveTo(index);
           }

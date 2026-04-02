@@ -14,18 +14,22 @@ import { CTA } from '@/components/pages/CTA';
 import {
   AppWindowIcon,
   CodeIcon,
+  DownloadIcon,
   EyeIcon,
+  LockIcon,
   RocketIcon,
   ShieldCheckIcon,
+  SlidersHorizontalIcon,
   SmileIcon,
   StarIcon,
+  UploadIcon,
 } from 'lucide-react';
 export const metadata: Metadata = {
   title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
   description:
     'Create and edit animated GIFs online. Convert video to GIF, make GIFs from images, crop, resize, add text, adjust speed, and optimize file size — free, fast, and without watermarks.',
   keywords:
-    'GIF maker, video to GIF, GIF editor, animated GIF maker, resize GIF, crop GIF, rotate GIF, GIF optimizer, split GIF frames, add text to GIF, GIF converter, online GIF tools, edit GIF frames, GIF animation editor, compress GIF, WebP to GIF, APNG maker, free GIF editor, no watermark GIF, animated image editor, GIF effects, frame editor, GIF duration editor, image to GIF, animated GIF creator',
+    'GIF maker, video to GIF, GIF editor, animated GIF maker, resize GIF, crop GIF, rotate GIF, GIF optimizer, split GIF frames, add text to GIF, GIF converter, online GIF tools, edit GIF frames, GIF animation editor, compress GIF, WebP to GIF, APNG maker, free GIF editor, no watermark GIF, animated image editor, GIF effects, frame editor, GIF duration editor, image to GIF, animated GIF creator, convert MP4 to GIF online free, how to make a GIF from a video, reduce GIF file size, GIF speed changer, screen recording to GIF, make GIF from images, browser-based GIF editor, private GIF maker no upload, GIF loop editor, best free online GIF tool, create animated GIF without watermark, GIF frame timing editor, video clip to GIF converter, optimize GIF for web, animated sticker maker, MOV to GIF, AVI to GIF, WebM to GIF',
   alternates: { canonical: '/' },
 };
 const files = [
@@ -336,6 +340,38 @@ export default function Home() {
     }))
   };
 
+  const howToStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Make a GIF Online",
+    "description": "Create animated GIFs from videos, images, or existing GIFs using a free browser-based editor. No uploads — everything runs locally in your browser.",
+    "totalTime": "PT2M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Upload your media",
+        "text": "Drop a video (MP4, MOV, AVI, WebM), images (PNG, JPG), or an existing GIF into the editor.",
+        "url": absoluteUrl('/video-to-gif')
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Edit your GIF",
+        "text": "Crop, resize, rotate, add text, adjust frame timing, apply effects, and fine-tune every detail — all locally in your browser.",
+        "url": absoluteUrl('/edit-gifs')
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Export your GIF",
+        "text": "Download your finished GIF, WebP, or APNG — optimized for the web with no watermark.",
+        "url": absoluteUrl('/')
+      }
+    ],
+    "tool": {
+      "@type": "HowToTool",
+      "name": SITE_BRAND
+    }
+  };
+
   return (
     <>
       <script
@@ -345,6 +381,10 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToStructuredData) }}
       />
       <div className="relative z-40 h-full w-screen text-black dark:text-white md:w-full">
       <div
@@ -357,7 +397,7 @@ export default function Home() {
             bg-[size:24px_24px] opacity-30 dark:bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
             dark:bg-[size:24px_24px] dark:opacity-100"
       ></div>
-      <div className="relative z-40 flex w-full flex-col items-center justify-center opacity-100">
+      <div className="relative z-40 flex w-full flex-col items-stretch opacity-100">
         <section className="mt-[100px] h-screen w-full">
           <div className="flex items-center justify-center">
             <div className="flex h-screen  max-w-6xl flex-col items-center justify-center gap-x-2">
@@ -403,9 +443,10 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="z-[999]">
-          <div className="container  mx-auto flex h-full w-full flex-col px-4 ">
-            <h2 className="pointer-events-none mb-8  whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/80 bg-clip-text py-28 text-center text-2xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
+        <section className="relative z-[999]">
+          <div className="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="relative container mx-auto flex h-full w-full flex-col px-4">
+            <h2 className="mb-8 whitespace-pre-wrap py-28 text-center text-2xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-8xl">
               Professional GIF Editing Tools
             </h2>
             {/* Bento Grid Layout */}
@@ -425,18 +466,103 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* How It Works */}
+        <section className="relative w-full py-24">
+          <div className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-xl dark:bg-slate-950/40 dark:backdrop-blur-lg" />
+          <div className="relative mx-auto max-w-5xl px-4">
+            <h2 className="mb-4 text-center text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
+              How to Make a GIF in 3 Steps
+            </h2>
+            <p className="mx-auto mb-16 max-w-2xl text-center text-base text-slate-500 dark:text-slate-400">
+              No installs, no sign-ups. Everything runs locally in your browser.
+            </p>
+            <div className="grid gap-10 md:grid-cols-3">
+              <div className="text-center">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-900/30">
+                  <UploadIcon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">1. Upload</h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  Drop a <Link href="/video-to-gif" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">video</Link>,{' '}
+                  <Link href="/image-to-gif" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">images</Link>, or an existing{' '}
+                  <Link href="/edit-gifs" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">GIF</Link> into the editor.
+                  Supports MP4, MOV, AVI, WebM, PNG, JPG, and more.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-900/30">
+                  <SlidersHorizontalIcon className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">2. Edit</h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  Crop, resize, rotate, add text, adjust frame timing, apply effects, and fine-tune every detail.
+                  All editing happens locally in your browser — your files are never uploaded.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30">
+                  <DownloadIcon className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">3. Export</h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  Download your finished GIF, WebP, or APNG — optimized for the web with no watermark.{' '}
+                  <Link href="/blog/optimize-gif-size-without-losing-quality" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">Learn how to optimize file size</Link>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <LatestPostsSection
           title="Learn the workflows behind better GIFs"
-          description="Build topical depth around GIF creation, editing, optimization, and screen-to-GIF workflows with practical guides that complement the core tools."
+          description="Practical guides for GIF creation, editing, optimization, and screen-to-GIF workflows."
           postSlugs={[
             'how-to-make-a-gif-from-a-video',
             'how-to-edit-a-gif-without-losing-quality',
             'optimize-gif-size-without-losing-quality',
           ]}
         />
-        <section className="">
-          <div className="container mx-auto px-4">
-            <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text py-28 text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-8xl">
+
+        {/* Privacy Section */}
+        <section className="relative w-full py-24">
+          <div className="pointer-events-none absolute inset-0 bg-white/70 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="relative mx-auto max-w-4xl px-4 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/20">
+              <LockIcon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <h2 className="mb-4 text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
+              Your Files Never Leave Your Device
+            </h2>
+            <p className="mx-auto mb-14 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+              Unlike most online GIF tools, {SITE_BRAND} processes everything locally in your browser
+              using WebAssembly and Canvas APIs. Your videos, images, and GIFs are never uploaded to
+              a server — they stay on your machine, always.
+            </p>
+            <div className="grid gap-6 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <ShieldCheckIcon className="mx-auto mb-3 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">No server uploads</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">All processing runs in your browser. Zero data leaves your device.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <EyeIcon className="mx-auto mb-3 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">No tracking</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">We don&apos;t track, store, or analyze your media. Your content is yours.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <SmileIcon className="mx-auto mb-3 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">No account needed</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Start editing immediately. No sign-up, no email, no friction.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative">
+          <div className="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="relative container mx-auto px-4">
+            <h2 className="mb-8 whitespace-pre-wrap py-28 text-center text-3xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-8xl">
               GIF Maker & Editor FAQ
             </h2>
             <div className="mx-auto max-w-4xl space-y-8 mb-[100px]">

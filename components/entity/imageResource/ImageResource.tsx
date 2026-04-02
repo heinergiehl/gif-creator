@@ -23,10 +23,10 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import imageCompression from 'browser-image-compression';
-import ShinyButton from '@/components/magicui/shiny-button';
-import { ImagePlus, Loader2, Trash2Icon } from 'lucide-react';
+import { ImagePlus, Loader2, X } from 'lucide-react';
 import { CustomProgress } from '@/components/ui/CustomProgress';
 import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
+import { getUid } from '@/utils';
 const DraggableImage = observer(({ image, index }: { image: string; index: number }) => {
   const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id: `imageResource-${index}`,
@@ -119,17 +119,36 @@ const ImageResource = observer(() => {
       }
 
       store.appendImageResources(importedImages);
-      store.setProgressState({
-        active: false,
-        stage: 'ready',
-        title: 'Images ready',
-        message:
-          importedImages.length === 1
-            ? '1 image is ready to drag onto the canvas.'
-            : `${importedImages.length} images are ready to drag onto the canvas.`,
-        conversion: 100,
-        rendering: 100,
-      });
+
+      // ── Auto-create frames when none exist yet ──────────────────
+      const hasNoFrames = store.frames.length === 0 && store.elements.length === 0;
+      if (hasNoFrames && importedImages.length > 0) {
+        const newFrames = importedImages.map((src) => ({ id: getUid(), src }));
+        store.appendFrames(newFrames);
+        store.setProgressState({
+          active: false,
+          stage: 'ready',
+          title: 'GIF started!',
+          message:
+            importedImages.length === 1
+              ? '1 image was added as your first frame. Add more to build your GIF!'
+              : `${importedImages.length} images were added as frames. Edit, reorder, and add overlays!`,
+          conversion: 100,
+          rendering: 100,
+        });
+      } else {
+        store.setProgressState({
+          active: false,
+          stage: 'ready',
+          title: 'Images ready',
+          message:
+            importedImages.length === 1
+              ? '1 image is ready to drag onto the canvas.'
+              : `${importedImages.length} images are ready to drag onto the canvas.`,
+          conversion: 100,
+          rendering: 100,
+        });
+      }
     } catch (error) {
       console.error('Error compressing image:', error);
       store.setProgressState({
@@ -168,22 +187,24 @@ const ImageResource = observer(() => {
   return (
     <ScrollArea className={cn('h-screen w-full bg-slate-300 dark:bg-slate-900 ')} draggable="false">
       <div className="flex max-h-[450px]  w-full flex-col space-y-2 ">
-        <div className="flex h-[50px] w-full items-center justify-center text-sm font-medium ">
-          Upload Images
+        <div className="flex h-[42px] w-full items-center justify-center text-sm font-medium ">
+          Images
         </div>
-        <div className="mx-4">
+        <div className="flex w-full flex-col items-center px-4">
           <MediaImportStatusCard
-            title={isImporting ? store.progress.title || 'Preparing images' : 'Upload still images'}
+            title={isImporting ? store.progress.title || 'Preparing images' : 'Upload images'}
             description={
               isImporting
-                ? store.progress.message || 'Compressing and loading images…'
-                : 'Upload PNG, JPG, WebP, AVIF, or GIF images. They appear here as draggable assets for the editor canvas.'
+                ? store.progress.message || 'Loading images…'
+                : 'PNG, JPG, WebP, AVIF, GIF — drag onto canvas or timeline'
             }
             icon={isImporting ? Loader2 : ImagePlus}
             iconClassName={isImporting ? 'animate-spin text-blue-500' : 'text-emerald-500'}
           />
         </div>
-        {!isImporting && <CustomInputFile onChange={handleImageChange} type="image" />}
+        <div className="w-full px-4">
+          {!isImporting && <CustomInputFile onChange={handleImageChange} type="image" />}
+        </div>
         <div className="px-4">{(isImporting || showReadyMessage) && <CustomProgress />}</div>
         <Separator orientation={'horizontal'} className="w-full" />
         {fileUploadScrollAreaHeight < 200 && (
@@ -194,12 +215,13 @@ const ImageResource = observer(() => {
             >
               {store.images.map((image, index) => (
                 <MagicCard key={index} className="relative z-[9999]  h-[100px] max-w-[130px] p-1">
-                  <ShinyButton
+                  <button
                     onClick={() => handleDeleteImage(index)}
-                    className="right-100 absolute top-0 rounded-full bg-inherit bg-red-500 p-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+                    className="absolute -right-1 -top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800/70 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                    title="Remove image"
                   >
-                    <Trash2Icon className="rounded-full" />
-                  </ShinyButton>
+                    <X className="h-3 w-3" />
+                  </button>
                   <DraggableImage image={image} index={index} />
                   <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
                 </MagicCard>
@@ -212,13 +234,14 @@ const ImageResource = observer(() => {
           <ScrollArea className="h-[200px]" ref={magicContainerRef}>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {store.images.map((image, index) => (
-                <MagicCard key={index} className="relative  h-[100px] max-w-[130px] p-1">
-                  <ShinyButton
+                <MagicCard key={index} className="group/card relative  h-[100px] max-w-[130px] p-1">
+                  <button
                     onClick={() => handleDeleteImage(index)}
-                    className="right-100 absolute top-0 rounded-full bg-inherit bg-red-500 p-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+                    className="absolute -right-1 -top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800/70 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-red-500 group-hover/card:opacity-100"
+                    title="Remove image"
                   >
-                    <Trash2Icon className="rounded-full" />
-                  </ShinyButton>
+                    <X className="h-3 w-3" />
+                  </button>
                   <DraggableImage image={image} index={index} />
                   <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
                 </MagicCard>
@@ -229,8 +252,8 @@ const ImageResource = observer(() => {
       </div>
       {store.images.length > 0 && <Separator orientation={'horizontal'} className="w-full" />}
       <div className="flex h-full w-full flex-col space-y-4 p-4">
-        <Label className="flex flex-col gap-y-4">
-          <div> Search for Images online</div>
+        <Label className="flex flex-col gap-y-3">
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Search online</div>
           <div className="flex gap-x-4">
             <CustomTextInput
               className="min-w-[100px]"

@@ -4,13 +4,15 @@ import { throttle } from 'lodash';
 import { useStores } from '@/store';
 import { AlignGuidelines } from 'fabric-guideline-plugin';
 import {
-  copiedImg,
-  copiedSuccessImg,
-  deleteImg,
   mouseRotateIcon,
-  renderIcon,
   rotationStyleHandler,
   treatAngle,
+  hoveredControlMap,
+  renderDeleteControl,
+  renderCopyControl,
+  renderCopiedSuccessControl,
+  renderRotateControl,
+  renderCornerControl,
 } from './customControls';
 import { useCanvas } from './canvasContext';
 import {
@@ -29,114 +31,77 @@ export const useInitializeCanvas = () => {
   const canvasStore = useStores().canvasOptionsStore;
   const timelineStore = useStores().timelineStore;
   useEffect(() => {
-    const setupCustomControls = (store: any) => {
-      fabric.Object.prototype.controls.remove = createCustomControl(
-        deleteImg,
-        store,
-        true,
-        handleDelete,
-        () => 'remove',
-        'remove',
-        -0.5,
-        -0.5,
-      );
-      fabric.Object.prototype.controls.copy = createCustomControl(
-        copiedImg,
-        store,
-        true,
-        handleCopy,
-        () => 'copy',
-        'copy',
-        0.5,
-        -0.5,
-      );
-      fabric.Textbox.prototype.controls.remove = createCustomControl(
-        deleteImg,
-        store,
-        true,
-        handleDelete,
-        () => 'remove',
-        'remove',
-        -0.5,
-        -0.5,
-      );
-      fabric.Textbox.prototype.controls.copy = createCustomControl(
-        copiedImg,
-        store,
-        true,
-        handleCopy,
-        () => 'copy',
-        'copy',
-        0.5,
-        -0.5,
-      );
-      fabric.Object.prototype.controls.copiedSuccess = createCustomControl(
-        copiedSuccessImg,
-        store,
-        false,
-        undefined,
-        () => 'copiedSuccess',
-        'copiedSuccess',
-        0.5,
-        -0.5,
-      );
-    };
-    fabric.Object.prototype.controls.mtr = new fabric.Control({
-      x: 0,
-      y: -0.5,
-      offsetX: 0,
-      offsetY: -60,
-      cursorStyleHandler: rotationStyleHandler,
-      //@ts-ignore
-      actionHandler: fabric.controlsUtils.rotationWithSnapping,
-      actionName: 'rotate',
-      render: renderIcon,
-    });
-    // also make sure every fabric object has this rotation control
-    fabric.Textbox.prototype.controls.mtr = new fabric.Control({
-      x: 0,
-      y: -0.5,
-      offsetX: 0,
-      offsetY: -60,
-      cursorStyleHandler: rotationStyleHandler,
-      //@ts-ignore
-      actionHandler: fabric.controlsUtils.rotationWithSnapping,
-      actionName: 'rotate',
-      render: renderIcon,
-    });
-    const createCustomControl = (
-      img: HTMLImageElement | null,
-      store: any,
-      visible = true,
-      mouseUpHandler:
-        | ((eventData: MouseEvent, transform: fabric.Transform, x: number, y: number) => boolean)
-        | undefined,
-      cursorStyleHandler:
-        | (() => 'pointer')
-        | ((eventData: MouseEvent, control: fabric.Control, fabricObject: fabric.Object) => string),
-      actionName: string,
-      x = 0.5,
-      y = -0.5,
-    ) => {
-      return new fabric.Control({
-        actionName,
-        x,
-        y,
-        offsetY: -60,
-        mouseUpHandler,
-        cursorStyleHandler,
-        render: (ctx, left, top) => {
-          if (img) {
-            const size = 60;
-            ctx.save();
-            ctx.translate(left, top);
-            ctx.drawImage(img, -size / 2, -size / 2, size, size);
-            ctx.restore();
-          }
-        },
-        visible,
+    /* ── Modern Action Controls ─────────────────────── */
+    const setupCustomControls = (_store: any) => {
+      // Delete — red circle, top-left
+      const deleteControl = new fabric.Control({
+        actionName: 'remove',
+        x: -0.5,
+        y: -0.5,
+        offsetY: -40,
+        cursorStyleHandler: () => 'pointer',
+        mouseUpHandler: handleDelete,
+        render: renderDeleteControl,
+        visible: true,
       });
+      // Copy — blue circle, top-right
+      const copyControl = new fabric.Control({
+        actionName: 'copy',
+        x: 0.5,
+        y: -0.5,
+        offsetY: -40,
+        cursorStyleHandler: () => 'pointer',
+        mouseUpHandler: handleCopy,
+        render: renderCopyControl,
+        visible: true,
+      });
+      // Copied success — green check, same slot as copy
+      const copiedSuccessControl = new fabric.Control({
+        actionName: 'copiedSuccess',
+        x: 0.5,
+        y: -0.5,
+        offsetY: -40,
+        cursorStyleHandler: () => 'copiedSuccess',
+        render: renderCopiedSuccessControl,
+        visible: false,
+      });
+
+      fabric.Object.prototype.controls.remove = deleteControl;
+      fabric.Object.prototype.controls.copy = copyControl;
+      fabric.Object.prototype.controls.copiedSuccess = copiedSuccessControl;
+      fabric.Textbox.prototype.controls.remove = deleteControl;
+      fabric.Textbox.prototype.controls.copy = copyControl;
+      fabric.Textbox.prototype.controls.copiedSuccess = copiedSuccessControl;
     };
+
+    // Rotate — slate circle, top-center
+    const mtrControl = new fabric.Control({
+      x: 0,
+      y: -0.5,
+      offsetX: 0,
+      offsetY: -40,
+      cursorStyleHandler: rotationStyleHandler,
+      //@ts-ignore
+      actionHandler: fabric.controlsUtils.rotationWithSnapping,
+      actionName: 'rotate',
+      render: renderRotateControl,
+    });
+    fabric.Object.prototype.controls.mtr = mtrControl;
+    fabric.Textbox.prototype.controls.mtr = mtrControl;
+
+    /* ── Modern corner handles ───────────────────────── */
+    // Override corner rendering for all standard resize handles
+    const cornerNames = ['tl', 'tr', 'bl', 'br', 'ml', 'mt', 'mr', 'mb'];
+    cornerNames.forEach((name) => {
+      const existing = fabric.Object.prototype.controls[name];
+      if (existing) {
+        existing.render = renderCornerControl;
+      }
+      const existingText = fabric.Textbox.prototype.controls[name];
+      if (existingText) {
+        existingText.render = renderCornerControl;
+      }
+    });
     const handleDelete = (
       eventData: MouseEvent,
       transform: fabric.Transform,
@@ -206,7 +171,13 @@ export const useInitializeCanvas = () => {
     };
     const startRenderLoop = (canvas: fabric.Canvas) => {
       const renderLoop = () => {
-        canvas.requestRenderAll();
+        // Skip render-loop redraws while the user is actively drawing.
+        // The brush handles its own rendering on contextTop; calling
+        // requestRenderAll here can interfere with real-time stroke
+        // visibility on some browsers / Fabric.js builds.
+        if (!canvas.isDrawingMode) {
+          canvas.requestRenderAll();
+        }
         fabric.util.requestAnimFrame(renderLoop);
       };
       fabric.util.requestAnimFrame(renderLoop);
@@ -313,6 +284,16 @@ export const useInitializeCanvas = () => {
         updateElementState(e.target);
         rootStore.historyStore.addState();
       });
+
+      // Update frame thumbnail when a freehand drawing stroke is completed
+      canvas.on('path:created', () => {
+        if (store.frames.length === 0) return;
+        // Small delay to ensure the path is fully rendered on canvas
+        requestAnimationFrame(() => {
+          const dataUrl = canvas.toDataURL({ multiplier: 0.1, format: 'png' });
+          store.updateCurrentFrameSource(dataUrl);
+        });
+      });
       canvas.on('object:moving', (e) => {
         const activeObject = e.target;
         if (activeObject) {
@@ -382,7 +363,30 @@ export const useInitializeCanvas = () => {
           store.setSelectedElements([e.target?.id]);
         }
       });
+      /* ── Hover tracking for modern control animations ── */
+      canvas.on('mouse:move', (e) => {
+        const activeObj = canvas.getActiveObject();
+        if (!activeObj || canvas.isDrawingMode) {
+          if (activeObj) hoveredControlMap.delete(activeObj);
+          return;
+        }
+        try {
+          const pointer = canvas.getPointer(e.e, true);
+          // @ts-ignore — _findTargetCorner is internal but stable in Fabric 5
+          const corner = activeObj._findTargetCorner?.(pointer);
+          if (corner) {
+            hoveredControlMap.set(activeObj, corner);
+          } else {
+            hoveredControlMap.delete(activeObj);
+          }
+        } catch {
+          // Ignore pointer errors
+        }
+      });
+
       canvas.on('mouse:down', (e) => {
+        // Never interfere with drawing mode — Fabric handles brush strokes
+        if (canvas.isDrawingMode) return;
         const activeObjs = canvas.getActiveObjects();
         if (activeObjs.length > 0) return;
         const pointer = canvas.getPointer(e.e);
@@ -426,8 +430,9 @@ export const useInitializeCanvas = () => {
         hoverCursor: 'pointer',
         allowTouchScrolling: true,
         selection: true,
-        selectionBorderColor: 'blue',
-        selectionDashArray: [5, 5],
+        selectionBorderColor: 'rgba(59,130,246,0.6)',
+        selectionDashArray: [6, 3],
+        selectionLineWidth: 1.5,
         width,
         height,
         enableRetinaScaling: true,
@@ -444,12 +449,16 @@ export const useInitializeCanvas = () => {
     }
     const canvas = canvasRef.current;
     if (canvas) {
-      fabric.Object.prototype.transparentCorners = false;
-      fabric.Object.prototype.cornerColor = 'blue';
+      /* ── Sleek selection styling ── */
+      fabric.Object.prototype.transparentCorners = true;
+      fabric.Object.prototype.cornerColor = '#3b82f6';
+      fabric.Object.prototype.cornerStrokeColor = '#3b82f6';
       fabric.Object.prototype.cornerStyle = 'circle';
       fabric.Object.prototype.centeredScaling = true;
-      fabric.Object.prototype.cornerSize = 20;
-      fabric.Object.prototype.borderScaleFactor = 5;
+      fabric.Object.prototype.cornerSize = 10;
+      fabric.Object.prototype.borderScaleFactor = 1.8;
+      fabric.Object.prototype.borderColor = 'rgba(59,130,246,0.6)';
+      fabric.Object.prototype.borderDashArray = [6, 3];
       fabric.Object.prototype.id = '';
       interface ObjectOptions {
         zIndex?: number;
@@ -459,8 +468,6 @@ export const useInitializeCanvas = () => {
       fabric.Object.prototype.drawSelectionBackground = function (ctx: CanvasRenderingContext2D) {
         return this;
       };
-      // fabric.Object.prototype.selectionBackgroundColor = 'rgba(0, 0, 0, 0.3)';
-      fabric.Object.prototype.borderColor = 'blue';
       fabric.Object.prototype.stateProperties?.push('id', 'zIndex');
       fabric.Object.prototype.statefullCache = true;
       fabric.filterBackend = new fabric.WebglFilterBackend();
@@ -475,6 +482,7 @@ export const useInitializeCanvas = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       canvas.off('object:modified');
+      canvas.off('path:created');
       canvas.off('selection:created');
       canvas.off('selection:updated');
       canvas.off('selection:cleared');

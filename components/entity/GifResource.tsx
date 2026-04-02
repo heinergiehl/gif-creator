@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
 import { SuperGif } from '@wizpanda/super-gif';
 import { useStores } from '@/store';
@@ -10,9 +10,19 @@ import { CustomProgress } from '../ui/CustomProgress';
 import { Button } from '../ui/button';
 import { MdDelete } from 'react-icons/md';
 import { FaRemoveFormat } from 'react-icons/fa';
-import FrameSettings from './videoResource/FrameSettings';
-import { Loader2, Images } from 'lucide-react';
+import { Loader2, Images, Settings2, Film, ArrowRight } from 'lucide-react';
 import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 const GifResource = observer(() => {
   const rootStore = useStores();
   const store = rootStore.editorStore;
@@ -22,6 +32,11 @@ const GifResource = observer(() => {
   const [inputKey, setInputKey] = useState<number>(Date.now());
   const [openModal, setOpenModal] = useState<boolean>(false);
   const editorStore = useStores().editorStore;
+
+  // ── Settings confirmation modal state ──────────────────────
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const pendingFile = useRef<File | null>(null);
+
   const extractFrames = async (file: File) => {
     store.setProgressState({
       active: true,
@@ -85,91 +100,220 @@ const GifResource = observer(() => {
       }
     });
   };
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+
+  /** Intercept file selection — stash the file and open settings modal */
+  const handleFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      await extractFrames(file);
+    if (!file) return;
+    pendingFile.current = file;
+    setSettingsOpen(true);
+  };
+
+  /** User confirms settings → run extraction */
+  const handleConfirmExtract = () => {
+    setSettingsOpen(false);
+    if (pendingFile.current) {
+      extractFrames(pendingFile.current);
+      pendingFile.current = null;
     }
   };
+
+  /** User cancels → discard the file selection */
+  const handleCancelExtract = () => {
+    setSettingsOpen(false);
+    pendingFile.current = null;
+    setInputKey(Date.now());
+  };
+
   const isImporting = editorCarouselStore.isCreatingGifs || store.progress.active;
   const showReadyMessage = !isImporting && store.progress.stage === 'ready' && store.progress.message;
+
   return (
-    <div className="relative  h-full w-screen md:w-full">
-      <CustomDialog
-        header="Add more frames from another GIF"
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-      >
-        <FrameSettings
-          frameRate={frameRate}
-          setFrameRate={setFrameRate}
-          quality={quality}
-          setQuality={setQuality}
-          disabled={isImporting}
-        />
-        {!isImporting && <CustomInputFile key={inputKey} onChange={handleFileChange} type="gif" />}
-        <CustomProgress />
-      </CustomDialog>
-      <div className="bg-slate-300 dark:bg-slate-900 md:h-full">
-        <div className="flex h-[50px] w-full items-center justify-center  text-sm font-medium ">
-          Upload GIF
+    <ScrollArea className="mb-[90px] h-[85vh] w-full bg-slate-300 dark:bg-slate-900 md:h-full">
+      <div className="flex w-full flex-col items-center justify-center gap-4">
+        {/* Add-more-frames dialog for when frames already exist */}
+        <CustomDialog
+          header="Add more frames from another GIF"
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+        >
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-slate-900 dark:text-white">
+                  Frame sampling rate
+                </label>
+                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                  every {frameRate === 1 ? '' : `${frameRate}`} frame{frameRate > 1 ? 's' : ''}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="24"
+                step="1"
+                value={frameRate}
+                onChange={(e) => setFrameRate(Number(e.target.value))}
+                disabled={isImporting}
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-blue-600 dark:bg-slate-700"
+              />
+            </div>
+            {!isImporting && <CustomInputFile key={inputKey} onChange={handleFileSelected} type="gif" />}
+            {isImporting && <CustomProgress />}
+          </div>
+        </CustomDialog>
+
+        {/* ── Settings confirmation modal ──────────────────── */}
+        <Dialog open={settingsOpen} onOpenChange={(open) => !open && handleCancelExtract()}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5 text-blue-500" />
+                GIF extraction settings
+              </DialogTitle>
+              <DialogDescription>
+                Adjust frame sampling and resolution before extracting.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Frame sampling rate */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-slate-900 dark:text-white">
+                    Frame sampling rate
+                  </label>
+                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                    {frameRate} fps
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="24"
+                  step="1"
+                  value={frameRate}
+                  onChange={(e) => setFrameRate(Number(e.target.value))}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-blue-600 dark:bg-slate-700"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>1 fps — fewer frames</span>
+                  <span>24 fps — smoother</span>
+                </div>
+              </div>
+
+              {/* Quality */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-slate-900 dark:text-white">
+                    Resolution quality
+                  </label>
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                    {Math.round(quality * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={quality}
+                  onChange={(e) => setQuality(Number(e.target.value))}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-emerald-600 dark:bg-slate-700"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>10% — small &amp; fast</span>
+                  <span>100% — full quality</span>
+                </div>
+              </div>
+
+              {/* Quick summary */}
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800/50">
+                <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                  <Film className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <span>
+                    <strong>{frameRate} fps</strong> · <strong>{Math.round(quality * 100)}%</strong> quality · processed locally
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={handleCancelExtract}>
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmExtract} className="gap-1.5">
+                Start extraction
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Header ── */}
+        <div className="w-full bg-slate-300 text-sm dark:bg-slate-900 md:h-full">
+          <span className="flex h-[42px] items-center justify-center font-medium">
+            Import GIF
+          </span>
         </div>
-        <div className="flex w-full flex-col items-start justify-center gap-y-4 p-8  text-xs">
+
+        {/* ── Main content ── */}
+        <div className="flex w-full flex-col items-center justify-center bg-slate-300 px-4 py-4 text-sm dark:bg-slate-900">
           <MediaImportStatusCard
-            title={isImporting ? store.progress.title || 'Importing GIF frames' : 'Import an editable GIF'}
+            title={
+              isImporting
+                ? store.progress.title || 'Importing frames'
+                : 'Import editable GIF'
+            }
             description={
               isImporting
-                ? store.progress.message || 'Extracting frames from your GIF…'
-                : 'Upload an animated GIF, choose sampling and quality, then edit the extracted frames like any other project.'
+                ? store.progress.message || 'Extracting frames…'
+                : 'Extract frames from any animated GIF for editing'
             }
             icon={isImporting ? Loader2 : Images}
             iconClassName={isImporting ? 'animate-spin text-blue-500' : 'text-emerald-500'}
+            className="mb-3 mt-2"
           />
-          {store.frames.length === 0 && store.elements.length === 0 && (
-            <>
-              <FrameSettings
-                frameRate={frameRate}
-                setFrameRate={setFrameRate}
-                quality={quality}
-                setQuality={setQuality}
-                disabled={isImporting}
-              />
-              {!isImporting && (
-                <CustomInputFile key={inputKey} onChange={handleFileChange} type="gif" />
-              )}
-            </>
-          )}
-          {store.frames.length > 0 && store.elements.length > 0 && (
-            <div className="mb-4 flex w-full flex-col gap-y-4">
-              <Button
-                onClick={() => {
-                  store.resetDocument();
-                }}
-                variant={'destructive'}
-                disabled={isImporting}
-              >
-                <MdDelete className="mr-2" /> Delete Frames
-              </Button>
-              <Button
-                onClick={() => {
-                  setOpenModal(true);
-                }}
-                variant={'outline'}
-                disabled={isImporting}
-              >
-                <FaRemoveFormat className="mr-2" /> Add more frames
-              </Button>
-            </div>
-          )}
+
+          {isImporting && <CustomProgress />}
+
           {showReadyMessage && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-200">
+            <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-200">
               {store.progress.message}
             </div>
           )}
-          <CustomProgress />
+
+          <Separator />
         </div>
+
+        {/* ── File input — only shown when not importing and no frames yet ── */}
+        {!isImporting && store.frames.length === 0 && store.elements.length === 0 && (
+          <div className="w-full">
+            <CustomInputFile key={inputKey} onChange={handleFileSelected} type="gif" />
+          </div>
+        )}
+
+        {/* ── Actions when frames exist ── */}
+        {store.frames.length > 0 && store.elements.length > 0 && !isImporting && (
+          <div className="flex w-full flex-col gap-3 px-4 pb-4">
+            <Button
+              onClick={() => setOpenModal(true)}
+              variant="outline"
+              className="gap-1.5"
+            >
+              <Images className="h-4 w-4" /> Add more frames from another GIF
+            </Button>
+            <Button
+              onClick={() => store.resetDocument()}
+              variant="ghost"
+              className="gap-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+            >
+              <MdDelete className="h-4 w-4" /> Clear all frames
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </ScrollArea>
   );
 });
 export default GifResource;

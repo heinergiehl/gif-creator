@@ -68,16 +68,16 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
     [isFocused, isDragAccept, isDragReject],
   );
   return (
-    <div className="container ">
+    <div className="flex w-full justify-center px-4">
       <div
         {...getRootProps({ style })}
         className={cn([
-          'relative flex h-full max-w-xs cursor-pointer items-center justify-center gap-1.5 rounded transition-colors duration-300 ease-in-out',
+          'relative flex h-full w-full cursor-pointer items-center justify-center gap-1.5 rounded transition-colors duration-300 ease-in-out',
         ])}
       >
         <div
           className={cn([
-            'flex h-full w-full cursor-pointer flex-col items-start justify-evenly gap-y-2  transition-colors duration-300',
+            'flex h-full w-full cursor-pointer flex-col items-center justify-evenly gap-y-2 transition-colors duration-300',
           ])}
         >
           {LabelContent(type, style, isDragReject, isDragAccept, isDragActive, isFocused)}
@@ -101,11 +101,11 @@ const LabelContent = (
   const Icon = ({ className }: { className: string }) => {
     switch (fileType) {
       case 'video':
-        return <FaRegFileVideo className={className} size="30" />;
+        return <FaRegFileVideo className={className} size="22" />;
       case 'image':
-        return <FaRegImage className={className} size="30" />;
+        return <FaRegImage className={className} size="22" />;
       case 'gif':
-        return <AiOutlineFileGif className={className} size="30" />;
+        return <AiOutlineFileGif className={className} size="22" />;
       default:
         return null;
     }
@@ -116,10 +116,10 @@ const LabelContent = (
       case 'image':
       case 'gif':
         return isDragAccept
-          ? `Drop it like it's hot!`
+          ? 'Drop here!'
           : isDragReject
-            ? 'Invalid file type'
-            : `Drop your ${fileType} here`;
+            ? 'Invalid file'
+            : `Drop ${fileType} here`;
       default:
         return null;
     }
@@ -127,12 +127,12 @@ const LabelContent = (
   return (
     <div
       className={cn([
-        'flex h-full w-full flex-col items-start justify-evenly gap-y-2',
+        'flex h-full w-full items-center justify-center gap-3',
         isDragAccept ? 'text-green-500' : isDragReject ? 'text-red-500' : 'text-foreground',
       ])}
     >
-      <Icon className="text-2xl" />
-      <span className="text-md ">{Text()}</span>
+      <Icon className="text-xl opacity-60" />
+      <span className="text-sm">{Text()}</span>
     </div>
   );
 };

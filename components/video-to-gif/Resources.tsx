@@ -12,6 +12,8 @@ import { AnimationsPanel } from '../panels/AnimationsPanel';
 import { EditOptionsPanel } from '../panels/EditOptionsPanel';
 import ShadowOptionsPanel from '../panels/ShadowOptionsPanel';
 import TextStyleOptions from '../panels/TextStyleOptions';
+import { DrawingPanel } from '../panels/DrawingPanel';
+import { ShapesPanel } from '../panels/ShapesPanel';
 export type AnimationResourceProps = {
   animation: Animation;
 };
@@ -56,6 +58,10 @@ const RenderResource = observer(({}: {}) => {
       return <GifResource />;
     case 'Animation':
       return <AnimationsPanel />;
+    case 'Draw':
+      return <DrawingPanel />;
+    case 'Shapes':
+      return <ShapesPanel />;
     default:
       return null;
   }

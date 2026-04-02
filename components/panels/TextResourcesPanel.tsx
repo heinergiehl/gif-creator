@@ -11,7 +11,7 @@ import { Separator } from '../ui/separator';
 import CustomTextInput from '@/app/components/ui/CustomTextInput';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { GripVertical, Layers, MousePointerClick, Type } from 'lucide-react';
+import { Layers, MousePointerClick, Type } from 'lucide-react';
 import { fabric } from 'fabric';
 import { getUid } from '@/utils';
 
@@ -83,9 +83,6 @@ const DraggableText = observer(
         style={{ opacity: isDragging ? 0.4 : 1 }}
       >
         <div className="group relative flex cursor-grab items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-400/50 hover:shadow-md active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-400/50">
-          {/* Grip handle */}
-          <GripVertical className="h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-slate-500 dark:text-slate-600 dark:group-hover:text-slate-400" />
-
           {/* Text preview */}
           <div
             className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap leading-tight"
@@ -212,12 +209,23 @@ export const TextResourcesPanel = observer(() => {
       className="flex h-[70dvh] w-full flex-col bg-slate-50 text-foreground dark:bg-slate-900 md:h-screen"
     >
       {/* Header */}
-      <div className="flex h-[50px] items-center justify-center border-b border-slate-200 dark:border-slate-800">
-        <span className="text-sm font-medium">Add Text</span>
+      <div className="flex h-[42px] items-center justify-center border-b border-slate-200 dark:border-slate-800">
+        <span className="text-sm font-medium">Text</span>
       </div>
 
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-5 p-5">
+          {/* Start with blank frame — shown first when no frames */}
+          {!hasFrames && (
+            <Button
+              variant="default"
+              className="w-full gap-1.5 border-dashed text-sm font-semibold"
+              onClick={() => store.addBlankFrame()}
+            >
+              <Layers className="h-4 w-4" /> Start with blank frame
+            </Button>
+          )}
+
           {/* Font & Color */}
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <FontPicker />
@@ -274,9 +282,6 @@ export const TextResourcesPanel = observer(() => {
 
           {/* Click-to-add buttons */}
           <div className="space-y-2">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              Quick Add
-            </span>
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
@@ -284,10 +289,10 @@ export const TextResourcesPanel = observer(() => {
                 className="h-9 gap-1.5 text-xs"
                 onClick={handleAddToCanvas}
                 disabled={!hasFrames}
-                title={hasFrames ? 'Add text as overlay on current frame' : 'Import frames first'}
+                title="Add as overlay"
               >
                 <MousePointerClick className="h-3.5 w-3.5" />
-                To Canvas
+                As Object
               </Button>
               <Button
                 variant="outline"
@@ -296,12 +301,12 @@ export const TextResourcesPanel = observer(() => {
                 onClick={handleAddToTimeline}
               >
                 <Layers className="h-3.5 w-3.5" />
-                To Timeline
+                As Frame
               </Button>
             </div>
             {!hasFrames && (
-              <p className="text-[10px] text-amber-600 dark:text-amber-400">
-                Import frames first to add text overlays to the canvas.
+              <p className="text-center text-[10px] text-amber-600 dark:text-amber-400">
+                No frames yet — use &ldquo;As Frame&rdquo; or start with a blank frame above
               </p>
             )}
           </div>
@@ -310,13 +315,9 @@ export const TextResourcesPanel = observer(() => {
 
           {/* Draggable preview */}
           <div className="space-y-2">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              Or Drag &amp; Drop
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">
+              Drag to canvas or timeline
             </span>
-            <p className="text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-              Drag onto the <strong>canvas</strong> to add a text overlay, or onto the{' '}
-              <strong>timeline</strong> to create a new text frame.
-            </p>
             <DraggableText
               fontSize={fontSize}
               fontFamily={store.fontFamily}

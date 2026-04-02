@@ -125,4 +125,6 @@ export type MenuOption =
   | 'Video'
   | 'Image'
   | 'Smilies'
-  | 'Gif';
+  | 'Gif'
+  | 'Draw'
+  | 'Shapes';

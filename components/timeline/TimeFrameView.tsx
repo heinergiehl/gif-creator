@@ -124,6 +124,7 @@ export const TimeFrameView = observer((props: { element: EditorElement }) => {
               width={18}
               height={18}
               className="shrink-0 rounded-sm object-cover"
+              style={{ width: 'auto', height: 'auto', maxWidth: 18, maxHeight: 18 }}
             />
           ) : null}
           <span className="min-w-0 flex-1 truncate">{element.name}</span>

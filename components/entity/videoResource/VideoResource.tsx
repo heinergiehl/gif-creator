@@ -66,8 +66,8 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
   };
 
   return (
-    <ScrollArea className=" mb-[90px]  h-[85vh] w-screen  bg-slate-300 dark:bg-slate-900  md:h-full md:w-full">
-      <div className="  flex w-full flex-col items-center justify-center gap-4 ">
+    <ScrollArea className="mb-[90px] h-[85vh] w-full bg-slate-300 dark:bg-slate-900 md:h-full">
+      <div className="flex w-full flex-col items-center justify-center gap-4">
         <CustomDialog
           header="Add more frames from another video"
           open={openModal}
@@ -81,8 +81,8 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
             disabled={isImporting}
           />
           {isPreparingEngine ? (
-            <div className="rounded-xl border border-dashed border-slate-400 p-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-300">
-              Preparing the local video processing engine. You’ll be able to upload a video in a moment.
+            <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 p-3 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading video engine…
             </div>
           ) : isImporting ? (
             <div className="w-full rounded-xl border border-blue-200 bg-blue-50/80 p-4 text-sm text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100">
@@ -113,8 +113,7 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
                 Frame extraction settings
               </DialogTitle>
               <DialogDescription>
-                Choose how frames are extracted from your video. A higher frame rate captures
-                more detail but creates more frames. Lower resolution saves memory.
+                Adjust frame rate and resolution before extracting.
               </DialogDescription>
             </DialogHeader>
 
@@ -170,13 +169,11 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
               </div>
 
               {/* Quick summary */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
-                <div className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                  <Film className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800/50">
+                <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                  <Film className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                   <span>
-                    Extracting at <strong>{frameRate} fps</strong> and{' '}
-                    <strong>{Math.round(quality * 100)}%</strong> resolution. Processing runs
-                    entirely in your browser — nothing is uploaded.
+                    <strong>{frameRate} fps</strong> · <strong>{Math.round(quality * 100)}%</strong> resolution · processed locally
                   </span>
                 </div>
               </div>
@@ -195,25 +192,25 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
         </Dialog>
 
         <div className="w-full bg-slate-300 text-sm dark:bg-slate-900 md:h-full">
-          <span className="flex h-[50px] items-center justify-center font-medium">
-            Upload Video
+          <span className="flex h-[42px] items-center justify-center font-medium">
+            Video
           </span>
         </div>
-        <div className="flex w-full flex-col items-start justify-center bg-slate-300 p-8 text-sm dark:bg-slate-900">
+        <div className="flex w-full flex-col items-center justify-center bg-slate-300 px-4 py-4 text-sm dark:bg-slate-900">
           <MediaImportStatusCard
             title={
               isPreparingEngine
-                ? 'Preparing local video engine'
+                ? 'Loading engine…'
                 : isImporting
                   ? progressLabel
-                  : 'Import a video into frames'
+                  : 'Import video'
             }
             description={
               isPreparingEngine
-                ? 'This runs entirely in your browser. Upload becomes available automatically once FFmpeg finishes loading.'
+                ? 'FFmpeg is loading in your browser'
                 : isImporting
                   ? progressMessage
-                  : 'Upload a video and confirm the frame rate and quality before extraction begins. Everything runs locally — nothing is uploaded.'
+                  : 'Extract frames from any video file — processed locally'
             }
             icon={isPreparingEngine ? Wand2 : isImporting ? Loader2 : Video}
             iconClassName={
@@ -223,11 +220,12 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
                   ? 'animate-spin text-blue-500'
                   : 'text-emerald-500'
             }
-            className="mb-4 mt-2"
+            className="mb-3 mt-2"
           />
           {isPreparingEngine && (
-            <div className="mb-4 rounded-xl border border-dashed border-slate-400 p-4 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-300">
-              Preparing the local video processing engine. Keep this panel open and upload will become available automatically.
+            <div className="mb-3 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Loading video engine…
             </div>
           )}
           {isImporting && <CustomProgress />}
@@ -239,7 +237,9 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
           <Separator />
         </div>
         {!isPreparingEngine && !isImporting && (
-          <FileInput key={inputKey} onChange={handleFileSelected} />
+          <div className="w-full">
+            <FileInput key={inputKey} onChange={handleFileSelected} />
+          </div>
         )}
       </div>
     </ScrollArea>

@@ -112,22 +112,24 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
               </button>
 
               {openSection === section.section ? (
-                <div className="absolute left-0 top-[calc(100%+12px)] w-[420px] rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/30">
-                  <div className="grid gap-2">
-                    {section.links?.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="rounded-2xl px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-900"
-                      >
-                        <div className="text-base font-semibold text-slate-950 dark:text-white">
-                          {link.title}
-                        </div>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                          {link.description}
-                        </p>
-                      </Link>
-                    ))}
+                <div className="absolute left-0 top-full w-[420px] pt-2">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/30">
+                    <div className="grid gap-2">
+                      {section.links?.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="rounded-2xl px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-900"
+                        >
+                          <div className="text-base font-semibold text-slate-950 dark:text-white">
+                            {link.title}
+                          </div>
+                          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                            {link.description}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -139,7 +141,7 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/edit-gifs/converter-and-editor"
-            className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl sm:px-5 sm:py-2.5 sm:text-sm"
+            className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md active:scale-[0.97] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 sm:px-5 sm:py-2.5 sm:text-sm"
           >
             Open Editor
           </Link>
@@ -223,7 +225,7 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
           <div className="mt-6">
             <Link
               href="/edit-gifs/converter-and-editor"
-              className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3.5 text-base font-semibold text-white shadow-lg transition hover:from-blue-700 hover:to-purple-700"
+              className="flex w-full items-center justify-center rounded-full bg-slate-900 px-5 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
             >
               Open GIF Editor
             </Link>
