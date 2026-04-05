@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { AnimatedBeam } from '@/components/magicui/animated-beam';
 import React, { forwardRef, useRef } from 'react';
-import { Film, ImageIcon, FileImage, Wand2, Sparkles, Zap, Layers, Share2 } from 'lucide-react';
+import { Film, ImageIcon, FileImage, Wand2, FolderDown } from 'lucide-react';
 
 const Node = forwardRef<
   HTMLDivElement,
@@ -33,10 +33,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
   const imagesRef = useRef<HTMLDivElement>(null);
   const gifInputRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-  const shareRef = useRef<HTMLDivElement>(null);
-  const gifOutputRef = useRef<HTMLDivElement>(null);
-  const webpRef = useRef<HTMLDivElement>(null);
-  const apngRef = useRef<HTMLDivElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
@@ -46,7 +43,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
       )}
       ref={containerRef}
     >
-      <div className="flex h-full w-full flex-row items-center justify-between gap-10">
+      <div className="flex h-full w-full flex-row items-center justify-center gap-24">
         {/* Left column: inputs */}
         <div className="flex flex-col items-center gap-8">
           <Node ref={videoRef} label="Video">
@@ -60,38 +57,34 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
           </Node>
         </div>
 
-        {/* Center hub: editor */}
-        <Node
-          ref={editorRef}
-          label="GIF Creator"
-          className="h-20 w-20 rounded-3xl border-pink-200 bg-gradient-to-br from-pink-50 to-cyan-50 dark:border-pink-800/60 dark:from-pink-950/40 dark:to-cyan-950/40"
-        >
-          <Wand2 className="h-9 w-9 text-pink-500" />
-        </Node>
+        {/* Center column: GIF Creator on top, Output directly below */}
+        <div className="flex flex-col items-center gap-12">
+          {/* GIF Creator hub */}
+          <Node
+            ref={editorRef}
+            label="GIF Creator"
+            className="h-20 w-20 rounded-3xl border-pink-200 bg-gradient-to-br from-pink-50 to-cyan-50 dark:border-pink-800/60 dark:from-pink-950/40 dark:to-cyan-950/40"
+          >
+            <Wand2 className="h-9 w-9 text-pink-500" />
+          </Node>
 
-        {/* Right column: outputs */}
-        <div className="flex flex-col items-center gap-6">
-          <Node ref={gifOutputRef} label="Animated GIF">
-            <Sparkles className="h-6 w-6 text-pink-500" />
-          </Node>
-          <Node ref={webpRef} label="Modern WebP">
-            <Zap className="h-6 w-6 text-teal-500" />
-          </Node>
-          <Node ref={apngRef} label="Lossless APNG">
-            <Layers className="h-6 w-6 text-violet-500" />
-          </Node>
-          <Node ref={shareRef} label="Share & Export">
-            <Share2 className="h-6 w-6 text-green-500" />
+          {/* Output node — the destination */}
+          <Node
+            ref={outputRef}
+            label="Your Output"
+            className="h-16 w-16 rounded-2xl border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg dark:border-amber-800/60 dark:from-amber-950/40 dark:to-orange-950/40"
+          >
+            <FolderDown className="h-7 w-7 text-amber-500" />
           </Node>
         </div>
       </div>
 
-      {/* Input beams: left to center */}
+      {/* Input beams: left column → GIF Creator */}
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={videoRef}
         toRef={editorRef}
-        curvature={-50}
+        curvature={-40}
         gradientStartColor="#ff2975"
         gradientStopColor="#a855f7"
         pathColor="#f9a8d4"
@@ -114,7 +107,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         containerRef={containerRef}
         fromRef={gifInputRef}
         toRef={editorRef}
-        curvature={50}
+        curvature={40}
         gradientStartColor="#3b82f6"
         gradientStopColor="#00FFF1"
         pathColor="#93c5fd"
@@ -123,58 +116,23 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         duration={4}
       />
 
-      {/* Output beams: center to right */}
+      {/* GIF Creator → Output (downward).
+          startXOffset/endXOffset create a slight diagonal so the horizontal
+          gradient animation travels visibly along the path. */}
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={editorRef}
-        toRef={gifOutputRef}
-        curvature={-70}
-        reverse
-        gradientStartColor="#00FFF1"
-        gradientStopColor="#ff2975"
-        pathColor="#f9a8d4"
-        pathWidth={1.5}
-        pathOpacity={0.4}
-        duration={3}
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={editorRef}
-        toRef={webpRef}
-        curvature={-25}
-        reverse
-        gradientStartColor="#00FFF1"
-        gradientStopColor="#a855f7"
-        pathColor="#d8b4fe"
-        pathWidth={1.5}
-        pathOpacity={0.4}
-        duration={4}
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={editorRef}
-        toRef={apngRef}
-        curvature={25}
-        reverse
-        gradientStartColor="#00FFF1"
-        gradientStopColor="#3b82f6"
-        pathColor="#93c5fd"
-        pathWidth={1.5}
-        pathOpacity={0.4}
-        duration={3.5}
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={editorRef}
-        toRef={shareRef}
-        curvature={70}
-        reverse
-        gradientStartColor="#00FFF1"
-        gradientStopColor="#22c55e"
-        pathColor="#86efac"
-        pathWidth={1.5}
-        pathOpacity={0.4}
-        duration={4.5}
+        toRef={outputRef}
+        startXOffset={-30}
+        startYOffset={40}
+        endXOffset={30}
+        endYOffset={-32}
+        gradientStartColor="#ff2975"
+        gradientStopColor="#f97316"
+        pathColor="#fda4af"
+        pathWidth={2}
+        pathOpacity={0.55}
+        duration={2.5}
       />
     </div>
   );
