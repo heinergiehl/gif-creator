@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/blog';
+import { getBlogWorkflowLinks } from '@/lib/seo-workflows';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 interface BlogPostPageProps {
@@ -64,6 +65,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const relatedPosts = getRelatedPosts(post.slug);
+  const workflowLinks = getBlogWorkflowLinks(post.slug);
   const articleStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -175,6 +177,31 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               className="blog-content mt-10"
               dangerouslySetInnerHTML={{ __html: post.html }}
             />
+            {workflowLinks.length > 0 ? (
+              <section className="mt-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950/70">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  Matching tools
+                </p>
+                <h2 className="mt-3 text-2xl font-bold tracking-tight">Use this workflow inside the product</h2>
+                <p className="mt-3 text-base leading-7 text-slate-700 dark:text-slate-300">
+                  These pages match the exact job this article covers, which strengthens internal linking and gives readers a direct next step.
+                </p>
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  {workflowLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                    >
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{link.label}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                        {link.description}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
       </article>

@@ -85,7 +85,16 @@ export function getRoutePriority(route: string): number {
     return 0.85;
   }
 
-  if (route === '/video-to-gif' || route === '/image-to-gif' || route === '/edit-gifs') {
+  if (
+    route === '/video-to-gif' ||
+    route === '/image-to-gif' ||
+    route === '/edit-gifs' ||
+    route === '/resize-gif' ||
+    route === '/crop-gif' ||
+    route === '/rotate-gif' ||
+    route === '/add-text-to-gif' ||
+    route === '/gif-optimizer'
+  ) {
     return 0.9;
   }
 
@@ -114,7 +123,12 @@ export function getRouteChangeFrequency(route: string): 'weekly' | 'monthly' {
     route === '/blog' ||
     route === '/video-to-gif' ||
     route === '/image-to-gif' ||
-    route === '/edit-gifs'
+    route === '/edit-gifs' ||
+    route === '/resize-gif' ||
+    route === '/crop-gif' ||
+    route === '/rotate-gif' ||
+    route === '/add-text-to-gif' ||
+    route === '/gif-optimizer'
   ) {
     return 'weekly';
   }

@@ -12,16 +12,18 @@ import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { CTA } from '@/components/pages/CTA';
 import AnimatedBeamDemo from '@/components/pages/animated-beam-multiple-outputs';
-import HowItWorksSection from '@/components/pages/HowItWorksSection';
 import {
   AppWindowIcon,
   CodeIcon,
+  DownloadIcon,
   EyeIcon,
   LockIcon,
   RocketIcon,
+  ScissorsIcon,
   ShieldCheckIcon,
   SmileIcon,
   StarIcon,
+  UploadIcon,
 } from 'lucide-react';
 export const metadata: Metadata = {
   title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
@@ -229,6 +231,77 @@ const features = [
     ),
   },
 ];
+
+const howItWorksSteps = [
+  {
+    Icon: UploadIcon,
+    title: 'Upload your video, images, or GIF',
+    description:
+      'Start with MP4, MOV, AVI, WebM, PNG, JPG, or an existing GIF. Choose the workflow that matches what you want to make.',
+    links: [
+      { href: '/video-to-gif', label: 'Convert video to GIF' },
+      { href: '/image-to-gif', label: 'Make a GIF from images' },
+      { href: '/edit-gifs', label: 'Edit an existing GIF' },
+    ],
+  },
+  {
+    Icon: ScissorsIcon,
+    title: 'Edit frames, timing, text, and size',
+    description:
+      'Crop, resize, rotate, add text, adjust speed, and fine-tune frame timing in a browser-based editor designed for animated media.',
+    links: [
+      { href: '/edit-gifs', label: 'Open the GIF editor' },
+      {
+        href: '/blog/how-to-edit-a-gif-without-losing-quality',
+        label: 'Learn how to edit GIFs without losing quality',
+      },
+    ],
+  },
+  {
+    Icon: DownloadIcon,
+    title: 'Export an optimized file for the web',
+    description:
+      'Download as GIF, WebP, or APNG with no watermark, then optimize file size for faster loading on websites, social posts, and chats.',
+    links: [
+      { href: '/blog/optimize-gif-size-without-losing-quality', label: 'Learn GIF optimization' },
+      { href: '/video-to-gif', label: 'Start creating now' },
+    ],
+  },
+];
+
+const popularTasks = [
+  {
+    href: '/resize-gif',
+    title: 'Resize GIF Online',
+    description:
+      'Change GIF dimensions for Discord, Slack, Notion, email, and the web while keeping the animation intact.',
+  },
+  {
+    href: '/crop-gif',
+    title: 'Crop GIF Online',
+    description:
+      'Trim empty edges and keep attention on the exact part of the animation that matters.',
+  },
+  {
+    href: '/rotate-gif',
+    title: 'Rotate GIF Online',
+    description:
+      'Fix sideways exports, mirror animations, and correct orientation without breaking the loop.',
+  },
+  {
+    href: '/add-text-to-gif',
+    title: 'Add Text to GIF Online',
+    description:
+      'Place captions, callouts, and short labels on a GIF without cluttering the motion.',
+  },
+  {
+    href: '/gif-optimizer',
+    title: 'GIF Optimizer Online',
+    description:
+      'Reduce GIF file size for faster loading in product docs, chats, social posts, and landing pages.',
+  },
+];
+
 export default function Home() {
   const structuredData = {
     "@context": "https://schema.org",
@@ -466,10 +539,86 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How It Works — replaced by HowItWorksSection */}
+        {/* How It Works */}
         <section className="relative w-full py-24">
           <div className="pointer-events-none absolute inset-0 bg-white/15 dark:bg-slate-950/20" />
-          <HowItWorksSection />
+          <div className="relative mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="mb-4 text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
+                How to Make a GIF Online
+              </h2>
+              <p className="mx-auto mb-14 max-w-2xl text-base text-slate-600 dark:text-slate-400 md:text-lg">
+                Create a GIF from a video, image sequence, or existing animation in three steps. The core workflow, use cases, and internal links are now rendered directly in the initial HTML.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {howItWorksSteps.map((step, index) => (
+                <article
+                  key={step.title}
+                  className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
+                >
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
+                    <step.Icon className="h-7 w-7 text-slate-900 dark:text-white" />
+                  </div>
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                    Step {index + 1}
+                  </p>
+                  <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    {step.description}
+                  </p>
+                  <div className="mt-6 flex flex-col gap-2">
+                    {step.links.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-sm font-medium text-indigo-700 underline decoration-dotted underline-offset-4 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative w-full py-24">
+          <div className="pointer-events-none absolute inset-0 bg-white/20 dark:bg-slate-950/25" />
+          <div className="relative mx-auto max-w-6xl px-4">
+            <div className="mx-auto mb-12 max-w-3xl text-center">
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
+                Popular GIF Editing Tasks
+              </h2>
+              <p className="mt-4 text-base text-slate-600 dark:text-slate-400 md:text-lg">
+                These entry points target the main jobs users search for when they need to create, edit, convert, or optimize GIFs online.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {popularTasks.map((task) => (
+                <Link
+                  key={task.href}
+                  href={task.href}
+                  className="group rounded-3xl border border-slate-200 bg-white/85 p-8 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700"
+                >
+                  <h3 className="text-2xl font-bold text-slate-900 transition group-hover:text-pink-600 dark:text-white dark:group-hover:text-pink-300">
+                    {task.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    {task.description}
+                  </p>
+                  <p className="mt-6 text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                    Explore this workflow
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Workflow Visualization */}
@@ -489,7 +638,7 @@ export default function Home() {
 
         <LatestPostsSection
           title="Learn the workflows behind better GIFs"
-          description="Practical guides for GIF creation, editing, optimization, and screen-to-GIF workflows."
+          description="Practical guides for GIF creation, editing, optimization, and intent-specific workflows like resizing, captioning, and performance tuning."
           postSlugs={[
             'how-to-make-a-gif-from-a-video',
             'how-to-edit-a-gif-without-losing-quality',
