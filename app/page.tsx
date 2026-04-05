@@ -11,15 +11,8 @@ import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { CTA } from '@/components/pages/CTA';
-import dynamic from 'next/dynamic';
-const AnimatedBeamDemo = dynamic(
-  () => import('@/components/pages/animated-beam-multiple-outputs'),
-  { ssr: false },
-);
-const HowItWorksSection = dynamic(
-  () => import('@/components/pages/HowItWorksSection'),
-  { ssr: false },
-);
+import AnimatedBeamDemo from '@/components/pages/animated-beam-multiple-outputs';
+import HowItWorksSection from '@/components/pages/HowItWorksSection';
 import {
   AppWindowIcon,
   CodeIcon,
