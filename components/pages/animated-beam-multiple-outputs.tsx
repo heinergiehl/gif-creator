@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { AnimatedBeam } from '@/components/magicui/animated-beam';
 import React, { forwardRef, useRef } from 'react';
-import { Film, ImageIcon, FileImage, Wand2, FolderDown } from 'lucide-react';
+import { Film, ImageIcon, FileImage, Wand2, Sparkles } from 'lucide-react';
 
 const Node = forwardRef<
   HTMLDivElement,
@@ -36,14 +36,13 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
   const outputRef = useRef<HTMLDivElement>(null);
 
   return (
+    /* No card — transparent, no border */
     <div
-      className={cn(
-        'relative flex w-full max-w-3xl items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-10 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-950/80',
-        className,
-      )}
+      className={cn('relative flex w-full max-w-3xl items-center justify-center py-6', className)}
       ref={containerRef}
     >
-      <div className="flex h-full w-full flex-row items-center justify-center gap-24">
+      <div className="flex h-full w-full flex-row items-center justify-center gap-20">
+
         {/* Left column: inputs */}
         <div className="flex flex-col items-center gap-8">
           <Node ref={videoRef} label="Video">
@@ -57,29 +56,27 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
           </Node>
         </div>
 
-        {/* Center column: GIF Creator on top, Output directly below */}
-        <div className="flex flex-col items-center gap-12">
-          {/* GIF Creator hub */}
-          <Node
-            ref={editorRef}
-            label="GIF Creator"
-            className="h-20 w-20 rounded-3xl border-pink-200 bg-gradient-to-br from-pink-50 to-cyan-50 dark:border-pink-800/60 dark:from-pink-950/40 dark:to-cyan-950/40"
-          >
-            <Wand2 className="h-9 w-9 text-pink-500" />
-          </Node>
+        {/* Center column: GIF Creator/Editor hub */}
+        <Node
+          ref={editorRef}
+          label="GIF Creator / Editor"
+          className="h-20 w-20 rounded-3xl border-pink-200 bg-gradient-to-br from-pink-50 to-cyan-50 dark:border-pink-800/60 dark:from-pink-950/40 dark:to-cyan-950/40"
+        >
+          <Wand2 className="h-9 w-9 text-pink-500" />
+        </Node>
 
-          {/* Output node — the destination */}
-          <Node
-            ref={outputRef}
-            label="Your Output"
-            className="h-16 w-16 rounded-2xl border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg dark:border-amber-800/60 dark:from-amber-950/40 dark:to-orange-950/40"
-          >
-            <FolderDown className="h-7 w-7 text-amber-500" />
-          </Node>
-        </div>
+        {/* Right column: GIF output — aligned to middle of left column (Images) */}
+        <Node
+          ref={outputRef}
+          label="GIF / WebP / APNG"
+          className="h-16 w-16 rounded-2xl border-pink-200 bg-gradient-to-br from-pink-50 to-fuchsia-50 shadow-lg dark:border-pink-800/60 dark:from-pink-950/40 dark:to-fuchsia-950/40"
+        >
+          <Sparkles className="h-7 w-7 text-pink-500" />
+        </Node>
+
       </div>
 
-      {/* Input beams: left column → GIF Creator */}
+      {/* Input beams: left column → GIF Creator/Editor */}
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={videoRef}
@@ -116,20 +113,14 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         duration={4}
       />
 
-      {/* GIF Creator → Output (downward).
-          startXOffset/endXOffset create a slight diagonal so the horizontal
-          gradient animation travels visibly along the path. */}
+      {/* GIF Creator/Editor → GIF output (horizontal, right side) */}
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={editorRef}
         toRef={outputRef}
-        startXOffset={-30}
-        startYOffset={40}
-        endXOffset={30}
-        endYOffset={-32}
         gradientStartColor="#ff2975"
-        gradientStopColor="#f97316"
-        pathColor="#fda4af"
+        gradientStopColor="#a855f7"
+        pathColor="#f9a8d4"
         pathWidth={2}
         pathOpacity={0.55}
         duration={2.5}
