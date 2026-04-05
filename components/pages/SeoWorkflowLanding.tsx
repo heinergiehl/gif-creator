@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { Footer } from '@/app/components/ui/Footer';
 import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
+import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { SeoWorkflowPage } from '@/lib/seo-workflows';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
@@ -85,26 +87,29 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
           <main>
             <section className="w-full pb-16 pt-32">
               <div className="mx-auto flex max-w-6xl flex-col items-center px-4 text-center">
-                <div className="rounded-full border border-white/50 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-200">
-                  Free browser-based workflow with local processing and no watermark
+                <div className="rounded-full border border-white/40 bg-white/60 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-200">
+                  Free browser-based workflow — local processing, no watermark
                 </div>
-                <h1 className="mt-8 max-w-4xl bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
-                  {page.title}
-                </h1>
-                <p className="mt-8 max-w-4xl text-lg leading-8 text-slate-700 dark:text-slate-300 md:text-xl">
+                <NeonGradientCard className="mt-8 flex w-full items-center justify-center">
+                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+                    {page.title}
+                  </h1>
+                </NeonGradientCard>
+                <p className="mt-8 max-w-3xl text-pretty text-center text-xl leading-8 text-slate-700 dark:text-slate-300">
                   {page.intro}
                 </p>
                 <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
                   <Link
                     href={page.primaryCta.href}
-                    className="inline-flex items-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-slate-900/10 transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:shadow-white/5 dark:hover:bg-slate-100"
                   >
                     {page.primaryCta.label}
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                   {page.secondaryCta ? (
                     <Link
                       href={page.secondaryCta.href}
-                      className="inline-flex items-center rounded-full border border-slate-300 bg-white/70 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-white dark:border-slate-700 dark:bg-slate-950/50 dark:text-white dark:hover:bg-slate-900"
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-4 text-lg font-semibold text-slate-900 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-800"
                     >
                       {page.secondaryCta.label}
                     </Link>
@@ -118,10 +123,10 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
               <div className="relative mx-auto max-w-6xl px-4">
                 <div className="mb-12 max-w-3xl">
                   <h2 className="text-3xl font-bold text-slate-900 dark:text-white md:text-5xl">
-                    Why use this workflow
+                    Why it works
                   </h2>
                   <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-400 md:text-lg">
-                    These sections are server-rendered so search engines can read the exact task intent, use cases, and supporting copy without waiting for client-side hydration.
+                    Key reasons this workflow fits how people actually edit and share animated images online.
                   </p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-3">
@@ -200,7 +205,8 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
             </section>
 
             <section className="relative w-full py-20">
-              <div className="mx-auto max-w-5xl px-4">
+              <div className="pointer-events-none absolute inset-0 bg-white/20 dark:bg-slate-950/25" />
+              <div className="relative mx-auto max-w-5xl px-4">
                 <div className="mx-auto mb-12 max-w-3xl text-center">
                   <h2 className="text-3xl font-bold text-slate-900 dark:text-white md:text-5xl">
                     Frequently asked questions
@@ -208,15 +214,15 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                 </div>
                 <div className="space-y-6">
                   {page.faqs.map((faq) => (
-                    <article
+                    <div
                       key={faq.question}
-                      className="rounded-3xl border border-slate-200 bg-white/85 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
+                      className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20"
                     >
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">{faq.question}</h3>
-                      <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                      <h3 className="mb-4 text-2xl font-bold text-[#ff2975]">{faq.question}</h3>
+                      <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
                         {faq.answer}
                       </p>
-                    </article>
+                    </div>
                   ))}
                 </div>
               </div>
