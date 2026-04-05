@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { AnimatedBeam } from '@/components/magicui/animated-beam';
 import React, { forwardRef, useRef } from 'react';
-import { Film, ImageIcon, FileImage, Wand2 } from 'lucide-react';
+import { Film, ImageIcon, FileImage, Wand2, Sparkles, Zap, Layers } from 'lucide-react';
 
 const Node = forwardRef<
   HTMLDivElement,
@@ -70,14 +70,14 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
 
         {/* Right column: outputs */}
         <div className="flex flex-col items-center gap-8">
-          <Node ref={gifOutputRef} label=".gif">
-            <span className="text-sm font-bold text-pink-500">GIF</span>
+          <Node ref={gifOutputRef} label="Animated GIF">
+            <Sparkles className="h-6 w-6 text-pink-500" />
           </Node>
-          <Node ref={webpRef} label=".webp">
-            <span className="text-sm font-bold text-teal-500">WebP</span>
+          <Node ref={webpRef} label="Modern WebP">
+            <Zap className="h-6 w-6 text-teal-500" />
           </Node>
-          <Node ref={apngRef} label=".apng">
-            <span className="text-sm font-bold text-violet-500">APNG</span>
+          <Node ref={apngRef} label="Lossless APNG">
+            <Layers className="h-6 w-6 text-violet-500" />
           </Node>
         </div>
       </div>
@@ -90,10 +90,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         curvature={-50}
         gradientStartColor="#ff2975"
         gradientStopColor="#a855f7"
-        pathColor="gray"
+        pathColor="#f9a8d4"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={4}
+        pathOpacity={0.4}
+        duration={7}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -101,10 +101,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         toRef={editorRef}
         gradientStartColor="#a855f7"
         gradientStopColor="#3b82f6"
-        pathColor="gray"
+        pathColor="#d8b4fe"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={5}
+        pathOpacity={0.4}
+        duration={8}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -113,10 +113,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         curvature={50}
         gradientStartColor="#3b82f6"
         gradientStopColor="#00FFF1"
-        pathColor="gray"
+        pathColor="#93c5fd"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={6}
+        pathOpacity={0.4}
+        duration={9}
       />
 
       {/* Output beams: center to right */}
@@ -128,10 +128,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         reverse
         gradientStartColor="#00FFF1"
         gradientStopColor="#ff2975"
-        pathColor="gray"
+        pathColor="#f9a8d4"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={4}
+        pathOpacity={0.4}
+        duration={7}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -140,10 +140,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         reverse
         gradientStartColor="#00FFF1"
         gradientStopColor="#a855f7"
-        pathColor="gray"
+        pathColor="#d8b4fe"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={5}
+        pathOpacity={0.4}
+        duration={8}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -153,10 +153,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         reverse
         gradientStartColor="#00FFF1"
         gradientStopColor="#3b82f6"
-        pathColor="gray"
+        pathColor="#93c5fd"
         pathWidth={1.5}
-        pathOpacity={0.15}
-        duration={6}
+        pathOpacity={0.4}
+        duration={9}
       />
     </div>
   );
