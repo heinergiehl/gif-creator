@@ -16,18 +16,19 @@ const AnimatedBeamDemo = dynamic(
   () => import('@/components/pages/animated-beam-multiple-outputs'),
   { ssr: false },
 );
+const HowItWorksSection = dynamic(
+  () => import('@/components/pages/HowItWorksSection'),
+  { ssr: false },
+);
 import {
   AppWindowIcon,
   CodeIcon,
-  DownloadIcon,
   EyeIcon,
   LockIcon,
   RocketIcon,
   ShieldCheckIcon,
-  SlidersHorizontalIcon,
   SmileIcon,
   StarIcon,
-  UploadIcon,
 } from 'lucide-react';
 export const metadata: Metadata = {
   title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
@@ -391,23 +392,23 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToStructuredData) }}
       />
-      <div className="relative z-40 h-full w-screen text-black dark:text-white md:w-full">
+      <div className="relative z-40 min-h-screen w-screen text-black dark:text-white md:w-full">
       <div
-        className="absolute inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
+        className="fixed inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
                [background:radial-gradient(125%_125%_at_50%_50%,#fdfdfd_30%,#63e_100%)]
                dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
       ></div>
       <div
-        className="absolute bottom-0 left-0 right-0 top-0 z-[20] h-full bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] 
-            bg-[size:24px_24px] opacity-30 dark:bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
-            dark:bg-[size:24px_24px] dark:opacity-100"
+        className="fixed inset-0 z-[20] h-full w-full bg-[linear-gradient(to_right,#4f4f4f40_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f40_1px,transparent_1px)] 
+            bg-[size:28px_28px] opacity-40 dark:bg-[linear-gradient(to_right,#4f4f4f55_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f55_1px,transparent_1px)]
+            dark:bg-[size:28px_28px] dark:opacity-100"
       ></div>
       <div className="relative z-40 flex w-full flex-col items-stretch opacity-100">
-        <section className="mt-[100px] h-screen w-full">
+        <section className="w-full pt-32 pb-16">
           <div className="flex items-center justify-center">
-            <div className="flex h-screen  max-w-6xl flex-col items-center justify-center gap-x-2">
-              <NeonGradientCard className="mt-[170px] flex   items-center justify-center ">
-                <h1 className="pointer-events-none z-10 w-full  bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-7xl font-bold leading-none tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+            <div className="flex w-full max-w-6xl flex-col items-center gap-y-6">
+              <NeonGradientCard className="flex w-full items-center justify-center">
+                <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
                   Free Online GIF Maker & Editor
                 </h1>
               </NeonGradientCard>
@@ -449,7 +450,7 @@ export default function Home() {
           </div>
         </section>
         <section className="relative z-[999]">
-          <div className="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="pointer-events-none absolute inset-0 bg-white/30 dark:bg-slate-950/40" />
           <div className="relative container mx-auto flex h-full w-full flex-col px-4">
             <h2 className="mb-8 whitespace-pre-wrap py-28 text-center text-2xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-8xl">
               Professional GIF Editing Tools
@@ -472,56 +473,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How It Works */}
+        {/* How It Works — replaced by HowItWorksSection */}
         <section className="relative w-full py-24">
-          <div className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-xl dark:bg-slate-950/40 dark:backdrop-blur-lg" />
-          <div className="relative mx-auto max-w-5xl px-4">
-            <h2 className="mb-4 text-center text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
-              How to Make a GIF in 3 Steps
-            </h2>
-            <p className="mx-auto mb-16 max-w-2xl text-center text-base text-slate-500 dark:text-slate-400">
-              No installs, no sign-ups. Everything runs locally in your browser.
-            </p>
-            <div className="grid gap-10 md:grid-cols-3">
-              <div className="text-center">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-900/30">
-                  <UploadIcon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">1. Upload</h3>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  Drop a <Link href="/video-to-gif" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">video</Link>,{' '}
-                  <Link href="/image-to-gif" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">images</Link>, or an existing{' '}
-                  <Link href="/edit-gifs" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">GIF</Link> into the editor.
-                  Supports MP4, MOV, AVI, WebM, PNG, JPG, and more.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-900/30">
-                  <SlidersHorizontalIcon className="h-7 w-7 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">2. Edit</h3>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  Crop, resize, rotate, add text, adjust frame timing, apply effects, and fine-tune every detail.
-                  All editing happens locally in your browser — your files are never uploaded.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30">
-                  <DownloadIcon className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">3. Export</h3>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  Download your finished GIF, WebP, or APNG — optimized for the web with no watermark.{' '}
-                  <Link href="/blog/optimize-gif-size-without-losing-quality" className="font-medium text-indigo-600 underline decoration-dotted underline-offset-2 dark:text-indigo-400">Learn how to optimize file size</Link>.
-                </p>
-              </div>
-            </div>
-          </div>
+          <div className="pointer-events-none absolute inset-0 bg-white/15 dark:bg-slate-950/20" />
+          <HowItWorksSection />
         </section>
 
         {/* Workflow Visualization */}
         <section className="relative w-full py-24">
-          <div className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-xl dark:bg-slate-950/40 dark:backdrop-blur-lg" />
+          <div className="pointer-events-none absolute inset-0 bg-white/20 dark:bg-slate-950/30" />
           <div className="relative mx-auto max-w-5xl px-4 flex flex-col items-center">
             <h2 className="mb-4 text-center text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
               Your Entire GIF Workflow, One Place
@@ -546,7 +506,7 @@ export default function Home() {
 
         {/* Privacy Section */}
         <section className="relative w-full py-24">
-          <div className="pointer-events-none absolute inset-0 bg-white/70 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="pointer-events-none absolute inset-0 bg-white/25 dark:bg-slate-950/35" />
           <div className="relative mx-auto max-w-4xl px-4 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/20">
               <LockIcon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
@@ -580,7 +540,7 @@ export default function Home() {
         </section>
 
         <section className="relative">
-          <div className="pointer-events-none absolute inset-0 bg-white/80 backdrop-blur-2xl dark:bg-slate-950/50 dark:backdrop-blur-xl" />
+          <div className="pointer-events-none absolute inset-0 bg-white/25 dark:bg-slate-950/40" />
           <div className="relative container mx-auto px-4">
             <h2 className="mb-8 whitespace-pre-wrap py-28 text-center text-3xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-8xl">
               GIF Maker & Editor FAQ
