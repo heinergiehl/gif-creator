@@ -157,80 +157,77 @@ const Editor = React.memo(
       }
 
       if (isCarousel) {
-        // Use insertIndex from handleDragMove (already tracks left/right of hovered frame)
+        // Determine the insertion point in the carousel
         const insertIndex =
           store.insertIndex != null && store.insertIndex >= 0
             ? store.insertIndex
             : store.frames.length;
 
+        // Step 1: Create a blank frame at the drop position so the carousel
+        // gains a new frame slot. The dragged resource will be layered on top
+        // as an editable overlay, making it fully selectable and adjustable.
+        const canvasW = rootStore.canvasOptionsStore.width || 400;
+        const canvasH = rootStore.canvasOptionsStore.height || 400;
+        const bgColor = rootStore.canvasOptionsStore.backgroundColor || '#ffffff';
+        const blankEl = document.createElement('canvas');
+        blankEl.width = canvasW;
+        blankEl.height = canvasH;
+        const blankCtx = blankEl.getContext('2d');
+        if (blankCtx) {
+          blankCtx.fillStyle = bgColor;
+          blankCtx.fillRect(0, 0, canvasW, canvasH);
+        }
+        const blankSrc = blankEl.toDataURL('image/png');
+        const blankFrameId = String(getUid());
+        if (insertIndex === 0 && store.frames.length > 0) {
+          store.frames.unshift({ id: blankFrameId, src: blankSrc });
+          store.addImage(-1, blankSrc, true, blankFrameId);
+        } else {
+          store.frames.splice(insertIndex, 0, { id: blankFrameId, src: blankSrc });
+          store.addImage(insertIndex, blankSrc, true, blankFrameId);
+        }
+        // Recalculate timings so the new frame slot has correct start/end
+        store.syncFramesTimeline();
+        // Navigate to the new blank frame so overlay timing is calculated correctly
+        store.setCurrentKeyFrame(insertIndex);
+
+        // Step 2: Add the resource as an editable overlay on the new blank frame
         if (resourceType.startsWith('imageResource')) {
-          const frameId = getUid();
-          const newFrame = { id: frameId, src: active?.data?.current?.image };
-          if (insertIndex === 0 && store.frames.length > 0) {
-            store.frames.unshift(newFrame);
-            store.addImage(-1, active?.data?.current?.image, true, frameId);
-          } else {
-            store.frames.splice(insertIndex, 0, newFrame);
-            store.addImage(insertIndex, active?.data?.current?.image, true, frameId);
-          }
+          const newId = String(getUid());
+          store.addImage(store.elements.length, active?.data?.current?.image, false, newId);
+          store.setSelectedElements([newId]);
         } else if (resourceType.startsWith('shapeResource')) {
           const getConfig = active?.data?.current?.getShapeConfig;
           const baseConfig: ShapeConfig | null = typeof getConfig === 'function' ? getConfig() : null;
-          if (!baseConfig) return;
-          // Always use the shapeType from the dragged tile, not the panel selection
-          const draggedType = active?.data?.current?.shapeType ?? baseConfig.shapeType;
-          const shapeConfig: ShapeConfig = { ...baseConfig, shapeType: draggedType };
-          const canvasW = rootStore.canvasOptionsStore.width || 400;
-          const canvasH = rootStore.canvasOptionsStore.height || 400;
-          const size = Math.min(canvasW, canvasH) * 0.3;
-          const src = renderShapeToDataURL(shapeConfig, size);
-          if (!src) return;
-          const frameId = getUid();
-          const newFrame = { id: frameId, src };
-          if (insertIndex === 0 && store.frames.length > 0) {
-            store.frames.unshift(newFrame);
-            store.addImage(-1, src, true, frameId);
-          } else {
-            store.frames.splice(insertIndex, 0, newFrame);
-            store.addImage(insertIndex, src, true, frameId);
+          if (baseConfig) {
+            const draggedType = active?.data?.current?.shapeType ?? baseConfig.shapeType;
+            const shapeConfig: ShapeConfig = { ...baseConfig, shapeType: draggedType };
+            const size = Math.min(canvasW, canvasH) * 0.3;
+            const src = renderShapeToDataURL(shapeConfig, size);
+            if (src) {
+              const newId = String(getUid());
+              store.addImage(store.elements.length, src, false, newId);
+              store.setSelectedElements([newId]);
+            }
           }
         } else if (resourceType.startsWith('textResource')) {
           const textContent = active?.data?.current?.text;
-          if (!textContent) return;
-          const newFrame = { id: getUid(), src: '' };
-          const fabricText = new fabric.Textbox(textContent, {
-            id: String(newFrame.id),
-            fill: store.fill,
-            fontSize: store.fontSize,
-            fontWeight: store.fontWeight,
-            textBackground: store.textBackground,
-            fontFamily: store.fontFamily,
-            fontStyle: store.fontStyle,
-            isFrame: true,
-            index: insertIndex,
-          });
-          const src = fabricText.toDataURL({
-            format: 'png',
-            quality: 1,
-          });
-          newFrame.src = src;
-          if (insertIndex === 0 && store.frames.length > 0) {
-            store.frames.unshift(newFrame);
-          } else {
-            store.frames.splice(insertIndex, 0, newFrame);
+          if (textContent) {
+            const newTextId = String(getUid());
+            store.addText({
+              fill: store.fill,
+              id: newTextId,
+              text: textContent,
+              fontSize: store.fontSize,
+              fontWeight: store.fontWeight,
+              textBackground: store.textBackground,
+              fontFamily: store.fontFamily,
+              fontStyle: store.fontStyle,
+              isFrame: false,
+              index: store.elements.length,
+            });
+            store.setSelectedElements([newTextId]);
           }
-          store.addText({
-            id: String(newFrame.id),
-            text: textContent,
-            fill: store.fill,
-            fontSize: store.fontSize,
-            fontWeight: store.fontWeight,
-            textBackground: store.textBackground,
-            fontFamily: store.fontFamily,
-            fontStyle: store.fontStyle,
-            isFrame: true,
-            index: insertIndex,
-          });
         }
       } else if (isCanvas) {
         if (store.frames.length === 0) {

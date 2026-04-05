@@ -218,7 +218,7 @@ const EditResource = observer(() => {
       className={cn(
         'flex w-full shrink-0 items-center border-b px-3',
         'border-slate-200 bg-slate-100/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95',
-        has ? 'h-11' : 'h-9',
+        'h-11',
       )}
     >
       {!has ? (

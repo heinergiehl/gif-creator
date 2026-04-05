@@ -6,7 +6,6 @@ const toolLinks = [
   { href: '/image-to-gif', label: 'Image to GIF' },
   { href: '/screen-to-video', label: 'Screen Recorder' },
   { href: '/edit-gifs', label: 'Edit GIFs' },
-  { href: '/edit-gifs/converter-and-editor', label: 'Open Editor' },
 ];
 
 const learnLinks = [

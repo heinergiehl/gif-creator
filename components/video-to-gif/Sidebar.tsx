@@ -112,10 +112,10 @@ const SidebarButton = observer(
             item.action(store);
           }}
           className={cn(
-            'flex h-[52px] w-[52px] flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-150',
+            'flex h-[52px] w-[52px] flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-200',
             isSelected
-              ? 'bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:bg-blue-600 dark:bg-blue-500 dark:shadow-blue-500/20'
-              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-200',
+              ? 'scale-[1.04] bg-blue-500 text-white shadow-lg shadow-blue-500/35 ring-2 ring-blue-400/50 hover:bg-blue-600 active:scale-100 dark:bg-blue-500 dark:ring-blue-300/25 dark:shadow-blue-500/25'
+              : 'text-slate-400 hover:scale-[1.06] hover:bg-blue-50 hover:text-blue-600 active:scale-95 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-blue-400',
           )}
         >
           <item.icon size="18" />

@@ -16,7 +16,6 @@ import {
   SprayCan,
   Circle,
   Eraser,
-  Power,
   PowerOff,
   Layers,
   Copy,
@@ -221,8 +220,12 @@ export const DrawingPanel = observer(function DrawingPanel() {
           <Button
             onClick={toggleDrawing}
             disabled={!hasFrames}
-            variant={isDrawing ? 'destructive' : 'default'}
-            className={cn('w-full gap-2 text-sm font-semibold transition-all', isDrawing && 'animate-pulse')}
+            variant={isDrawing ? 'destructive' : 'ghost'}
+            className={cn(
+              'w-full gap-2 text-sm font-semibold transition-all',
+              !isDrawing && 'bg-violet-600 text-white hover:bg-violet-700 hover:text-white dark:bg-violet-600 dark:hover:bg-violet-700',
+              isDrawing && 'animate-pulse',
+            )}
           >
             {isDrawing ? (
               <>
@@ -230,7 +233,7 @@ export const DrawingPanel = observer(function DrawingPanel() {
               </>
             ) : (
               <>
-                <Power className="h-4 w-4" /> Start Drawing
+                <Paintbrush className="h-4 w-4" /> Start Drawing
               </>
             )}
           </Button>

@@ -10,7 +10,7 @@ import { CustomProgress } from '../ui/CustomProgress';
 import { Button } from '../ui/button';
 import { MdDelete } from 'react-icons/md';
 import { FaRemoveFormat } from 'react-icons/fa';
-import { Loader2, Images, Settings2, Film, ArrowRight } from 'lucide-react';
+import { Loader2, Images, Settings2, Film, ArrowRight, Plus } from 'lucide-react';
 import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -286,6 +286,18 @@ const GifResource = observer(() => {
           <Separator />
         </div>
 
+        {/* ── Start with blank frame — quick-start alternative ── */}
+        {!isImporting && store.frames.length === 0 && (
+          <div className="w-full px-4 pb-2">
+            <Button
+              onClick={() => store.addBlankFrame()}
+              variant="outline"
+              className="w-full gap-1.5 border-dashed text-sm"
+            >
+              <Plus className="h-4 w-4" /> Start with blank frame
+            </Button>
+          </div>
+        )}
         {/* ── File input — only shown when not importing and no frames yet ── */}
         {!isImporting && store.frames.length === 0 && store.elements.length === 0 && (
           <div className="w-full">

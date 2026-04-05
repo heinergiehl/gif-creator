@@ -23,7 +23,8 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import imageCompression from 'browser-image-compression';
-import { ImagePlus, Loader2, X } from 'lucide-react';
+import { ImagePlus, Loader2, Plus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { CustomProgress } from '@/components/ui/CustomProgress';
 import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
 import { getUid } from '@/utils';
@@ -183,6 +184,7 @@ const ImageResource = observer(() => {
   };
   const isImporting = store.progress.active;
   const showReadyMessage = !isImporting && store.progress.stage === 'ready' && store.progress.message;
+  const hasFrames = store.frames.length > 0;
   const active = useDndContext().active;
   return (
     <ScrollArea className={cn('h-screen w-full bg-slate-300 dark:bg-slate-900 ')} draggable="false">
@@ -190,6 +192,17 @@ const ImageResource = observer(() => {
         <div className="flex h-[42px] w-full items-center justify-center text-sm font-medium ">
           Images
         </div>
+        {!hasFrames && !isImporting && (
+          <div className="w-full px-4">
+            <Button
+              onClick={() => store.addBlankFrame()}
+              variant="outline"
+              className="w-full gap-1.5 border-dashed text-sm"
+            >
+              <Plus className="h-4 w-4" /> Start with blank frame
+            </Button>
+          </div>
+        )}
         <div className="flex w-full flex-col items-center px-4">
           <MediaImportStatusCard
             title={isImporting ? store.progress.title || 'Preparing images' : 'Upload images'}

@@ -139,12 +139,6 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
 
         {/* ---- Right side actions ---- */}
         <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/edit-gifs/converter-and-editor"
-            className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md active:scale-[0.97] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 sm:px-5 sm:py-2.5 sm:text-sm"
-          >
-            Open Editor
-          </Link>
           <ModeToggle />
           <button
             type="button"

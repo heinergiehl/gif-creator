@@ -11,7 +11,7 @@ import { VideoResourceProps } from './types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Loader2, Video, Wand2, Settings2, Film, ArrowRight } from 'lucide-react';
+import { Loader2, Video, Wand2, Settings2, Film, ArrowRight, Plus } from 'lucide-react';
 import { ffmpegStore } from '@/store/FFmpegStore';
 import { MediaImportStatusCard } from '@/components/entity/media/MediaImportStatusCard';
 import {
@@ -236,6 +236,17 @@ const VideoResource: React.FC<VideoResourceProps> = observer(() => {
           )}
           <Separator />
         </div>
+        {!isPreparingEngine && !isImporting && editorStore.frames.length === 0 && (
+          <div className="w-full px-4 pb-2">
+            <Button
+              onClick={() => editorStore.addBlankFrame()}
+              variant="outline"
+              className="w-full gap-1.5 border-dashed text-sm"
+            >
+              <Plus className="h-4 w-4" /> Start with blank frame
+            </Button>
+          </div>
+        )}
         {!isPreparingEngine && !isImporting && (
           <div className="w-full">
             <FileInput key={inputKey} onChange={handleFileSelected} />
