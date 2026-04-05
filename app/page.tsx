@@ -11,6 +11,11 @@ import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { FaMobile } from 'react-icons/fa6';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
 import { CTA } from '@/components/pages/CTA';
+import dynamic from 'next/dynamic';
+const AnimatedBeamDemo = dynamic(
+  () => import('@/components/pages/animated-beam-multiple-outputs'),
+  { ssr: false },
+);
 import {
   AppWindowIcon,
   CodeIcon,
@@ -511,6 +516,21 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Workflow Visualization */}
+        <section className="relative w-full py-24">
+          <div className="pointer-events-none absolute inset-0 bg-white/60 backdrop-blur-xl dark:bg-slate-950/40 dark:backdrop-blur-lg" />
+          <div className="relative mx-auto max-w-5xl px-4 flex flex-col items-center">
+            <h2 className="mb-4 text-center text-3xl font-bold text-slate-800 dark:text-white md:text-5xl">
+              Your Entire GIF Workflow, One Place
+            </h2>
+            <p className="mx-auto mb-12 max-w-2xl text-center text-base text-slate-500 dark:text-slate-400">
+              Bring in video, images, or existing GIFs — edit your frames — export as GIF, WebP, or APNG.
+              No uploads, no watermarks.
+            </p>
+            <AnimatedBeamDemo />
           </div>
         </section>
 
