@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { AnimatedBeam } from '@/components/magicui/animated-beam';
 import React, { forwardRef, useRef } from 'react';
-import { Film, ImageIcon, FileImage, Wand2, Sparkles, Zap, Layers } from 'lucide-react';
+import { Film, ImageIcon, FileImage, Wand2, Sparkles, Zap, Layers, Monitor } from 'lucide-react';
 
 const Node = forwardRef<
   HTMLDivElement,
@@ -33,6 +33,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
   const imagesRef = useRef<HTMLDivElement>(null);
   const gifInputRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
   const gifOutputRef = useRef<HTMLDivElement>(null);
   const webpRef = useRef<HTMLDivElement>(null);
   const apngRef = useRef<HTMLDivElement>(null);
@@ -47,7 +48,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
     >
       <div className="flex h-full w-full flex-row items-center justify-between gap-10">
         {/* Left column: inputs */}
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-6">
           <Node ref={videoRef} label="Video">
             <Film className="h-6 w-6 text-pink-500" />
           </Node>
@@ -56,6 +57,9 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
           </Node>
           <Node ref={gifInputRef} label="GIF / APNG">
             <FileImage className="h-6 w-6 text-blue-500" />
+          </Node>
+          <Node ref={screenRef} label="Screen">
+            <Monitor className="h-6 w-6 text-orange-500" />
           </Node>
         </div>
 
@@ -87,36 +91,49 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         containerRef={containerRef}
         fromRef={videoRef}
         toRef={editorRef}
-        curvature={-50}
+        curvature={-70}
         gradientStartColor="#ff2975"
         gradientStopColor="#a855f7"
         pathColor="#f9a8d4"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={7}
+        duration={3}
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={imagesRef}
         toRef={editorRef}
+        curvature={-25}
         gradientStartColor="#a855f7"
         gradientStopColor="#3b82f6"
         pathColor="#d8b4fe"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={8}
+        duration={3.5}
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={gifInputRef}
         toRef={editorRef}
-        curvature={50}
+        curvature={25}
         gradientStartColor="#3b82f6"
         gradientStopColor="#00FFF1"
         pathColor="#93c5fd"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={9}
+        duration={4}
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={screenRef}
+        toRef={editorRef}
+        curvature={70}
+        gradientStartColor="#f97316"
+        gradientStopColor="#eab308"
+        pathColor="#fed7aa"
+        pathWidth={1.5}
+        pathOpacity={0.4}
+        duration={3.5}
       />
 
       {/* Output beams: center to right */}
@@ -131,7 +148,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         pathColor="#f9a8d4"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={7}
+        duration={3}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -143,7 +160,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         pathColor="#d8b4fe"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={8}
+        duration={4}
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -156,7 +173,7 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
         pathColor="#93c5fd"
         pathWidth={1.5}
         pathOpacity={0.4}
-        duration={9}
+        duration={3.5}
       />
     </div>
   );

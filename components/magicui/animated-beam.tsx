@@ -46,13 +46,13 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   // Calculate the gradient coordinates based on the reverse prop
   const gradientCoordinates = reverse
     ? {
-        x1: ['90%', '-10%'],
+        x1: ['65%', '-35%'],
         x2: ['100%', '0%'],
         y1: ['0%', '0%'],
         y2: ['0%', '0%'],
       }
     : {
-        x1: ['10%', '110%'],
+        x1: ['35%', '135%'],
         x2: ['0%', '100%'],
         y1: ['0%', '0%'],
         y2: ['0%', '0%'],
@@ -143,7 +143,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         >
           <stop stopColor={gradientStartColor} stopOpacity="0"></stop>
           <stop stopColor={gradientStartColor}></stop>
-          <stop offset="32.5%" stopColor={gradientStopColor}></stop>
+          <stop offset="55%" stopColor={gradientStopColor}></stop>
           <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0"></stop>
         </motion.linearGradient>
       </defs>
