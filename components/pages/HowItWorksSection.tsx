@@ -27,7 +27,6 @@ export default function HowItWorksSection() {
         No installs, no sign-ups. Everything runs locally in your browser.
       </p>
 
-      {/* containerRef wraps the full row so AnimatedBeam can measure positions correctly */}
       <div className="relative" ref={containerRef}>
         <div className="relative grid gap-10 md:grid-cols-3">
 
@@ -63,9 +62,8 @@ export default function HowItWorksSection() {
               <span className="font-medium text-slate-700 dark:text-slate-300">text</span>, drop{' '}
               <span className="font-medium text-slate-700 dark:text-slate-300">shapes</span>, or{' '}
               <span className="inline-flex items-center gap-0.5 font-medium text-slate-700 dark:text-slate-300">
-                <PaintbrushIcon className="h-3.5 w-3.5" />{'paint freehand'}
-              </span>
-              . Adjust per-frame timing, apply filters, and preview changes live — all locally in your browser.
+                <PaintbrushIcon className="h-3.5 w-3.5" />paint freehand
+              </span>. Adjust per-frame timing, apply filters, and preview changes live.
             </p>
           </div>
 
@@ -87,11 +85,8 @@ export default function HowItWorksSection() {
           </div>
         </div>
 
-        {/* Animated beams — desktop only. startXOffset/endXOffset push the beam
-            endpoints to the icon edges so the beam doesn't draw on top of the buttons. */}
         {isDesktop && (
           <>
-            {/* Upload → Edit: indigo to purple */}
             <AnimatedBeam
               containerRef={containerRef}
               fromRef={icon1Ref}
@@ -105,7 +100,6 @@ export default function HowItWorksSection() {
               pathOpacity={0.5}
               duration={8}
             />
-            {/* Edit → Export: purple to emerald */}
             <AnimatedBeam
               containerRef={containerRef}
               fromRef={icon2Ref}
@@ -126,4 +120,3 @@ export default function HowItWorksSection() {
     </div>
   );
 }
-
