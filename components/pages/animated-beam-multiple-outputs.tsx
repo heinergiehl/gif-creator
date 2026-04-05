@@ -41,10 +41,10 @@ export default function AnimatedBeamDemo({ className }: { className?: string }) 
       className={cn('relative flex w-full max-w-3xl items-center justify-center py-6', className)}
       ref={containerRef}
     >
-      <div className="flex h-full w-full flex-row items-center justify-center gap-20">
+      <div className="flex h-full w-full flex-row items-center justify-center gap-40">
 
         {/* Left column: inputs */}
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-14">
           <Node ref={videoRef} label="Video">
             <Film className="h-6 w-6 text-pink-500" />
           </Node>
