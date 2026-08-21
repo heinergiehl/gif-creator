@@ -31,46 +31,11 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
     },
   };
 
-  const faqStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: page.faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
-
-  const howToStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: page.title,
-    description: page.description,
-    totalTime: 'PT2M',
-    step: page.steps.map((step) => ({
-      '@type': 'HowToStep',
-      name: step.title,
-      text: step.description,
-      url: absoluteUrl(page.path),
-    })),
-  };
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(appStructuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToStructuredData) }}
       />
       <div className="relative z-40 min-h-screen w-screen text-black dark:text-white md:w-full">
         <div
@@ -91,7 +56,7 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                   Free browser-based workflow — local processing, no watermark
                 </div>
                 <NeonGradientCard className="mt-8 flex w-full items-center justify-center">
-                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] sm:text-5xl md:text-7xl md:leading-none">
                     {page.title}
                   </h1>
                 </NeonGradientCard>
@@ -126,7 +91,8 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                     Why it works
                   </h2>
                   <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-400 md:text-lg">
-                    Key reasons this workflow fits how people actually edit and share animated images online.
+                    Key reasons this workflow fits how people actually edit and share animated
+                    images online.
                   </p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-3">
@@ -135,7 +101,9 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                       key={feature.title}
                       className="rounded-3xl border border-slate-200 bg-white/85 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
                     >
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">{feature.title}</h3>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                        {feature.title}
+                      </h3>
                       <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
                         {feature.description}
                       </p>
@@ -152,7 +120,8 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                     How to {page.title.toLowerCase()}
                   </h2>
                   <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-400 md:text-lg">
-                    Use this simple workflow to go from raw animation to a clean export that is ready for the web.
+                    Use this simple workflow to go from raw animation to a clean export that is
+                    ready for the web.
                   </p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-3">
@@ -164,7 +133,9 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                       <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                         Step {index + 1}
                       </p>
-                      <h3 className="mt-3 text-xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
+                      <h3 className="mt-3 text-xl font-bold text-slate-900 dark:text-white">
+                        {step.title}
+                      </h3>
                       <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
                         {step.description}
                       </p>
@@ -182,7 +153,8 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                     Related GIF workflows
                   </h2>
                   <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-400 md:text-lg">
-                    Internal links between closely related tasks help users move deeper into the product and help search engines understand the workflow cluster.
+                    Internal links between closely related tasks help users move deeper into the
+                    product and help search engines understand the workflow cluster.
                   </p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2">

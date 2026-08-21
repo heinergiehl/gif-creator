@@ -110,7 +110,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     ],
     relatedLinks: [
       {
-        href: '/gif-optimizer',
+        href: '/compress-gif',
         label: 'Optimize GIF file size',
         description: 'Reduce file weight further after resizing.',
       },
@@ -195,7 +195,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
         description: 'Change overall dimensions after cropping the frame.',
       },
       {
-        href: '/gif-optimizer',
+        href: '/compress-gif',
         label: 'Optimize GIF size',
         description: 'Shrink the exported file further for web delivery.',
       },
@@ -361,7 +361,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
         description: 'Use additional frame, crop, and optimization controls.',
       },
       {
-        href: '/gif-optimizer',
+        href: '/compress-gif',
         label: 'Optimize after adding text',
         description: 'Reduce file size once the captions are in place.',
       },
@@ -374,11 +374,11 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
   },
   {
     slug: 'gif-optimizer',
-    path: '/gif-optimizer',
-    title: 'GIF Optimizer Online',
-    metaTitle: `GIF Optimizer Online Free | ${SITE_BRAND}`,
+    path: '/compress-gif',
+    title: 'Compress GIF to an Exact Size',
+    metaTitle: `Compress GIF Online to Exact KB or MB | ${SITE_BRAND}`,
     description:
-      'Optimize GIFs online to reduce file size without losing quality more than necessary. Resize, crop, adjust timing, and export cleaner animations for the web.',
+      'Compress an animated GIF to a specific KB or MB limit. Compare measured output files and download the clearest result under your target.',
     keywords: [
       'gif optimizer',
       'compress gif',
@@ -387,11 +387,11 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
       'make gif smaller online',
     ],
     intro:
-      'Optimize GIFs for the web by balancing dimensions, frame count, timing, and visual quality. A lighter GIF loads faster, feels better in docs and landing pages, and is easier to share in chats and social posts.',
+      'Set a real file-size target, then compare measured output variants. The browser balances dimensions, motion, palette, and dithering while keeping your source GIF local.',
     primaryCta: {
-      href: '/edit-gifs/converter-and-editor/editor',
-      label: 'Optimize a GIF now',
-      description: 'Open the editor and reduce GIF file size in your browser.',
+      href: '/compress-gif',
+      label: 'Compress a GIF now',
+      description: 'Set an exact KB or MB target and run the local size search.',
     },
     secondaryCta: {
       href: '/blog/optimize-gif-size-without-losing-quality',

@@ -38,7 +38,7 @@ const editorModeConfig: Record<EditorRouteMode, EditorModeConfig> = {
   },
   gif: {
     routeMode: 'gif',
-    menuOption: 'Video',
+    menuOption: 'Gif',
     title: 'Edit an existing GIF',
     description:
       'Upload a GIF, inspect the extracted frames, adjust timing, resize or crop, and export a cleaner optimized version.',

@@ -13,5 +13,5 @@ const DynamicEditor = dynamic(() => import('@/components/video-to-gif/Editor'), 
 });
 
 export default function EditGifsEditor() {
-  return <DynamicEditor initialMenuOption="Video" />;
+  return <DynamicEditor initialMenuOption="Gif" />;
 }

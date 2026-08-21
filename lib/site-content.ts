@@ -9,6 +9,7 @@ const EXCLUDED_EXACT_ROUTES = new Set([
   '/create-and-edit-gifs',
   '/create-and-edit-gifs/converter-and-editor',
   '/create-and-edit-gifs/converter-and-editor/editor',
+  '/gif-optimizer',
   '/login',
   '/screen-to-video/record-screen',
 ]);
@@ -93,7 +94,7 @@ export function getRoutePriority(route: string): number {
     route === '/crop-gif' ||
     route === '/rotate-gif' ||
     route === '/add-text-to-gif' ||
-    route === '/gif-optimizer'
+    route === '/compress-gif'
   ) {
     return 0.9;
   }
@@ -128,7 +129,7 @@ export function getRouteChangeFrequency(route: string): 'weekly' | 'monthly' {
     route === '/crop-gif' ||
     route === '/rotate-gif' ||
     route === '/add-text-to-gif' ||
-    route === '/gif-optimizer'
+    route === '/compress-gif'
   ) {
     return 'weekly';
   }

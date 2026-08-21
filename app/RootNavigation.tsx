@@ -3,27 +3,32 @@ import CustomNavigation from './components/ui/CustomNavigation';
 import { usePathname } from 'next/navigation';
 const sections = [
   {
-    section: 'Tools',
+    section: 'Edit & convert',
     links: [
       {
-        title: 'Video to GIF',
-        href: '/video-to-gif',
-        description: 'Convert MP4, MOV, and AVI to GIF — trim, crop, resize, and optimize.',
+        title: 'Resize GIF',
+        href: '/resize-gif',
+        description: 'Set exact dimensions while keeping the animation intact.',
       },
       {
-        title: 'Image to GIF',
-        href: '/image-to-gif',
-        description: 'Turn photos into animated GIFs with frame timing and captions.',
+        title: 'Crop GIF',
+        href: '/crop-gif',
+        description: 'Remove unused edges with an animated crop preview.',
       },
       {
-        title: 'Edit GIFs',
-        href: '/edit-gifs',
-        description: 'Resize, crop, add text, and optimize existing animated GIFs.',
+        title: 'Trim GIF',
+        href: '/trim-gif',
+        description: 'Keep an exact time range and rebuild the shorter loop.',
       },
       {
-        title: 'Screen Recorder',
-        href: '/screen-to-video',
-        description: 'Record your screen to video, then convert the clip to a GIF.',
+        title: 'Split GIF into frames',
+        href: '/split-gif-into-frames',
+        description: 'Extract composited PNG frames and download them as a ZIP.',
+      },
+      {
+        title: 'GIF to MP4',
+        href: '/gif-to-mp4',
+        description: 'Turn an animated GIF into a shareable MP4 video.',
       },
     ],
   },
@@ -36,6 +41,11 @@ const sections = [
         description: 'Read practical guides for making, editing, optimizing, and converting GIFs.',
       },
       {
+        title: 'All GIF tools',
+        href: '/gif-tools',
+        description: 'Browse every creation, editing, motion, conversion, and extraction tool.',
+      },
+      {
         title: 'Make a GIF from video',
         href: '/blog/how-to-make-a-gif-from-a-video',
         description: 'Trim, crop, and convert MP4, MOV, and WebM clips into clean looping GIFs.',
@@ -43,7 +53,8 @@ const sections = [
       {
         title: 'Edit a GIF without quality loss',
         href: '/blog/how-to-edit-a-gif-without-losing-quality',
-        description: 'Learn how to resize, crop, add text, and tune timing without hurting readability.',
+        description:
+          'Learn how to resize, crop, add text, and tune timing without hurting readability.',
       },
       {
         title: 'Reduce GIF file size',

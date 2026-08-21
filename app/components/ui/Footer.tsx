@@ -2,16 +2,22 @@ import Link from 'next/link';
 import { SITE_BRAND } from '@/lib/site';
 
 const toolLinks = [
+  { href: '/gif-tools', label: 'All GIF Tools' },
+  { href: '/compress-gif', label: 'Compress GIF' },
+  { href: '/resize-gif', label: 'Resize GIF' },
+  { href: '/change-gif-speed', label: 'Change GIF Speed' },
+  { href: '/split-gif-into-frames', label: 'Split GIF into Frames' },
+  { href: '/gif-to-mp4', label: 'GIF to MP4' },
   { href: '/video-to-gif', label: 'Video to GIF' },
-  { href: '/image-to-gif', label: 'Image to GIF' },
-  { href: '/screen-to-video', label: 'Screen Recorder' },
-  { href: '/edit-gifs', label: 'Edit GIFs' },
 ];
 
 const learnLinks = [
   { href: '/blog', label: 'Blog' },
   { href: '/blog/how-to-make-a-gif-from-a-video', label: 'How to Make a GIF from Video' },
-  { href: '/blog/how-to-edit-a-gif-without-losing-quality', label: 'Edit GIFs Without Quality Loss' },
+  {
+    href: '/blog/how-to-edit-a-gif-without-losing-quality',
+    label: 'Edit GIFs Without Quality Loss',
+  },
   { href: '/blog/optimize-gif-size-without-losing-quality', label: 'Reduce GIF File Size' },
 ];
 
@@ -88,7 +94,9 @@ export const Footer = () => {
               Privacy
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-              {SITE_BRAND} runs entirely in your browser. Your files are never uploaded to a server, and nothing is stored or tracked. It&apos;s private by design.
+              {SITE_BRAND} processes your source media locally in your browser instead of uploading
+              it to an editing server. Basic site analytics may run according to the privacy and
+              cookie settings.
             </p>
           </div>
         </div>

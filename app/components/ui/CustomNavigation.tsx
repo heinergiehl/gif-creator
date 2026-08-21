@@ -23,6 +23,7 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileToggleRef = React.useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,12 +52,26 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
     };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMobileOpen(false);
+      setOpenSection(null);
+      mobileToggleRef.current?.focus();
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [mobileOpen]);
+
   const featuredLinks = useMemo(
     () => [
-      { title: 'Blog', href: '/blog' },
+      { title: 'All GIF Tools', href: '/gif-tools' },
+      { title: 'Compress GIF', href: '/compress-gif' },
+      { title: 'Change Speed', href: '/change-gif-speed' },
       { title: 'Video to GIF', href: '/video-to-gif' },
-      { title: 'Image to GIF', href: '/image-to-gif' },
-      { title: 'Edit GIFs', href: '/edit-gifs' },
     ],
     [],
   );
@@ -83,7 +98,8 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
               href={link.href}
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white',
-                pathname === link.href && 'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
+                pathname === link.href &&
+                  'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
               )}
             >
               {link.title}
@@ -95,17 +111,24 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
               key={section.section}
               className="relative"
               onMouseEnter={() => setOpenSection(section.section)}
-              onMouseLeave={() => setOpenSection((current) => (current === section.section ? null : current))}
+              onMouseLeave={() =>
+                setOpenSection((current) => (current === section.section ? null : current))
+              }
             >
               <button
                 type="button"
                 className={cn(
                   'inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white',
-                  openSection === section.section && 'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
+                  openSection === section.section &&
+                    'bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-white',
                 )}
                 onClick={() =>
-                  setOpenSection((current) => (current === section.section ? null : section.section))
+                  setOpenSection((current) =>
+                    current === section.section ? null : section.section,
+                  )
                 }
+                aria-expanded={openSection === section.section}
+                aria-haspopup="true"
               >
                 {section.section}
                 <ChevronDown className="h-4 w-4" />
@@ -141,11 +164,13 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
         <div className="ml-auto flex items-center gap-2">
           <ModeToggle />
           <button
+            ref={mobileToggleRef}
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900 lg:hidden"
             onClick={() => setMobileOpen((current) => !current)}
             aria-label="Toggle navigation"
             aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -154,7 +179,11 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
 
       {/* ---- Mobile menu ---- */}
       {mobileOpen ? (
-        <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 bg-white px-4 pb-8 pt-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden">
+        <nav
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
+          className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 bg-white px-4 pb-8 pt-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden"
+        >
           <div className="grid gap-1">
             {featuredLinks.map((link) => (
               <Link
@@ -174,12 +203,17 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
 
           <div className="mt-4 grid gap-3">
             {sections.map((section) => (
-              <div key={section.section} className="rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div
+                key={section.section}
+                className="rounded-2xl border border-slate-200 dark:border-slate-800"
+              >
                 <button
                   type="button"
                   className="flex w-full items-center justify-between px-4 py-3.5 text-left"
                   onClick={() =>
-                    setOpenSection((current) => (current === section.section ? null : section.section))
+                    setOpenSection((current) =>
+                      current === section.section ? null : section.section,
+                    )
                   }
                   aria-expanded={openSection === section.section}
                 >
@@ -199,7 +233,7 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className="rounded-2xl px-3 py-3 transition active:bg-slate-200 dark:active:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/60"
+                        className="rounded-2xl px-3 py-3 transition hover:bg-slate-50 active:bg-slate-200 dark:hover:bg-slate-900/60 dark:active:bg-slate-800"
                       >
                         <div className="text-sm font-semibold text-slate-950 dark:text-white">
                           {link.title}
@@ -218,13 +252,13 @@ export default function CustomNavigation({ sections }: CustomNavigationProps) {
           {/* Mobile CTA */}
           <div className="mt-6">
             <Link
-              href="/edit-gifs/converter-and-editor"
+              href="/gif-tools"
               className="flex w-full items-center justify-center rounded-full bg-slate-900 px-5 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
             >
-              Open GIF Editor
+              Browse all GIF tools
             </Link>
           </div>
-        </div>
+        </nav>
       ) : null}
     </div>
   );
