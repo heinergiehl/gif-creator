@@ -8,9 +8,10 @@ import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 interface SeoWorkflowLandingProps {
   page: SeoWorkflowPage;
+  toolSlot?: React.ReactNode;
 }
 
-export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
+export function SeoWorkflowLanding({ page, toolSlot }: SeoWorkflowLandingProps) {
   const appStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -82,6 +83,12 @@ export function SeoWorkflowLanding({ page }: SeoWorkflowLandingProps) {
                 </div>
               </div>
             </section>
+
+            {toolSlot ? (
+              <section id="workflow-tool" className="relative w-full scroll-mt-24 px-4 pb-8">
+                <div className="mx-auto max-w-7xl">{toolSlot}</div>
+              </section>
+            ) : null}
 
             <section className="relative w-full py-20">
               <div className="pointer-events-none absolute inset-0 bg-white/20 dark:bg-slate-950/30" />

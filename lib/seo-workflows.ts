@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getGifEditorIntentHref } from '@/lib/editor-intents';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 export interface SeoWorkflowFaq {
@@ -44,7 +45,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'resize-gif',
     path: '/resize-gif',
     title: 'Resize GIF Online',
-    metaTitle: `Resize GIF Online Free | ${SITE_BRAND}`,
+    metaTitle: 'Resize GIF Online Free',
     description:
       'Resize animated GIFs online without installing software. Change GIF dimensions for Discord, Slack, Notion, email, and the web while keeping animation quality under control.',
     keywords: [
@@ -57,7 +58,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     intro:
       'Resize animated GIFs for chat apps, docs, websites, and social posts with a browser-based editor that keeps the full animation intact. Adjust dimensions, preserve legibility, and export a lighter file without a watermark.',
     primaryCta: {
-      href: '/edit-gifs/converter-and-editor/editor',
+      href: getGifEditorIntentHref('resize'),
       label: 'Resize a GIF now',
       description: 'Open the editor and change GIF dimensions immediately.',
     },
@@ -69,43 +70,52 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     features: [
       {
         title: 'Resize for real platforms',
-        description: 'Prepare GIFs for Discord, Slack, Notion, email, help docs, and landing pages with dimensions that fit the destination.',
+        description:
+          'Prepare GIFs for Discord, Slack, Notion, email, help docs, and landing pages with dimensions that fit the destination.',
       },
       {
         title: 'Keep loops readable',
-        description: 'Adjust the canvas without losing the timing and motion that make the animation understandable.',
+        description:
+          'Adjust the canvas without losing the timing and motion that make the animation understandable.',
       },
       {
         title: 'Control size and weight',
-        description: 'Smaller dimensions usually mean smaller files, which helps your GIF load faster and rank better on performance-sensitive pages.',
+        description:
+          'Smaller dimensions usually mean smaller files, which helps your GIF load faster and rank better on performance-sensitive pages.',
       },
     ],
     steps: [
       {
         title: 'Upload the GIF you want to resize',
-        description: 'Start with an existing GIF or create one from video or images before opening the editor.',
+        description:
+          'Start with an existing GIF or create one from video or images before opening the editor.',
       },
       {
         title: 'Set the new dimensions',
-        description: 'Choose the width and height that match your target platform, then preview the updated animation.',
+        description:
+          'Choose the width and height that match your target platform, then preview the updated animation.',
       },
       {
         title: 'Export a lighter optimized GIF',
-        description: 'Download the resized file and reduce file weight further if the destination has strict upload limits.',
+        description:
+          'Download the resized file and reduce file weight further if the destination has strict upload limits.',
       },
     ],
     faqs: [
       {
         question: 'How do I resize a GIF without breaking the animation?',
-        answer: 'Use an editor that keeps every frame in sequence while changing the overall canvas size. That preserves the loop instead of flattening the GIF into a still image.',
+        answer:
+          'Use an editor that keeps every frame in sequence while changing the overall canvas size. That preserves the loop instead of flattening the GIF into a still image.',
       },
       {
         question: 'Will resizing a GIF reduce file size?',
-        answer: 'Usually yes. Smaller dimensions reduce the amount of data per frame, which often results in a smaller exported GIF and faster loading.',
+        answer:
+          'Usually yes. Smaller dimensions reduce the amount of data per frame, which often results in a smaller exported GIF and faster loading.',
       },
       {
         question: 'What size should a GIF be for Slack or Discord?',
-        answer: 'The best size depends on the use case, but smaller dimensions usually improve upload speed and playback. Test the GIF where it will actually be used.',
+        answer:
+          'The best size depends on the use case, but smaller dimensions usually improve upload speed and playback. Test the GIF where it will actually be used.',
       },
     ],
     relatedLinks: [
@@ -130,14 +140,14 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'crop-gif',
     path: '/crop-gif',
     title: 'Crop GIF Online',
-    metaTitle: `Crop GIF Online Free | ${SITE_BRAND}`,
+    metaTitle: 'Crop GIF Online Free',
     description:
       'Crop animated GIFs online to remove extra space, focus attention, and reduce file size. Trim the frame area without losing motion or adding a watermark.',
     keywords: ['crop gif', 'crop animated gif', 'trim gif', 'crop gif online', 'cut gif frame'],
     intro:
       'Crop animated GIFs to keep the viewer focused on the action that matters. Remove empty borders, highlight the important region, and export a cleaner animation for product demos, tutorials, and social posts.',
     primaryCta: {
-      href: '/edit-gifs/converter-and-editor/editor',
+      href: getGifEditorIntentHref('crop'),
       label: 'Crop a GIF now',
       description: 'Open the editor and crop your GIF directly in the browser.',
     },
@@ -149,15 +159,18 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     features: [
       {
         title: 'Focus the animation',
-        description: 'Cut away side panels, menus, or empty borders so the motion lands on the right detail.',
+        description:
+          'Cut away side panels, menus, or empty borders so the motion lands on the right detail.',
       },
       {
         title: 'Improve clarity in docs',
-        description: 'A tighter crop often makes tutorial GIFs easier to read inside documentation, changelogs, and release notes.',
+        description:
+          'A tighter crop often makes tutorial GIFs easier to read inside documentation, changelogs, and release notes.',
       },
       {
         title: 'Reduce file size naturally',
-        description: 'Cropping unnecessary pixels lowers the amount of data rendered in every frame.',
+        description:
+          'Cropping unnecessary pixels lowers the amount of data rendered in every frame.',
       },
     ],
     steps: [
@@ -167,25 +180,30 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
       },
       {
         title: 'Select the area to keep',
-        description: 'Drag the crop bounds around the part of the animation your audience actually needs to see.',
+        description:
+          'Drag the crop bounds around the part of the animation your audience actually needs to see.',
       },
       {
         title: 'Preview and export',
-        description: 'Check playback to ensure the crop feels stable across the loop, then export the cleaned-up animation.',
+        description:
+          'Check playback to ensure the crop feels stable across the loop, then export the cleaned-up animation.',
       },
     ],
     faqs: [
       {
         question: 'Can I crop an animated GIF without turning it into a static image?',
-        answer: 'Yes. A GIF editor crops every frame consistently, so the result stays animated instead of flattening into a single still.',
+        answer:
+          'Yes. A GIF editor crops every frame consistently, so the result stays animated instead of flattening into a single still.',
       },
       {
         question: 'Does cropping help with GIF file size?',
-        answer: 'Often it does. Removing unused screen area lowers frame area and can make exports faster and lighter.',
+        answer:
+          'Often it does. Removing unused screen area lowers frame area and can make exports faster and lighter.',
       },
       {
         question: 'Should I crop before or after resizing?',
-        answer: 'Usually crop first to remove unnecessary pixels, then resize the remaining content to the final output dimensions.',
+        answer:
+          'Usually crop first to remove unnecessary pixels, then resize the remaining content to the final output dimensions.',
       },
     ],
     relatedLinks: [
@@ -210,14 +228,20 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'rotate-gif',
     path: '/rotate-gif',
     title: 'Rotate GIF Online',
-    metaTitle: `Rotate GIF Online Free | ${SITE_BRAND}`,
+    metaTitle: 'Rotate GIF Online Free',
     description:
       'Rotate animated GIFs online to fix orientation, flip motion, or match a new layout. Adjust the full animation in your browser and export a clean GIF without a watermark.',
-    keywords: ['rotate gif', 'flip gif', 'rotate animated gif', 'rotate gif online', 'turn gif sideways'],
+    keywords: [
+      'rotate gif',
+      'flip gif',
+      'rotate animated gif',
+      'rotate gif online',
+      'turn gif sideways',
+    ],
     intro:
       'Rotate animated GIFs when the source clip is sideways, the layout changed, or you need a mirrored version for a cleaner visual story. Adjust the full loop in-browser and keep the animation intact from start to finish.',
     primaryCta: {
-      href: '/edit-gifs/converter-and-editor/editor',
+      href: getGifEditorIntentHref('rotate'),
       label: 'Rotate a GIF now',
       description: 'Open the editor and correct GIF orientation immediately.',
     },
@@ -229,15 +253,18 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     features: [
       {
         title: 'Fix incorrect orientation',
-        description: 'Correct screen recordings, phone clips, and exported animations that appear sideways or upside down.',
+        description:
+          'Correct screen recordings, phone clips, and exported animations that appear sideways or upside down.',
       },
       {
         title: 'Flip or mirror motion',
-        description: 'Reverse the visual direction of a loop to better fit layouts, UI demos, or social formats.',
+        description:
+          'Reverse the visual direction of a loop to better fit layouts, UI demos, or social formats.',
       },
       {
         title: 'Keep the full sequence aligned',
-        description: 'Apply the same transformation across every frame so playback stays consistent.',
+        description:
+          'Apply the same transformation across every frame so playback stays consistent.',
       },
     ],
     steps: [
@@ -247,25 +274,30 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
       },
       {
         title: 'Rotate or flip the canvas',
-        description: 'Choose the orientation that makes the motion easiest to understand in the final placement.',
+        description:
+          'Choose the orientation that makes the motion easiest to understand in the final placement.',
       },
       {
         title: 'Export and share',
-        description: 'Download the corrected animation and reuse it in docs, product updates, or posts.',
+        description:
+          'Download the corrected animation and reuse it in docs, product updates, or posts.',
       },
     ],
     faqs: [
       {
         question: 'Can I rotate a GIF by 90 degrees online?',
-        answer: 'Yes. A browser-based GIF editor can rotate the full animation without requiring desktop software.',
+        answer:
+          'Yes. A browser-based GIF editor can rotate the full animation without requiring desktop software.',
       },
       {
         question: 'Will rotation change the playback speed?',
-        answer: 'No. Rotation changes orientation, not timing, so the frame order and playback speed stay the same unless you edit them separately.',
+        answer:
+          'No. Rotation changes orientation, not timing, so the frame order and playback speed stay the same unless you edit them separately.',
       },
       {
         question: 'Can I flip a GIF horizontally or vertically?',
-        answer: 'Yes. Flipping is useful when a mirrored direction works better for the surrounding layout or story.',
+        answer:
+          'Yes. Flipping is useful when a mirrored direction works better for the surrounding layout or story.',
       },
     ],
     relatedLinks: [
@@ -290,7 +322,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'add-text-to-gif',
     path: '/add-text-to-gif',
     title: 'Add Text to GIF Online',
-    metaTitle: `Add Text to GIF Online Free | ${SITE_BRAND}`,
+    metaTitle: 'Add Text to GIF Online Free',
     description:
       'Add captions, labels, and callouts to animated GIFs online. Place text without blocking the motion, then export a clean GIF without a watermark.',
     keywords: [
@@ -303,7 +335,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     intro:
       'Add text to GIFs when you need captions, short callouts, tutorial labels, or reaction text. Keep the message readable without covering the motion that makes the animation work.',
     primaryCta: {
-      href: '/edit-gifs/converter-and-editor/editor',
+      href: getGifEditorIntentHref('add-text'),
       label: 'Add text to a GIF now',
       description: 'Open the editor and place text overlays on your animation.',
     },
@@ -315,15 +347,18 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     features: [
       {
         title: 'Caption product demos',
-        description: 'Add short labels that explain UI changes, features, or next steps without forcing users to read a long paragraph.',
+        description:
+          'Add short labels that explain UI changes, features, or next steps without forcing users to read a long paragraph.',
       },
       {
         title: 'Create clearer reaction GIFs',
-        description: 'Overlay short captions for social posts, internal chats, and lightweight content marketing.',
+        description:
+          'Overlay short captions for social posts, internal chats, and lightweight content marketing.',
       },
       {
         title: 'Keep the motion visible',
-        description: 'Position text around the action instead of blocking the parts of the frame that viewers need to track.',
+        description:
+          'Position text around the action instead of blocking the parts of the frame that viewers need to track.',
       },
     ],
     steps: [
@@ -333,25 +368,30 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
       },
       {
         title: 'Place and style the text',
-        description: 'Write short, clear copy, choose a readable style, and position it where it supports the motion.',
+        description:
+          'Write short, clear copy, choose a readable style, and position it where it supports the motion.',
       },
       {
         title: 'Preview the full loop',
-        description: 'Check that the caption stays readable and does not collide with the action in later frames.',
+        description:
+          'Check that the caption stays readable and does not collide with the action in later frames.',
       },
     ],
     faqs: [
       {
         question: 'How do I put text on a GIF without cluttering it?',
-        answer: 'Keep the copy short, place it away from the main motion path, and use strong contrast instead of decorative styling.',
+        answer:
+          'Keep the copy short, place it away from the main motion path, and use strong contrast instead of decorative styling.',
       },
       {
         question: 'Can I add captions to an animated GIF online?',
-        answer: 'Yes. A browser-based editor can add labels, captions, and short overlays directly on the animation.',
+        answer:
+          'Yes. A browser-based editor can add labels, captions, and short overlays directly on the animation.',
       },
       {
         question: 'What kind of text works best on GIFs?',
-        answer: 'Short labels, step names, and reaction captions usually perform better than long sentences because they are easier to read in motion.',
+        answer:
+          'Short labels, step names, and reaction captions usually perform better than long sentences because they are easier to read in motion.',
       },
     ],
     relatedLinks: [
@@ -376,7 +416,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'gif-optimizer',
     path: '/compress-gif',
     title: 'Compress GIF to an Exact Size',
-    metaTitle: `Compress GIF Online to Exact KB or MB | ${SITE_BRAND}`,
+    metaTitle: 'Compress GIF Online to Exact KB or MB',
     description:
       'Compress an animated GIF to a specific KB or MB limit. Compare measured output files and download the clearest result under your target.',
     keywords: [
@@ -389,7 +429,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     intro:
       'Set a real file-size target, then compare measured output variants. The browser balances dimensions, motion, palette, and dithering while keeping your source GIF local.',
     primaryCta: {
-      href: '/compress-gif',
+      href: getGifEditorIntentHref('optimize'),
       label: 'Compress a GIF now',
       description: 'Set an exact KB or MB target and run the local size search.',
     },
@@ -401,15 +441,18 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     features: [
       {
         title: 'Reduce upload friction',
-        description: 'Smaller GIFs are easier to use in docs, product updates, support articles, and chat tools with tighter size limits.',
+        description:
+          'Smaller GIFs are easier to use in docs, product updates, support articles, and chat tools with tighter size limits.',
       },
       {
         title: 'Improve page performance',
-        description: 'Optimized animations reduce transfer weight and help pages stay more responsive.',
+        description:
+          'Optimized animations reduce transfer weight and help pages stay more responsive.',
       },
       {
         title: 'Balance quality with size',
-        description: 'Use resizing, cropping, and timing changes together instead of relying on one destructive compression step.',
+        description:
+          'Use resizing, cropping, and timing changes together instead of relying on one destructive compression step.',
       },
     ],
     steps: [
@@ -419,25 +462,30 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
       },
       {
         title: 'Adjust the biggest size drivers',
-        description: 'Reduce dimensions, crop dead space, or simplify timing until the file reaches a practical balance.',
+        description:
+          'Reduce dimensions, crop dead space, or simplify timing until the file reaches a practical balance.',
       },
       {
         title: 'Export and compare results',
-        description: 'Preview the final loop to confirm that readability and motion still hold up at the smaller size.',
+        description:
+          'Preview the final loop to confirm that readability and motion still hold up at the smaller size.',
       },
     ],
     faqs: [
       {
         question: 'How do I reduce GIF file size without destroying quality?',
-        answer: 'Start by reducing dimensions or cropping unused space, then adjust timing and export settings until the file becomes light enough for the destination.',
+        answer:
+          'Start by reducing dimensions or cropping unused space, then adjust timing and export settings until the file becomes light enough for the destination.',
       },
       {
         question: 'Why are GIF files so large?',
-        answer: 'GIFs can be heavy because every frame stores pixel data. Large dimensions, long duration, and busy visuals all increase file weight.',
+        answer:
+          'GIFs can be heavy because every frame stores pixel data. Large dimensions, long duration, and busy visuals all increase file weight.',
       },
       {
         question: 'What is the fastest way to optimize a GIF for the web?',
-        answer: 'Cropping and resizing usually have the biggest impact first. After that, shorten the loop or simplify frame timing if needed.',
+        answer:
+          'Cropping and resizing usually have the biggest impact first. After that, shorten the loop or simplify frame timing if needed.',
       },
     ],
     relatedLinks: [
@@ -471,6 +519,8 @@ export function getSeoWorkflowPage(slug: string): SeoWorkflowPage {
 }
 
 export function buildSeoWorkflowMetadata(page: SeoWorkflowPage): Metadata {
+  const socialTitle = `${page.metaTitle} | ${SITE_BRAND}`;
+
   return {
     title: page.metaTitle,
     description: page.description,
@@ -479,7 +529,7 @@ export function buildSeoWorkflowMetadata(page: SeoWorkflowPage): Metadata {
     openGraph: {
       type: 'website',
       url: absoluteUrl(page.path),
-      title: page.metaTitle,
+      title: socialTitle,
       description: page.description,
       images: [
         {
@@ -492,7 +542,7 @@ export function buildSeoWorkflowMetadata(page: SeoWorkflowPage): Metadata {
     },
     twitter: {
       card: 'summary_large_image',
-      title: page.metaTitle,
+      title: socialTitle,
       description: page.description,
       images: ['/hero-dark.png'],
     },

@@ -1,6 +1,5 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
 export default function CreateAndEditGifsConverterRedirect() {
-  redirect('/edit-gifs/converter-and-editor');
+  permanentRedirect('/edit-gifs/converter-and-editor');
 }
-

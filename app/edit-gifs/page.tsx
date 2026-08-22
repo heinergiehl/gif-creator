@@ -1,233 +1,467 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
-import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { Footer } from '@/app/components/ui/Footer';
+import { Button } from '@/components/ui/button';
+import { getGifEditorIntentHref } from '@/lib/editor-intents';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
-import { Footer } from '../components/ui/Footer';
-import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
-import { CTA } from '@/components/pages/CTA';
+
+const pageTitle = 'Free Online GIF Editor — Frame-by-Frame Studio';
+const pageDescription =
+  'Edit animated GIFs online with per-frame timing, transforms, text, redaction, annotations, and effects. Local browser processing with no forced watermark.';
 
 export const metadata: Metadata = {
-  title: `Free Online GIF Editor - Create & Edit Animated GIFs | ${SITE_BRAND}`,
-  description:
-    'Create and edit animated GIFs online. Resize, crop, rotate, add text, adjust timing, and optimize file size — with clean exports and no watermarks.',
-  keywords: 'GIF editor, online GIF editor, free GIF editor, create GIF, edit animated GIF, resize GIF, crop GIF, rotate GIF, GIF frame editor, optimize GIF size, add text to GIF, split GIF frames, animated image editor, GIF effects, frame-by-frame editor, compress GIF, GIF animation editor, GIF maker, animated GIF creator, no watermark GIF editor',
+  title: pageTitle,
+  description: pageDescription,
+  keywords: [
+    'GIF editor',
+    'online GIF editor',
+    'free GIF editor',
+    'frame by frame GIF editor',
+    'edit animated GIF',
+    'add text to GIF',
+    'redact GIF',
+    'crop GIF',
+    'resize GIF',
+    'GIF effects',
+    'GIF timing editor',
+    'GIF editor no watermark',
+  ],
   alternates: { canonical: '/edit-gifs' },
+  openGraph: {
+    type: 'website',
+    url: absoluteUrl('/edit-gifs'),
+    title: pageTitle,
+    description: pageDescription,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: pageTitle,
+    description: pageDescription,
+  },
 };
 
 const editingFeatures = [
   {
-    icon: '🎨',
-    title: 'Resize Animated GIFs',
-    description: 'Resize your animated GIFs to any dimensions while maintaining quality. Perfect for social media, web use, or specific size requirements.',
+    label: 'Timing',
+    title: 'Control the pace frame by frame',
+    description:
+      'Set an individual delay for each frame or update the duration of a selected group, then preview the pacing on the timeline.',
   },
   {
-    icon: '✂️',
-    title: 'Crop GIF Regions',
-    description: 'Crop specific regions of your animated GIFs. Select custom areas, use preset aspect ratios, or auto-crop transparent areas.',
+    label: 'Transform',
+    title: 'Correct only the frames that need it',
+    description:
+      'Crop, rotate, flip, zoom, and pan selected frames without taking the animation out of context.',
   },
   {
-    icon: '🔄',
-    title: 'Rotate & Flip Animations',
-    description: 'Rotate animated GIFs by any degree, flip horizontally or vertically. Correct orientation issues in your animated images.',
+    label: 'Text',
+    title: 'Place copy on a precise moment',
+    description:
+      'Style and position a text overlay, then choose exactly when it enters and leaves the animation.',
   },
   {
-    icon: '🎯',
-    title: 'Frame-by-Frame Editor',
-    description: 'Edit individual frames of your GIF animation. Add, remove, reorder frames, and control timing for each frame.',
+    label: 'Redaction',
+    title: 'Hide sensitive details locally',
+    description:
+      'Cover a region for part or all of the animation with adjustable blur or pixelation.',
   },
   {
-    icon: '📝',
-    title: 'Add Text & Effects',
-    description: 'Add text overlays, stickers, and visual effects to your animated GIFs. Customize fonts, colors, and positioning.',
+    label: 'Annotations',
+    title: 'Explain a product flow clearly',
+    description:
+      'Add timed spotlights, callouts, and cursor markers for focused demos and walkthroughs.',
   },
   {
-    icon: '⚡',
-    title: 'Optimize & Compress',
-    description: 'Reduce GIF file size without losing quality. Optimize colors, frame rate, and compression for faster loading.',
+    label: 'Effects',
+    title: 'Tune the look per selection',
+    description:
+      'Adjust brightness, contrast, saturation, blur, grayscale, and sepia on the selected frames.',
   },
-];
+] as const;
 
-export default function EditGifs() {
+const workflowSteps = [
+  {
+    number: '01',
+    title: 'Bring in the source',
+    description:
+      'Open a GIF, video, image sequence, or record a screen demo. The source media stays in your browser.',
+  },
+  {
+    number: '02',
+    title: 'Edit with the timeline in view',
+    description:
+      'Select one or more frames, set their timing, and add transforms, overlays, redaction, annotations, or effects.',
+  },
+  {
+    number: '03',
+    title: 'Export for the destination',
+    description:
+      'Download without a forced watermark. GIF is the core output; WebP, APNG, and MP4 depend on the current browser runtime.',
+  },
+] as const;
+
+const toolLinks = [
+  {
+    href: '/resize-gif',
+    title: 'Resize GIF',
+    description: 'Set exact output dimensions in a focused resizing workflow.',
+  },
+  {
+    href: '/crop-gif',
+    title: 'Crop GIF',
+    description: 'Remove unused edges and keep attention on the important region.',
+  },
+  {
+    href: '/compress-gif',
+    title: 'Compress GIF',
+    description: 'Reduce file size with a workflow built around practical output targets.',
+  },
+  {
+    href: '/add-text-to-gif',
+    title: 'Add text to GIF',
+    description: 'Start with the dedicated text workflow, then continue editing if needed.',
+  },
+  {
+    href: '/video-to-gif',
+    title: 'Video to GIF',
+    description: 'Turn a short video clip into an editable animated GIF.',
+  },
+] as const;
+
+const guideLinks = [
+  {
+    href: '/blog/how-to-edit-a-gif-without-losing-quality',
+    title: 'How to edit a GIF without losing quality',
+    description: 'A practical editing order for keeping motion clean and readable.',
+  },
+  {
+    href: '/blog/optimize-gif-size-without-losing-quality',
+    title: 'How to reduce GIF file size',
+    description: 'Balance dimensions, timing, color, and motion before exporting again.',
+  },
+  {
+    href: '/blog/how-to-add-text-to-a-gif-without-cluttering-the-animation',
+    title: 'How to add text without cluttering a GIF',
+    description: 'Choose readable copy, placement, and timing for short animations.',
+  },
+  {
+    href: '/blog/gif-vs-webp-vs-apng-which-format-should-you-use',
+    title: 'GIF vs WebP vs APNG',
+    description: 'Choose an animation format based on compatibility, quality, and size.',
+  },
+] as const;
+
+const faqs = [
+  {
+    question: 'Can I edit one GIF frame at a time?',
+    answer:
+      'Yes. The timeline lets you set timing for individual frames and select multiple frames when a transform or effect should apply to a group.',
+  },
+  {
+    question: 'Does the GIF editor upload my source file?',
+    answer:
+      'No editing server is used for your source media. Importing, editing, previewing, and rendering happen locally in the browser.',
+  },
+  {
+    question: 'Can I add text, blur, or annotations to an animated GIF?',
+    answer:
+      'Yes. Text, blur, pixelation, spotlights, callouts, and cursor markers can be positioned and limited to a chosen time range.',
+  },
+  {
+    question: 'Which export formats are available?',
+    answer:
+      'GIF is the primary output. The studio checks the current browser runtime before offering animated WebP, APNG, or MP4, so those formats can vary by browser and device.',
+  },
+  {
+    question: 'Will the editor add a watermark?',
+    answer:
+      'No forced watermark is added. A watermark remains an optional annotation only when you choose to add one yourself.',
+  },
+] as const;
+
+export default function EditGifsPage() {
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `${SITE_BRAND} GIF Studio`,
+    url: absoluteUrl('/edit-gifs'),
+    description: pageDescription,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Any device with a supported web browser',
+    browserRequirements: 'JavaScript and WebAssembly support',
+    isAccessibleForFree: true,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    featureList: [
+      'Local browser-based GIF editing',
+      'Per-frame and multi-frame timing controls',
+      'Crop, rotate, flip, zoom, and pan transforms',
+      'Timed text overlays',
+      'Blur and pixelation redaction',
+      'Spotlight, callout, and cursor annotations',
+      'Brightness, contrast, saturation, blur, grayscale, and sepia effects',
+      'GIF export with runtime-checked WebP, APNG, and MP4 options',
+      'Exports without a forced watermark',
+    ],
+    author: {
+      '@type': 'Organization',
+      name: SITE_BRAND,
+    },
+  };
+
   return (
-    <>
+    <div className="dark min-h-screen overflow-x-hidden bg-[#090d14] text-slate-100">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": `GIF Editor - ${SITE_BRAND}`,
-            "url": absoluteUrl('/edit-gifs'),
-            "description": "Professional online GIF editor with advanced editing tools for animated images.",
-            "applicationCategory": "ImageApplication",
-            "featureList": [
-              "Resize animated GIFs",
-              "Crop GIF regions", 
-              "Rotate animated images",
-              "Frame-by-frame editing",
-              "Add text to GIFs",
-              "Optimize GIF file size",
-              "Split GIF frames",
-              "Animation speed control"
-            ],
-            "author": {
-              "@type": "Organization",
-              "name": SITE_BRAND
-            }
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <div className="relative z-40 h-full w-screen text-black dark:text-white md:w-full">
-        <div
-          className="absolute inset-0 z-[10] h-full w-full items-center px-5 py-24 opacity-100 
-                   [background:radial-gradient(125%_125%_at_50%_50%,#fdfdfd_30%,#63e_100%)]
-                   dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
-        ></div>
-        <div
-          className="absolute bottom-0 left-0 right-0 top-0 z-[20] h-full bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] 
-              bg-[size:24px_24px] opacity-30 dark:bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
-              dark:bg-[size:24px_24px] dark:opacity-100"
-        ></div>
-        <div className="relative z-40 flex w-full flex-col items-center justify-center opacity-100">
-          <section className="mt-[100px] min-h-screen w-full">
-            <div className="flex items-center justify-center">
-              <div className="flex max-w-6xl flex-col items-center justify-center gap-x-2 px-4">
-                <NeonGradientCard className="mt-[170px] flex items-center justify-center">
-                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-7xl font-bold leading-none tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
-                    Free Online GIF Editor
-                  </h1>
-                </NeonGradientCard>
-                <p className="max-w-6xl text-pretty px-4 py-6 text-center text-xl md:px-0">
-                  Edit animated GIFs with a fast, browser-based editor. Resize, crop, rotate, add text, adjust timing, and optimize file size — then export a clean GIF with no watermark.
-                </p>
-                <div className="mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
-                  <CTA />
+
+      <main>
+        <section aria-labelledby="editor-heading" className="border-b border-slate-800">
+          <div className="mx-auto flex min-h-[760px] max-w-7xl flex-col justify-between px-5 pb-10 pt-32 sm:px-8 sm:pb-14 sm:pt-40 lg:px-12">
+            <div className="max-w-5xl">
+              <p className="font-mono text-xs font-medium uppercase tracking-[0.24em] text-sky-300">
+                Browser-based GIF Studio
+              </p>
+              <h1
+                id="editor-heading"
+                className="mt-7 max-w-5xl text-balance text-[clamp(3.25rem,8vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-white"
+              >
+                Edit GIFs, <br />
+                frame by frame.
+              </h1>
+              <p className="mt-8 max-w-2xl text-pretty text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
+                A focused online GIF editor for timing, transforms, text, redaction, annotations,
+                and visual effects. Your source media stays in your browser, and exports carry no
+                forced watermark.
+              </p>
+
+              <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 rounded-md bg-white px-6 text-base font-semibold text-slate-950 hover:bg-slate-200"
+                >
+                  <Link href={getGifEditorIntentHref('edit')}>
+                    Open GIF Studio
+                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+                  <Link
+                    href={getGifEditorIntentHref('add-text')}
+                    className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
+                  >
+                    Add text
+                  </Link>
+                  <Link
+                    href={getGifEditorIntentHref('record-demo')}
+                    className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
+                  >
+                    Record a screen demo
+                  </Link>
                 </div>
               </div>
             </div>
-          </section>
 
-          <section className="z-[999] w-full py-20">
-            <div className="container mx-auto px-4">
-              <h2 className="pointer-events-none mb-16 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/80 bg-clip-text text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-6xl">
-                Advanced GIF Editing Tools
+            <ul className="mt-20 grid border-y border-slate-800 text-sm text-slate-400 sm:grid-cols-3 sm:divide-x sm:divide-slate-800">
+              <li className="flex min-h-14 items-center border-b border-slate-800 py-4 sm:border-b-0 sm:px-5 sm:first:pl-0">
+                Local browser processing
+              </li>
+              <li className="flex min-h-14 items-center border-b border-slate-800 py-4 sm:border-b-0 sm:px-5">
+                Per-frame timing
+              </li>
+              <li className="flex min-h-14 items-center py-4 sm:px-5 sm:last:pr-0">
+                No forced watermark
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section aria-labelledby="features-heading" className="border-b border-slate-800">
+          <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:px-12 lg:py-32">
+            <header className="max-w-md">
+              <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-500">
+                Editing controls
+              </p>
+              <h2
+                id="features-heading"
+                className="mt-5 text-balance text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+              >
+                Enough control to finish the animation in one place.
               </h2>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {editingFeatures.map((feature, index) => (
-                  <div key={index} className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
-                    <div className="mb-4 text-4xl">{feature.icon}</div>
-                    <h3 className="mb-3 text-xl font-bold">{feature.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+              <p className="mt-6 text-base leading-7 text-slate-400">
+                Each tool stays connected to the same canvas and timeline, so timing and visual
+                decisions remain easy to compare.
+              </p>
+            </header>
+
+            <div className="border-y border-slate-800">
+              {editingFeatures.map((feature) => (
+                <article
+                  key={feature.label}
+                  className="grid gap-3 border-b border-slate-800 py-7 last:border-b-0 sm:grid-cols-[7rem_1fr] sm:gap-7"
+                >
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-sky-300">
+                    {feature.label}
+                  </p>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-100">{feature.title}</h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                      {feature.description}
+                    </p>
                   </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="workflow-heading" className="border-b border-slate-800">
+          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+            <div className="max-w-2xl">
+              <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-500">
+                Three-step workflow
+              </p>
+              <h2
+                id="workflow-heading"
+                className="mt-5 text-balance text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+              >
+                From source to finished loop.
+              </h2>
+            </div>
+
+            <ol className="mt-12 border-y border-slate-800 lg:grid lg:grid-cols-3 lg:divide-x lg:divide-slate-800">
+              {workflowSteps.map((step) => (
+                <li
+                  key={step.number}
+                  className="border-b border-slate-800 py-8 last:border-b-0 lg:border-b-0 lg:px-8 lg:first:pl-0 lg:last:pr-0"
+                >
+                  <span className="font-mono text-xs text-sky-300">{step.number}</span>
+                  <h3 className="mt-8 text-xl font-semibold text-slate-100">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-400">{step.description}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section aria-labelledby="tools-heading" className="border-b border-slate-800">
+          <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:px-12 lg:py-32">
+            <header className="max-w-md">
+              <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-500">
+                Focused GIF tools
+              </p>
+              <h2
+                id="tools-heading"
+                className="mt-5 text-balance text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+              >
+                Start with the smallest workflow that fits the job.
+              </h2>
+              <p className="mt-6 text-base leading-7 text-slate-400">
+                Use a dedicated tool for a quick change, or open the full studio when the task spans
+                multiple editing steps.
+              </p>
+            </header>
+
+            <nav aria-label="Focused GIF tools">
+              <ul className="border-t border-slate-800">
+                {toolLinks.map((tool) => (
+                  <li key={tool.href} className="border-b border-slate-800">
+                    <Link
+                      href={tool.href}
+                      className="group grid min-h-24 gap-2 py-6 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400 sm:grid-cols-[12rem_1fr_auto] sm:items-center sm:gap-6"
+                    >
+                      <span className="font-semibold text-slate-100">{tool.title}</span>
+                      <span className="text-sm leading-6 text-slate-400">{tool.description}</span>
+                      <ArrowRight
+                        className="hidden h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-slate-200 sm:block"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        </section>
+
+        <section aria-labelledby="guides-heading" className="border-b border-slate-800">
+          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+            <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-14">
+              <header className="max-w-md">
+                <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-500">
+                  Editing guides
+                </p>
+                <h2
+                  id="guides-heading"
+                  className="mt-5 text-balance text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+                >
+                  Make deliberate export choices.
+                </h2>
+              </header>
+
+              <div className="grid border-y border-slate-800 sm:grid-cols-2">
+                {guideLinks.map((guide, index) => (
+                  <Link
+                    key={guide.href}
+                    href={guide.href}
+                    className={`group min-h-48 border-b border-slate-800 py-7 transition-colors hover:bg-slate-900/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400 sm:px-7 ${
+                      index % 2 === 0 ? 'sm:border-r sm:border-slate-800 sm:pl-0' : 'sm:pr-0'
+                    } ${index >= guideLinks.length - 2 ? 'sm:border-b-0' : ''}`}
+                  >
+                    <h3 className="max-w-xs text-lg font-semibold text-slate-100 group-hover:text-white">
+                      {guide.title}
+                    </h3>
+                    <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
+                      {guide.description}
+                    </p>
+                    <span className="mt-7 inline-flex items-center text-xs font-medium uppercase tracking-[0.15em] text-sky-300">
+                      Read guide
+                      <ArrowRight
+                        className="ml-2 h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Link>
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="w-full py-20 bg-white/5 dark:bg-black/10">
-            <div className="container mx-auto px-4">
-              <h2 className="pointer-events-none mb-12 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-5xl">
-                Create and Edit GIFs in Three Simple Steps
+        <section aria-labelledby="faq-heading">
+          <div className="mx-auto grid max-w-7xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:px-12 lg:py-32">
+            <header className="max-w-md">
+              <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-500">FAQ</p>
+              <h2
+                id="faq-heading"
+                className="mt-5 text-balance text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+              >
+                What to know before editing.
               </h2>
-              <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
-                <div className="rounded-lg border bg-white/10 p-6 text-center backdrop-blur-sm dark:bg-black/20">
-                  <div className="mb-4 inline-block rounded-full bg-gradient-to-br from-[#ff2975] to-[#00FFF1] p-3 text-2xl font-bold text-white">1</div>
-                  <h3 className="mb-3 text-xl font-bold">Upload Your Media</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Easily upload a GIF, video, or a series of images. Our editor supports all major formats and is optimized for a smooth workflow.
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white/10 p-6 text-center backdrop-blur-sm dark:bg-black/20">
-                  <div className="mb-4 inline-block rounded-full bg-gradient-to-br from-[#ff2975] to-[#00FFF1] p-3 text-2xl font-bold text-white">2</div>
-                  <h3 className="mb-3 text-xl font-bold">Edit and Enhance</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Use our powerful tools to bring your vision to life. Resize, crop, add text, apply filters, and edit frame-by-frame with precision.
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white/10 p-6 text-center backdrop-blur-sm dark:bg-black/20">
-                  <div className="mb-4 inline-block rounded-full bg-gradient-to-br from-[#ff2975] to-[#00FFF1] p-3 text-2xl font-bold text-white">3</div>
-                  <h3 className="mb-3 text-xl font-bold">Download and Share</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Preview your creation and download the high-quality, optimized GIF. No watermarks, ever. Share your masterpiece with the world.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+            </header>
 
-          <section className="w-full py-20">
-            <div className="container mx-auto px-4">
-              <h2 className="pointer-events-none mb-12 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-5xl">
-                Why Choose Our GIF Editor?
-              </h2>
-              <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">Comprehensive Toolset</h3>
-                  <p className="text-gray-600 dark:text-gray-300">From basic resizing to advanced frame-by-frame editing, we have all the tools you need.</p>
+            <dl className="border-y border-slate-800">
+              {faqs.map((faq) => (
+                <div key={faq.question} className="border-b border-slate-800 py-7 last:border-b-0">
+                  <dt>
+                    <h3 className="text-lg font-semibold text-slate-100">{faq.question}</h3>
+                  </dt>
+                  <dd className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">{faq.answer}</dd>
                 </div>
-                <div className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">User-Friendly Interface</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Our intuitive editor is powerful for professionals yet easy for beginners to master.</p>
-                </div>
-                <div className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">High-Quality Output</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Create stunning, high-quality GIFs optimized for the web without sacrificing quality.</p>
-                </div>
-                <div className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">Privacy-Focused</h3>
-                  <p className="text-gray-600 dark:text-gray-300">All processing is done in your browser. Your files are never uploaded to our servers.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+              ))}
+            </dl>
+          </div>
+        </section>
+      </main>
 
-          <section className="w-full py-20 bg-white/5 dark:bg-black/10">
-            <div className="container mx-auto px-4">
-              <h2 className="pointer-events-none mb-8 whitespace-pre-wrap bg-gradient-to-b from-black to-gray-200/90 bg-clip-text text-center text-3xl font-bold leading-none text-transparent dark:from-white dark:to-slate-600/20 md:text-5xl">
-                Frequently Asked Questions
-              </h2>
-              <div className="mx-auto max-w-4xl space-y-6">
-                <div className="rounded-lg border bg-white/10 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">How do I create a GIF from a video?</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Simply upload your video file, select the segment you want to convert, make any desired edits, and export it as a high-quality animated GIF.
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white/10 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">Can I add text to a GIF?</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Yes! Our editor allows you to add and customize text overlays with various fonts, colors, and animations to make your GIFs more engaging.
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white/10 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">Is it possible to resize a GIF without losing quality?</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Our smart resizing algorithm minimizes quality loss. For best results, start with a high-resolution source and use our optimization tools to balance file size and quality.
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white/10 p-6 backdrop-blur-sm dark:bg-black/20">
-                  <h3 className="mb-3 text-lg font-semibold">Is this GIF editor free to use?</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Absolutely. All our GIF editing tools are completely free to use, with no watermarks or hidden costs. Enjoy unlimited access to all features.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <LatestPostsSection
-            title="Editing, resizing, and optimization guides"
-            description="Reinforce editing intent with supporting content that answers adjacent questions users search before and after opening the editor."
-            postSlugs={[
-              'how-to-edit-a-gif-without-losing-quality',
-              'optimize-gif-size-without-losing-quality',
-              'how-to-make-a-gif-from-a-video',
-            ]}
-          />
-
-          <Footer />
-        </div>
-      </div>
-    </>
+      <Footer />
+    </div>
   );
 }

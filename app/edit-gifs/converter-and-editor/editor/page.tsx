@@ -1,17 +1,19 @@
 'use client';
 
-import React from 'react';
 import dynamic from 'next/dynamic';
 
-const DynamicEditor = dynamic(() => import('@/components/video-to-gif/Editor'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-    </div>
-  ),
-});
+const DynamicStudio = dynamic(
+  () => import('@/components/gif-studio/GifStudio').then((module) => module.GifStudio),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-dvh items-center justify-center bg-[#090d14] text-sm text-slate-400">
+        Loading GIF Studio…
+      </div>
+    ),
+  },
+);
 
 export default function EditGifsEditor() {
-  return <DynamicEditor initialMenuOption="Gif" />;
+  return <DynamicStudio />;
 }

@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ThemeProvider } from '@/app/theme-provider';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import { PwaRegistration } from '@/components/pwa/PwaRegistration';
 import { Metadata } from 'next';
 import { SITE_BRAND, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL } from '@/lib/site';
 const inter = Inter({ subsets: ['latin'] });
@@ -18,6 +19,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: SITE_URL,
+  manifest: '/manifest.webmanifest',
   title: {
     default: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
     template: `%s | ${SITE_BRAND}`,
@@ -93,6 +95,7 @@ export default function RootLayout({
           <Toaster />
           {children}
         </ThemeProvider>
+        <PwaRegistration />
         <Analytics />
         <SpeedInsights />
       </body>

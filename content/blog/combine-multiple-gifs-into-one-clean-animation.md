@@ -19,7 +19,7 @@ keywords:
 relatedSlugs:
   - how-to-edit-a-gif-without-losing-quality
   - optimize-gif-size-without-losing-quality
-  - add-text-to-a-gif-without-cluttering-the-animation
+  - how-to-add-text-to-a-gif-without-cluttering-the-animation
 ctaHref: /edit-gifs/converter-and-editor
 ctaLabel: Open the editor to merge GIFs
 ---
@@ -66,7 +66,7 @@ If pacing still feels off, revisit [how to edit a GIF without losing quality](/b
 
 Sometimes a combined GIF benefits from small labels like “Step 1”, “Before”, or “After”. But captions should support the sequence, not rescue a confusing concept.
 
-If you need captions, keep them short and consistent. For more detail, see [how to add text to a GIF without cluttering the animation](/blog/add-text-to-a-gif-without-cluttering-the-animation).
+If you need captions, keep them short and consistent. For more detail, see [how to add text to a GIF without cluttering the animation](/blog/how-to-add-text-to-a-gif-without-cluttering-the-animation).
 
 ## Watch file size early
 

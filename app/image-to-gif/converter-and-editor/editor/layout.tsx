@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Image to GIF Editor - ${SITE_BRAND}`,
+  title: 'Image to GIF Editor',
   description: 'Interactive image to GIF editor interface.',
-  robots: 'noindex, nofollow'
+  alternates: { canonical: '/edit-gifs' },
+  robots: { index: false, follow: true },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
