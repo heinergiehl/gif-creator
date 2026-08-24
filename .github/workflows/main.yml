@@ -59,6 +59,8 @@ jobs:
             git reset --hard origin/main
             echo "Deployed git commit: $(git rev-parse --short HEAD)"
             git log -1 --pretty=%s
+            # Production uses distDir=.next-build. Remove stale webpack artifacts before rebuilding.
+            rm -rf -- /var/www/myapps/gif-creator/.next-build
             bun install
             bun run build
             pm2 delete gif_creator 2>/dev/null || true
