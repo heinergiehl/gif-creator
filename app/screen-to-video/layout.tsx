@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 export const metadata: Metadata = {
-  title: `Free Online Screen Recorder - Record Screen to Video (MP4) | ${SITE_BRAND}`,
+  title: 'Free Online Screen Recorder - Record Screen to Video (MP4)',
   description:
     'Record your screen online and download the recording as a video. Choose resolution, crop to the area you want, then convert the clip to a GIF — free and easy to use.',
   keywords:

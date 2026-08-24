@@ -22,7 +22,7 @@ relatedSlugs:
   - optimize-gif-size-without-losing-quality
   - how-to-make-a-gif-from-a-video
   - turn-images-into-a-smooth-animated-gif
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /edit-gifs#gif-editor-tool
 ctaLabel: Open the GIF editor
 ---
 

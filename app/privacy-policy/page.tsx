@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND, SUPPORT_EMAIL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Privacy Policy | ${SITE_BRAND}`,
+  title: 'Privacy Policy',
   description:
     `Learn how ${SITE_BRAND} handles your data, cookies, and analytics. We focus on privacy and keep media processing in the browser whenever possible.`,
   alternates: { canonical: '/privacy-policy' },

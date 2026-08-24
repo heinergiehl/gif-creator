@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Footer } from '@/app/components/ui/Footer';
+import { GifStudioEmbed } from '@/components/gif-studio/GifStudioEmbed';
 import { Button } from '@/components/ui/button';
 import { getGifEditorIntentHref } from '@/lib/editor-intents';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
@@ -280,6 +281,31 @@ export default function EditGifsPage() {
                 No forced watermark
               </li>
             </ul>
+          </div>
+        </section>
+
+        <section
+          id="gif-editor-tool"
+          aria-labelledby="gif-editor-tool-heading"
+          className="scroll-mt-20 border-b border-slate-800"
+        >
+          <div className="mx-auto max-w-7xl px-3 py-16 sm:px-8 sm:py-20 lg:px-12">
+            <div className="mb-8 max-w-3xl">
+              <p className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-sky-300">
+                Full GIF editor
+              </p>
+              <h2
+                id="gif-editor-tool-heading"
+                className="mt-4 text-balance text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl"
+              >
+                Upload and edit the animation here.
+              </h2>
+              <p className="mt-5 text-base leading-7 text-slate-400 sm:text-lg">
+                Import a GIF, video, or image sequence, then work with timing, transforms, text,
+                redaction, annotations, and export controls without jumping between tools.
+              </p>
+            </div>
+            <GifStudioEmbed />
           </div>
         </section>
 

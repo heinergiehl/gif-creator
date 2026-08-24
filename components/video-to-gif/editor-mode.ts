@@ -50,10 +50,14 @@ const editorModeConfig: Record<EditorRouteMode, EditorModeConfig> = {
 };
 
 export function getEditorRouteMode(pathname: string): EditorRouteMode {
-  if (pathname.includes('/image-to-gif/')) {
+  if (pathname === '/image-to-gif' || pathname.startsWith('/image-to-gif/')) {
     return 'image';
   }
-  if (pathname.includes('/edit-gifs/')) {
+  if (
+    pathname === '/edit-gifs' ||
+    pathname.startsWith('/edit-gifs/') ||
+    pathname === '/add-text-to-gif'
+  ) {
     return 'gif';
   }
   return 'video';

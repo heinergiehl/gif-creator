@@ -20,7 +20,7 @@ relatedSlugs:
   - best-gif-size-for-email-docs-and-social-media
   - optimize-gif-size-without-losing-quality
   - record-screen-and-turn-it-into-a-gif
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /resize-gif
 ctaLabel: Resize a GIF now
 ---
 

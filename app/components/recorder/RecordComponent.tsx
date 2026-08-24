@@ -737,7 +737,7 @@ const RecordComponent = observer(() => {
                   Download
                 </Button>
               </a>
-              <Link href="/video-to-gif/converter-and-editor/editor">
+              <Link href="/video-to-gif#video-to-gif-tool">
                 <Button
                   size="sm"
                   variant="outline"

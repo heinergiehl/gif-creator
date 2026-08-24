@@ -11,11 +11,11 @@ const tertiaryClassName =
 
 const ctaLinks = {
   video: {
-    href: '/video-to-gif/converter-and-editor/editor',
+    href: '/video-to-gif#video-to-gif-tool',
     label: 'Convert video to GIF',
   },
   image: {
-    href: '/image-to-gif/converter-and-editor/editor',
+    href: '/image-to-gif#image-to-gif-tool',
     label: 'Create from images',
   },
   gif: {

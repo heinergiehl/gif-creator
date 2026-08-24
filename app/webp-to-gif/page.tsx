@@ -66,7 +66,7 @@ export default function WebpToGifPage() {
           description: 'Move in the other direction for modern image delivery.',
         },
         {
-          href: '/split-gif-into-frames',
+          href: '/gif-to-png',
           label: 'Extract GIF frames',
           description: 'Inspect or download the individual PNG frames after conversion.',
         },

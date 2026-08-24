@@ -20,7 +20,7 @@ relatedSlugs:
   - turn-images-into-a-smooth-animated-gif
   - how-to-edit-a-gif-without-losing-quality
   - gif-vs-webp-vs-apng-which-format-should-you-use
-ctaHref: /image-to-gif/converter-and-editor
+ctaHref: /image-to-gif#image-to-gif-tool
 ctaLabel: Create a GIF from transparent images
 ---
 

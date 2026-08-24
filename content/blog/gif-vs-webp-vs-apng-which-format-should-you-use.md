@@ -20,7 +20,7 @@ relatedSlugs:
   - make-a-transparent-gif-from-video-or-images
   - optimize-gif-size-without-losing-quality
   - how-to-edit-a-gif-without-losing-quality
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /gif-tools
 ctaLabel: Start with the GIF editor
 ---
 

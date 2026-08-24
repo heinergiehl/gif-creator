@@ -3,18 +3,18 @@ import { ConversionPageShell } from '@/components/gif-tools/conversion/Conversio
 import { GifFrameExtractorTool } from '@/components/gif-tools/conversion/GifFrameExtractorTool';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Split GIF Into Frames Online and Download PNGs';
+const title = 'GIF to PNG Converter — Extract Every Frame Online';
 const description =
-  'Extract every GIF frame as a correctly composited PNG. Preview individual frames, download them separately, or save the complete sequence as one ZIP file.';
+  'Convert an animated GIF to correctly composited PNG frames. Preview each frame, download individual PNGs, or save the complete sequence as one ZIP file.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['split GIF into frames', 'GIF frame extractor', 'GIF to frames', 'extract GIF frames'],
-  alternates: { canonical: '/split-gif-into-frames' },
+  keywords: ['GIF to PNG', 'split GIF into frames', 'GIF frame extractor', 'GIF to frames', 'extract GIF frames'],
+  alternates: { canonical: '/gif-to-png' },
   openGraph: {
     type: 'website',
-    url: absoluteUrl('/split-gif-into-frames'),
+    url: absoluteUrl('/gif-to-png'),
     title,
     description,
     images: [{ url: '/hero-dark.png', width: 1200, height: 630, alt: 'GIF frame extractor' }],
@@ -25,11 +25,11 @@ export const metadata: Metadata = {
 export default function SplitGifIntoFramesPage() {
   return (
     <ConversionPageShell
-      canonicalPath="/split-gif-into-frames"
-      eyebrow="GIF frame extractor"
-      title="Split a GIF into the frames it is really made of"
+      canonicalPath="/gif-to-png"
+      eyebrow="GIF to PNG converter"
+      title="Convert a GIF into complete PNG frames"
       description={description}
-      toolName="Split GIF Into Frames"
+      toolName="GIF to PNG Frame Converter"
       featureList={[
         'Correctly composited PNG frames',
         'Individual frame downloads',

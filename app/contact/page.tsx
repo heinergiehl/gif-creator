@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND, SUPPORT_EMAIL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Contact | ${SITE_BRAND}`,
+  title: 'Contact',
   description:
     `Contact ${SITE_BRAND} for support, feedback, or feature requests. We read every message and use it to improve the GIF tools.`,
   alternates: { canonical: '/contact' },

@@ -6,7 +6,7 @@ const toolLinks = [
   { href: '/compress-gif', label: 'Compress GIF' },
   { href: '/resize-gif', label: 'Resize GIF' },
   { href: '/change-gif-speed', label: 'Change GIF Speed' },
-  { href: '/split-gif-into-frames', label: 'Split GIF into Frames' },
+  { href: '/gif-to-png', label: 'GIF to PNG' },
   { href: '/gif-to-mp4', label: 'GIF to MP4' },
   { href: '/video-to-gif', label: 'Video to GIF' },
 ];

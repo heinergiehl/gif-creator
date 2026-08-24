@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ImageResourceClient } from './ImageResourceClient';
 import { getImageResults } from './utils/getImageResults';
-import { Loader2, SearchX } from 'lucide-react';
+import { Loader2, Search, SearchX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ImageSearchProps {
   query: string;
@@ -16,10 +17,13 @@ export const ImageSearchSuspended = ({ query, imageType }: ImageSearchProps) => 
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     if (!query.trim()) {
       setImages([]);
+      setError(null);
+      setLoading(false);
       return;
     }
 
@@ -43,7 +47,16 @@ export const ImageSearchSuspended = ({ query, imageType }: ImageSearchProps) => 
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query, imageType]);
+  }, [query, imageType, retryKey]);
+
+  if (!query.trim()) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+        <Search className="h-5 w-5" aria-hidden="true" />
+        <span>Enter a search term to find optional images.</span>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -56,9 +69,15 @@ export const ImageSearchSuspended = ({ query, imageType }: ImageSearchProps) => 
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-red-500">
-        <SearchX className="h-5 w-5" />
-        <span>{error}</span>
+      <div
+        className="flex flex-col items-center justify-center gap-3 py-10 text-center text-sm text-red-600 dark:text-red-400"
+        role="alert"
+      >
+        <SearchX className="h-5 w-5" aria-hidden="true" />
+        <span>{error} Your uploaded files are unaffected.</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => setRetryKey((key) => key + 1)}>
+          Retry search
+        </Button>
       </div>
     );
   }

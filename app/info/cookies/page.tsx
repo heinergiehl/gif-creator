@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Cookie Policy | ${SITE_BRAND}`,
+  title: 'Cookie Policy',
   description:
     `Learn how ${SITE_BRAND} uses cookies and local storage for essential features and optional analytics.`,
   alternates: { canonical: '/info/cookies' },

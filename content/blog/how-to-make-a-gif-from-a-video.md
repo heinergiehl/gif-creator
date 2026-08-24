@@ -22,7 +22,7 @@ relatedSlugs:
   - how-to-edit-a-gif-without-losing-quality
   - optimize-gif-size-without-losing-quality
   - record-screen-and-turn-it-into-a-gif
-ctaHref: /video-to-gif/converter-and-editor/editor
+ctaHref: /video-to-gif#video-to-gif-tool
 ctaLabel: Open the video to GIF editor
 ---
 

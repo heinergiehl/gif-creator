@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Sign in | ${SITE_BRAND}`,
+  title: 'Sign in',
   description: `Sign in to your ${SITE_BRAND} account to manage your profile and saved projects.`,
   robots: { index: false, follow: false },
 };

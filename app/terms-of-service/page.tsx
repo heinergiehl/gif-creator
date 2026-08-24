@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Terms of Service | ${SITE_BRAND}`,
+  title: 'Terms of Service',
   description: `Terms and conditions for using ${SITE_BRAND} and its online GIF creation tools.`,
   alternates: { canonical: '/terms-of-service' },
 };

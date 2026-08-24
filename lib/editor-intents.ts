@@ -1,4 +1,4 @@
-export const GIF_EDITOR_PATH = '/edit-gifs/converter-and-editor/editor' as const;
+export const GIF_EDITOR_PATH = '/edit-gifs' as const;
 
 export const EDITOR_INTENTS = [
   'edit',
@@ -23,5 +23,5 @@ export function isEditorIntent(value: string | null | undefined): value is Edito
 }
 
 export function getGifEditorIntentHref(intent: EditorIntent): string {
-  return `${GIF_EDITOR_PATH}?intent=${encodeURIComponent(intent)}`;
+  return `${GIF_EDITOR_PATH}?intent=${encodeURIComponent(intent)}#gif-editor-tool`;
 }

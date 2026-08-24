@@ -20,7 +20,7 @@ relatedSlugs:
   - how-to-edit-a-gif-without-losing-quality
   - optimize-gif-size-without-losing-quality
   - best-gif-size-for-email-docs-and-social-media
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /add-text-to-gif#add-text-to-gif-tool
 ctaLabel: Add text in the GIF editor
 ---
 

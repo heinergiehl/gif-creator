@@ -4,7 +4,7 @@ import { getAllPosts } from '@/lib/blog';
 import { SITE_BRAND, SITE_KEYWORDS, absoluteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `GIF Blog - Tutorials, Editing Tips & Optimization Guides | ${SITE_BRAND}`,
+  title: 'GIF Blog - Tutorials, Editing Tips & Optimization Guides',
   description:
     'People-first guides for making, editing, optimizing, and converting GIFs. Learn video to GIF workflows, image sequence tips, screen recording steps, and file size best practices.',
   keywords: [

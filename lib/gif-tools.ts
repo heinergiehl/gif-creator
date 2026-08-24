@@ -57,6 +57,7 @@ export const gifTools: GifToolDefinition[] = [
     category: 'create',
     related: ['/trim-gif', '/compress-gif', '/gif-to-mp4'],
     featured: true,
+    updatedAt: '2026-08-24',
   },
   {
     path: '/image-to-gif',
@@ -64,7 +65,8 @@ export const gifTools: GifToolDefinition[] = [
     shortName: 'Images to GIF',
     description: 'Build an animated GIF from still images and control frame timing.',
     category: 'create',
-    related: ['/split-gif-into-frames', '/resize-gif', '/compress-gif'],
+    related: ['/gif-to-png', '/resize-gif', '/compress-gif'],
+    updatedAt: '2026-08-24',
   },
   {
     path: '/edit-gifs',
@@ -73,6 +75,7 @@ export const gifTools: GifToolDefinition[] = [
     description: 'Use the complete editor for layered and frame-level changes.',
     category: 'create',
     related: ['/add-text-to-gif', '/crop-gif', '/resize-gif'],
+    updatedAt: '2026-08-24',
   },
   {
     path: '/screen-to-video',
@@ -117,6 +120,7 @@ export const gifTools: GifToolDefinition[] = [
     description: 'Add a caption, callout, or label to an existing animated GIF.',
     category: 'edit',
     related: ['/edit-gifs', '/resize-gif', '/compress-gif'],
+    updatedAt: '2026-08-24',
   },
   {
     path: '/change-gif-speed',
@@ -185,14 +189,14 @@ export const gifTools: GifToolDefinition[] = [
     updatedAt: '2026-08-21',
   },
   {
-    path: '/split-gif-into-frames',
-    name: 'Split GIF into Frames',
-    shortName: 'Extract Frames',
-    description: 'Extract correctly rendered PNG frames from an animated GIF.',
+    path: '/gif-to-png',
+    name: 'GIF to PNG Frames',
+    shortName: 'GIF to PNG',
+    description: 'Convert an animated GIF into correctly rendered PNG frames.',
     category: 'extract',
     related: ['/image-to-gif', '/gif-to-webp', '/trim-gif'],
     featured: true,
-    updatedAt: '2026-08-21',
+    updatedAt: '2026-08-24',
   },
 ];
 

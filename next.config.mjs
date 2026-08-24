@@ -34,6 +34,63 @@ const baseConfig = {
     ],
   },
   reactStrictMode: true,
+  redirects: async () => [
+    {
+      source: '/create-and-edit-gifs',
+      destination: '/edit-gifs',
+      permanent: true,
+    },
+    {
+      source: '/create-and-edit-gifs/converter-and-editor',
+      destination: '/edit-gifs',
+      permanent: true,
+    },
+    {
+      source: '/create-and-edit-gifs/converter-and-editor/editor',
+      destination: '/edit-gifs',
+      permanent: true,
+    },
+    {
+      source: '/edit-gifs/converter-and-editor',
+      destination: '/edit-gifs',
+      permanent: true,
+    },
+    {
+      source: '/edit-gifs/converter-and-editor/editor',
+      destination: '/edit-gifs',
+      permanent: true,
+    },
+    {
+      source: '/image-to-gif/converter-and-editor',
+      destination: '/image-to-gif',
+      permanent: true,
+    },
+    {
+      source: '/image-to-gif/converter-and-editor/editor',
+      destination: '/image-to-gif',
+      permanent: true,
+    },
+    {
+      source: '/video-to-gif/converter-and-editor',
+      destination: '/video-to-gif',
+      permanent: true,
+    },
+    {
+      source: '/video-to-gif/converter-and-editor/editor',
+      destination: '/video-to-gif',
+      permanent: true,
+    },
+    {
+      source: '/gif-optimizer',
+      destination: '/compress-gif',
+      permanent: true,
+    },
+    {
+      source: '/split-gif-into-frames',
+      destination: '/gif-to-png',
+      permanent: true,
+    },
+  ],
   webpack: (config) => {
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',

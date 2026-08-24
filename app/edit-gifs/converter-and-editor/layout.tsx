@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import React from 'react';
 import { SITE_BRAND } from '@/lib/site';
 export const metadata: Metadata = {
-  title: `Professional GIF Editor & Advanced Editing Tools - Edit Animated GIFs Online | ${SITE_BRAND}`,
+  title: 'Professional GIF Editor & Advanced Editing Tools - Edit Animated GIFs Online',
   description:
     'Advanced GIF editor with professional editing tools. Edit animated GIFs online: add text, resize, crop, rotate, optimize frames, control animation speed. Free GIF editing with no watermarks.',
   keywords:

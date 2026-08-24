@@ -71,7 +71,7 @@ const DraggableImage = observer(({ image, index }: { image: string; index: numbe
   );
 });
 const ImageResource = observer(() => {
-  const [query, setQuery] = useState('smilies');
+  const [query, setQuery] = useState('');
   const [imageType, setImageType] = useState('vector');
   const rootStore = useStores();
   const store = rootStore.editorStore;

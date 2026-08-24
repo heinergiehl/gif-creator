@@ -70,4 +70,4 @@ jobs:
             curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/blog" | grep -q "A practical blog for making better GIFs"
             curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/gif-tools" | grep -q "One focused tool for every GIF job"
             curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/change-gif-speed" | grep -q "Change GIF speed without guessing"
-            curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/sitemap.xml" | grep -q "/split-gif-into-frames"
+            curl -fsS "http://127.0.0.1:${{ env.APP_PORT }}/sitemap.xml" | grep -q "/gif-to-png"

@@ -28,7 +28,7 @@ export function RecorderResultCard({
             Download MP4
           </Button>
         </a>
-        <Link href="/video-to-gif/converter-and-editor/editor">
+        <Link href="/video-to-gif#video-to-gif-tool">
           <Button
             variant="outline"
             className="gap-2 border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white"

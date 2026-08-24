@@ -20,7 +20,7 @@ relatedSlugs:
   - how-to-edit-a-gif-without-losing-quality
   - optimize-gif-size-without-losing-quality
   - how-to-add-text-to-a-gif-without-cluttering-the-animation
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /edit-gifs#gif-editor-tool
 ctaLabel: Open the editor to merge GIFs
 ---
 

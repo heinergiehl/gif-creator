@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   return {
-    title: `${post.title} | ${SITE_BRAND}`,
+    title: post.title,
     description: post.description,
     keywords: post.keywords,
     authors: [{ name: post.author }],

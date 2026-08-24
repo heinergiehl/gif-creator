@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Account | ${SITE_BRAND}`,
+  title: 'Account',
   robots: { index: false, follow: false },
 };
 export default async function Account() {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 export const metadata: Metadata = {
-  title: `Image to GIF Converter - Create Animated GIFs from Photos | ${SITE_BRAND}`,
+  title: 'Image to GIF Converter - Create Animated GIFs from Photos',
   description:
     'Convert images to animated GIFs online. Create GIFs from JPG, PNG, WebP photos. Professional editing tools: resize, crop, add text, optimize. Free image to GIF converter.',
   keywords: 'image to GIF, photo to GIF, JPG to GIF, PNG to GIF, animated GIF from images, image animation maker, free image to GIF converter',

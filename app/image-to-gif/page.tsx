@@ -4,10 +4,11 @@ import { ArrowRight } from 'lucide-react';
 import { Footer } from '../components/ui/Footer';
 import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
+import { GifEditorEmbed } from '@/components/video-to-gif/GifEditorEmbed';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Image to GIF Converter - Create Animated GIFs from Photos | ${SITE_BRAND}`,
+  title: 'Image to GIF Converter - Create Animated GIFs from Photos',
   description:
     'Free image to GIF converter. Turn JPG, PNG, WebP, and HEIC photos into animated GIFs. Arrange frames, add text, resize, crop, and optimize file size - no watermark.',
   keywords: 'image to GIF, photo to GIF, JPG to GIF, PNG to GIF, WebP to GIF, create animated GIF from images, image animation maker, photo GIF converter, animated image creator, free image to GIF converter',
@@ -48,7 +49,7 @@ export default function ImageToGif() {
                 </p>
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <Link
-                    href="/image-to-gif/converter-and-editor"
+                    href="#image-to-gif-tool"
                     className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-slate-900/10 transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:shadow-white/5 dark:hover:bg-slate-100"
                   >
                     Create Your GIF
@@ -68,6 +69,31 @@ export default function ImageToGif() {
                   <span>No watermark</span>
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section
+            id="image-to-gif-tool"
+            aria-labelledby="image-to-gif-tool-title"
+            className="relative z-[999] scroll-mt-24 bg-slate-50/95 py-14 dark:bg-slate-950/95 sm:py-20"
+          >
+            <div className="mx-auto w-full max-w-7xl sm:px-6 lg:px-8">
+              <div className="mb-8 px-4 sm:px-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400">
+                  Image to GIF tool
+                </p>
+                <h2
+                  id="image-to-gif-tool-title"
+                  className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl"
+                >
+                  Upload your images and build the animation here
+                </h2>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-400">
+                  Add JPG, PNG, WebP, or HEIC files, arrange the frame order, adjust timing, and
+                  export without leaving this page.
+                </p>
+              </div>
+              <GifEditorEmbed initialMenuOption="Image" label="Image to GIF editor" />
             </div>
           </section>
 

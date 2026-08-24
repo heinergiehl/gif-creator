@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Video to GIF Converter - Convert MP4, AVI, MOV to Animated GIF | ${SITE_BRAND}`,
+  title: 'Video to GIF Converter - Convert MP4, AVI, MOV to Animated GIF',
   description:
     'Free online video to GIF converter. Convert MP4, AVI, MOV (and more) into high-quality animated GIFs. Trim, crop, resize, add text, and optimize file size — no watermark and no sign-up.',
   keywords:

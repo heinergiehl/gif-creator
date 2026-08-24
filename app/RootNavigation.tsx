@@ -21,9 +21,9 @@ const sections = [
         description: 'Keep an exact time range and rebuild the shorter loop.',
       },
       {
-        title: 'Split GIF into frames',
-        href: '/split-gif-into-frames',
-        description: 'Extract composited PNG frames and download them as a ZIP.',
+        title: 'GIF to PNG',
+        href: '/gif-to-png',
+        description: 'Convert a GIF into composited PNG frames and download them as a ZIP.',
       },
       {
         title: 'GIF to MP4',

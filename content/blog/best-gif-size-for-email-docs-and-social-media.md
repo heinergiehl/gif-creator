@@ -20,7 +20,7 @@ relatedSlugs:
   - optimize-gif-size-without-losing-quality
   - resize-a-gif-for-discord-slack-and-notion
   - how-to-make-a-gif-from-a-video
-ctaHref: /edit-gifs/converter-and-editor
+ctaHref: /resize-gif
 ctaLabel: Resize and optimize a GIF
 ---
 
