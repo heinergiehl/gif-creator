@@ -7,27 +7,13 @@ import { Button } from '@/components/ui/button';
 import { getGifEditorIntentHref } from '@/lib/editor-intents';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
-const pageTitle = 'Free Online GIF Editor — Frame-by-Frame Studio';
+const pageTitle = 'Free Online GIF Editor — Edit Animated GIFs';
 const pageDescription =
-  'Edit animated GIFs online with per-frame timing, transforms, text, redaction, annotations, and effects. Local browser processing with no forced watermark.';
+  'Edit animated GIFs frame by frame in one online studio. Crop, resize, add timed text, blur details, and export locally without a watermark.';
 
 export const metadata: Metadata = {
   title: pageTitle,
   description: pageDescription,
-  keywords: [
-    'GIF editor',
-    'online GIF editor',
-    'free GIF editor',
-    'frame by frame GIF editor',
-    'edit animated GIF',
-    'add text to GIF',
-    'redact GIF',
-    'crop GIF',
-    'resize GIF',
-    'GIF effects',
-    'GIF timing editor',
-    'GIF editor no watermark',
-  ],
   alternates: { canonical: '/edit-gifs' },
   openGraph: {
     type: 'website',
@@ -182,7 +168,7 @@ const faqs = [
 ] as const;
 
 export default function EditGifsPage() {
-  const structuredData = {
+  const applicationStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: `${SITE_BRAND} GIF Studio`,
@@ -213,64 +199,85 @@ export default function EditGifsPage() {
       name: SITE_BRAND,
     },
   };
+  const faqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
 
   return (
     <div className="dark min-h-screen overflow-x-hidden bg-[#090d14] text-slate-100">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(applicationStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
       />
 
       <main>
         <section aria-labelledby="editor-heading" className="border-b border-slate-800">
-          <div className="mx-auto flex min-h-[760px] max-w-7xl flex-col justify-between px-5 pb-10 pt-32 sm:px-8 sm:pb-14 sm:pt-40 lg:px-12">
-            <div className="max-w-5xl">
-              <p className="font-mono text-xs font-medium uppercase tracking-[0.24em] text-sky-300">
-                Browser-based GIF Studio
-              </p>
-              <h1
-                id="editor-heading"
-                className="mt-7 max-w-5xl text-balance text-[clamp(3.25rem,8vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.065em] text-white"
-              >
-                Edit GIFs, <br />
-                frame by frame.
-              </h1>
-              <p className="mt-8 max-w-2xl text-pretty text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
-                A focused online GIF editor for timing, transforms, text, redaction, annotations,
-                and visual effects. Your source media stays in your browser, and exports carry no
-                forced watermark.
-              </p>
-
-              <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-12 rounded-md bg-white px-6 text-base font-semibold text-slate-950 hover:bg-slate-200"
+          <div className="mx-auto max-w-7xl px-3 pb-14 pt-20 sm:px-8 sm:pb-20 sm:pt-24 lg:px-12">
+            <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-end lg:gap-16">
+              <div>
+                <p className="font-mono text-xs font-medium uppercase tracking-[0.24em] text-sky-300">
+                  Free browser-based GIF editor
+                </p>
+                <h1
+                  id="editor-heading"
+                  className="mt-5 max-w-4xl text-balance text-[clamp(3.1rem,7vw,6.4rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-white"
                 >
-                  <Link href={getGifEditorIntentHref('edit')}>
-                    Open GIF Studio
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                  </Link>
-                </Button>
+                  Free online <br />
+                  GIF editor.
+                </h1>
+              </div>
 
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
-                  <Link
-                    href={getGifEditorIntentHref('add-text')}
-                    className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
+              <div className="max-w-2xl lg:pb-1">
+                <p className="mt-8 max-w-2xl text-pretty text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
+                  Edit every frame in one timeline. Crop, resize, tune timing, add timed text, blur
+                  private details, and export without a watermark. Your source media stays in your
+                  browser.
+                </p>
+
+                <div className="mt-7 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-12 rounded-md bg-white px-6 text-base font-semibold text-slate-950 hover:bg-slate-200"
                   >
-                    Add text
-                  </Link>
-                  <Link
-                    href={getGifEditorIntentHref('record-demo')}
-                    className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
-                  >
-                    Record a screen demo
-                  </Link>
+                    <Link href={getGifEditorIntentHref('edit')}>
+                      Start editing
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+                    <Link
+                      href={getGifEditorIntentHref('add-text')}
+                      className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
+                    >
+                      Add text
+                    </Link>
+                    <Link
+                      href={getGifEditorIntentHref('record-demo')}
+                      className="inline-flex min-h-11 items-center border-b border-slate-700 text-slate-300 transition-colors hover:border-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 focus-visible:ring-offset-[#090d14]"
+                    >
+                      Record a screen demo
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <ul className="mt-20 grid border-y border-slate-800 text-sm text-slate-400 sm:grid-cols-3 sm:divide-x sm:divide-slate-800">
+            <ul className="mt-6 grid border-y border-slate-800 text-sm text-slate-400 sm:grid-cols-3 sm:divide-x sm:divide-slate-800">
               <li className="flex min-h-14 items-center border-b border-slate-800 py-4 sm:border-b-0 sm:px-5 sm:first:pl-0">
                 Local browser processing
               </li>
@@ -281,31 +288,13 @@ export default function EditGifsPage() {
                 No forced watermark
               </li>
             </ul>
-          </div>
-        </section>
-
-        <section
-          id="gif-editor-tool"
-          aria-labelledby="gif-editor-tool-heading"
-          className="scroll-mt-20 border-b border-slate-800"
-        >
-          <div className="mx-auto max-w-7xl px-3 py-16 sm:px-8 sm:py-20 lg:px-12">
-            <div className="mb-8 max-w-3xl">
-              <p className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-sky-300">
-                Full GIF editor
-              </p>
-              <h2
-                id="gif-editor-tool-heading"
-                className="mt-4 text-balance text-3xl font-semibold tracking-[-0.04em] text-white sm:text-5xl"
-              >
-                Upload and edit the animation here.
-              </h2>
-              <p className="mt-5 text-base leading-7 text-slate-400 sm:text-lg">
-                Import a GIF, video, or image sequence, then work with timing, transforms, text,
-                redaction, annotations, and export controls without jumping between tools.
-              </p>
+            <div
+              id="gif-editor-tool"
+              aria-label="Upload and edit an animated GIF"
+              className="mt-6 scroll-mt-24"
+            >
+              <GifStudioEmbed />
             </div>
-            <GifStudioEmbed />
           </div>
         </section>
 

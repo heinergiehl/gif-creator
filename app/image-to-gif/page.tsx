@@ -8,10 +8,9 @@ import { GifEditorEmbed } from '@/components/video-to-gif/GifEditorEmbed';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Image to GIF Converter - Create Animated GIFs from Photos',
+  title: 'Image to GIF Maker — Create GIFs from Photos',
   description:
-    'Free image to GIF converter. Turn JPG, PNG, WebP, and HEIC photos into animated GIFs. Arrange frames, add text, resize, crop, and optimize file size - no watermark.',
-  keywords: 'image to GIF, photo to GIF, JPG to GIF, PNG to GIF, WebP to GIF, create animated GIF from images, image animation maker, photo GIF converter, animated image creator, free image to GIF converter',
+    'Turn JPG, PNG, WebP, and HEIC images into an animated GIF. Arrange frames, set timing, add text, resize, and export locally without a watermark.',
   alternates: { canonical: '/image-to-gif' },
 };
 
@@ -30,7 +29,6 @@ export default function ImageToGif() {
       />
       <div className="relative z-40 flex w-full flex-col items-stretch opacity-100">
         <main className="font-sans">
-
           <section className="w-full pb-16 pt-32">
             <div className="flex items-center justify-center">
               <div className="flex w-full max-w-6xl flex-col items-center gap-y-6 px-4">
@@ -38,7 +36,7 @@ export default function ImageToGif() {
                   JPG &middot; PNG &middot; WebP &middot; HEIC &mdash; browser-based, no watermark
                 </div>
                 <NeonGradientCard className="flex w-full items-center justify-center">
-                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] sm:text-5xl md:text-7xl md:leading-none">
                     Free Image to GIF Converter
                   </h1>
                 </NeonGradientCard>
@@ -104,19 +102,38 @@ export default function ImageToGif() {
                 Make an Animated GIF from Images
               </h2>
               <p className="mx-auto mb-12 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400 md:text-lg">
-                {SITE_BRAND} makes it easy to create an animated GIF from an image sequence.
-                Upload your photos, adjust the timing, and export a lightweight GIF ready for
-                social media, websites, and messaging.
+                {SITE_BRAND} makes it easy to create an animated GIF from an image sequence. Upload
+                your photos, adjust the timing, and export a lightweight GIF ready for social media,
+                websites, and messaging.
               </p>
               <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-3">
                 {[
-                  { step: '1', title: 'Upload photos', body: 'Add JPG, PNG, WebP, or HEIC images and they become individual frames.' },
-                  { step: '2', title: 'Arrange and edit', body: 'Reorder frames, set duration, crop and resize, and add text for captions.' },
-                  { step: '3', title: 'Export and share', body: 'Download an optimized animated GIF - clean exports with no watermark.' },
+                  {
+                    step: '1',
+                    title: 'Upload photos',
+                    body: 'Add JPG, PNG, WebP, or HEIC images and they become individual frames.',
+                  },
+                  {
+                    step: '2',
+                    title: 'Arrange and edit',
+                    body: 'Reorder frames, set duration, crop and resize, and add text for captions.',
+                  },
+                  {
+                    step: '3',
+                    title: 'Export and share',
+                    body: 'Download an optimized animated GIF - clean exports with no watermark.',
+                  },
                 ].map(({ step, title, body }) => (
-                  <article key={step} className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
-                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Step {step}</p>
-                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+                  <article
+                    key={step}
+                    className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
+                  >
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                      Step {step}
+                    </p>
+                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                      {title}
+                    </h3>
                     <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{body}</p>
                   </article>
                 ))}
@@ -130,14 +147,29 @@ export default function ImageToGif() {
               <h2 className="mb-8 py-8 text-center text-3xl font-bold text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-5xl">
                 Image to GIF FAQ
               </h2>
-              <div className="space-y-6 mb-[60px]">
+              <div className="mb-[60px] space-y-6">
                 {[
-                  { q: 'What image formats do you support?', a: 'You can create GIFs from JPG, PNG, WebP, HEIC, and most common image formats. Upload a sequence and export a single animated GIF.' },
-                  { q: 'How do I control GIF speed?', a: 'Adjust the frame duration to speed up or slow down your animation. Shorter durations create a faster GIF; longer durations create a slower one.' },
-                  { q: 'How can I reduce GIF file size?', a: 'Resize dimensions, reduce the number of frames, or increase frame duration. Exporting an optimized size helps GIFs load faster on the web.' },
-                  { q: 'Can I add text to an image GIF?', a: 'Yes. After arranging your frames, use the built-in text tool to add captions, labels, or callouts to any frame before exporting.' },
+                  {
+                    q: 'What image formats do you support?',
+                    a: 'You can create GIFs from JPG, PNG, WebP, HEIC, and most common image formats. Upload a sequence and export a single animated GIF.',
+                  },
+                  {
+                    q: 'How do I control GIF speed?',
+                    a: 'Adjust the frame duration to speed up or slow down your animation. Shorter durations create a faster GIF; longer durations create a slower one.',
+                  },
+                  {
+                    q: 'How can I reduce GIF file size?',
+                    a: 'Resize dimensions, reduce the number of frames, or increase frame duration. Exporting an optimized size helps GIFs load faster on the web.',
+                  },
+                  {
+                    q: 'Can I add text to an image GIF?',
+                    a: 'Yes. After arranging your frames, use the built-in text tool to add captions, labels, or callouts to any frame before exporting.',
+                  },
                 ].map(({ q, a }) => (
-                  <div key={q} className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
+                  <div
+                    key={q}
+                    className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20"
+                  >
                     <h3 className="mb-4 text-2xl font-bold text-[#ff2975]">{q}</h3>
                     <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">{a}</p>
                   </div>

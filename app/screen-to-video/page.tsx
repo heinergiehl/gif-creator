@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   title: 'Free Online Screen Recorder - Capture, Trim & Convert to GIF',
   description:
     'Record your screen, browser tab, or app window in the browser. Trim the clip, crop the area you want, download MP4, or continue into GIF conversion - no install, no sign-up.',
-  keywords: 'screen recorder, online screen recording, record screen to video, screen capture browser, screen to GIF, trim screen recording, crop screen recording, free screen recorder',
   alternates: { canonical: '/screen-to-video' },
 };
 
@@ -56,7 +55,6 @@ export default function ScreenToVideo() {
       />
       <div className="relative z-40 flex w-full flex-col items-stretch opacity-100">
         <main className="font-sans">
-
           <section className="w-full pb-16 pt-32">
             <div className="flex items-center justify-center">
               <div className="flex w-full max-w-6xl flex-col items-center gap-y-6 px-4">
@@ -64,7 +62,7 @@ export default function ScreenToVideo() {
                   Screen recording + trim + crop + GIF workflow
                 </div>
                 <NeonGradientCard className="flex w-full items-center justify-center">
-                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+                  <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] sm:text-5xl md:text-7xl md:leading-none">
                     Free Online Screen Recorder
                   </h1>
                 </NeonGradientCard>
@@ -106,15 +104,40 @@ export default function ScreenToVideo() {
               </h2>
               <div className="grid grid-cols-1 gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { title: 'Clean MP4 export', body: 'Capture sharp recordings in-browser and download a shareable video without extra software.' },
-                  { title: 'Fast capture workflow', body: 'Choose a screen, stop when ready, trim the clip, and export in a few steps.' },
-                  { title: 'Completely free', body: SITE_BRAND + ' is completely free to use. No hidden costs or subscriptions required.' },
-                  { title: 'Crop and focus', body: 'Record your whole screen, a browser tab, or a single app window, then crop to the area that matters.' },
-                  { title: 'Built for GIF workflows', body: 'Move from screen recording to video trimming to GIF conversion without switching tools.' },
-                  { title: 'Privacy-first processing', body: 'All recording and processing happens locally in your browser. Nothing is uploaded to a server.' },
+                  {
+                    title: 'Clean MP4 export',
+                    body: 'Capture sharp recordings in-browser and download a shareable video without extra software.',
+                  },
+                  {
+                    title: 'Fast capture workflow',
+                    body: 'Choose a screen, stop when ready, trim the clip, and export in a few steps.',
+                  },
+                  {
+                    title: 'Completely free',
+                    body:
+                      SITE_BRAND +
+                      ' is completely free to use. No hidden costs or subscriptions required.',
+                  },
+                  {
+                    title: 'Crop and focus',
+                    body: 'Record your whole screen, a browser tab, or a single app window, then crop to the area that matters.',
+                  },
+                  {
+                    title: 'Built for GIF workflows',
+                    body: 'Move from screen recording to video trimming to GIF conversion without switching tools.',
+                  },
+                  {
+                    title: 'Privacy-first processing',
+                    body: 'All recording and processing happens locally in your browser. Nothing is uploaded to a server.',
+                  },
                 ].map(({ title, body }) => (
-                  <div key={title} className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
-                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+                  <div
+                    key={title}
+                    className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
+                  >
+                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                      {title}
+                    </h3>
                     <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{body}</p>
                   </div>
                 ))}
@@ -133,13 +156,32 @@ export default function ScreenToVideo() {
               </p>
               <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-3">
                 {[
-                  { step: '1', title: 'Choose what to capture', body: 'Select your full screen, a browser tab, or a single app window in the browser permission dialog.' },
-                  { step: '2', title: 'Trim and crop', body: 'After recording, trim the start/end and crop the frame so the final video focuses on the important content.' },
-                  { step: '3', title: 'Export or convert', body: 'Download MP4 for sharing or move into the GIF editor for a short animation for docs, demos, or social posts.' },
+                  {
+                    step: '1',
+                    title: 'Choose what to capture',
+                    body: 'Select your full screen, a browser tab, or a single app window in the browser permission dialog.',
+                  },
+                  {
+                    step: '2',
+                    title: 'Trim and crop',
+                    body: 'After recording, trim the start/end and crop the frame so the final video focuses on the important content.',
+                  },
+                  {
+                    step: '3',
+                    title: 'Export or convert',
+                    body: 'Download MP4 for sharing or move into the GIF editor for a short animation for docs, demos, or social posts.',
+                  },
                 ].map(({ step, title, body }) => (
-                  <article key={step} className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
-                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Step {step}</p>
-                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+                  <article
+                    key={step}
+                    className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
+                  >
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                      Step {step}
+                    </p>
+                    <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                      {title}
+                    </h3>
                     <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{body}</p>
                   </article>
                 ))}
@@ -153,14 +195,31 @@ export default function ScreenToVideo() {
               <h2 className="mb-8 py-8 text-center text-3xl font-bold text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-5xl">
                 Frequently Asked Questions
               </h2>
-              <div className="space-y-6 mb-[60px]">
+              <div className="mb-[60px] space-y-6">
                 {[
-                  { q: 'How do I record my screen and convert it into a video?', a: 'Click "Start Recording", choose what you want to capture (screen, tab, or window), then download the result as a video when you are done.' },
-                  { q: 'Can I edit a video after recording it?', a: 'Yes. After recording you can trim start and end points, crop the frame, and continue into the GIF editor to add text, adjust sizes, and apply filters.' },
-                  { q: 'Can I convert a screen recording to a GIF?', a: 'Yes. After recording, use the "Convert recording to GIF" button to take your MP4 straight into the GIF conversion workflow.' },
-                  { q: 'Is there a limit to how many recordings I can make?', a: SITE_BRAND + ' is completely free. Record as many screen captures as you need with no restrictions.' },
+                  {
+                    q: 'How do I record my screen and convert it into a video?',
+                    a: 'Click "Start Recording", choose what you want to capture (screen, tab, or window), then download the result as a video when you are done.',
+                  },
+                  {
+                    q: 'Can I edit a video after recording it?',
+                    a: 'Yes. After recording you can trim start and end points, crop the frame, and continue into the GIF editor to add text, adjust sizes, and apply filters.',
+                  },
+                  {
+                    q: 'Can I convert a screen recording to a GIF?',
+                    a: 'Yes. After recording, use the "Convert recording to GIF" button to take your MP4 straight into the GIF conversion workflow.',
+                  },
+                  {
+                    q: 'Is there a limit to how many recordings I can make?',
+                    a:
+                      SITE_BRAND +
+                      ' is completely free. Record as many screen captures as you need with no restrictions.',
+                  },
                 ].map(({ q, a }) => (
-                  <div key={q} className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
+                  <div
+                    key={q}
+                    className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20"
+                  >
                     <h3 className="mb-4 text-2xl font-bold text-[#ff2975]">{q}</h3>
                     <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">{a}</p>
                   </div>

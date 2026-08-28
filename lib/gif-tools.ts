@@ -215,9 +215,9 @@ export function getRelatedGifTools(path: string, limit = 3): GifToolDefinition[]
 }
 
 export const canonicalStaticPages: Array<{ path: string; updatedAt?: string }> = [
-  { path: '/', updatedAt: '2026-08-21' },
+  { path: '/', updatedAt: '2026-08-28' },
   { path: '/gif-tools', updatedAt: '2026-08-21' },
-  ...gifTools.map(({ path, updatedAt }) => ({ path, updatedAt })),
+  ...gifTools.map(({ path }) => ({ path, updatedAt: '2026-08-28' })),
   { path: '/blog' },
   { path: '/contact' },
   { path: '/privacy-policy' },

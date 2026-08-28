@@ -322,7 +322,7 @@ export const seoWorkflowPages: SeoWorkflowPage[] = [
     slug: 'add-text-to-gif',
     path: '/add-text-to-gif',
     title: 'Add Text to GIF Online',
-    metaTitle: 'Add Text to GIF Online Free',
+    metaTitle: 'Add Text to GIF Online — Animated GIF Captions',
     description:
       'Add captions, labels, and callouts to animated GIFs online. Place text without blocking the motion, then export a clean GIF without a watermark.',
     keywords: [
@@ -524,7 +524,6 @@ export function buildSeoWorkflowMetadata(page: SeoWorkflowPage): Metadata {
   return {
     title: page.metaTitle,
     description: page.description,
-    keywords: page.keywords,
     alternates: { canonical: page.path },
     openGraph: {
       type: 'website',

@@ -5,8 +5,6 @@ export const metadata: Metadata = {
   title: 'Professional GIF Editor & Advanced Editing Tools - Edit Animated GIFs Online',
   description:
     'Advanced GIF editor with professional editing tools. Edit animated GIFs online: add text, resize, crop, rotate, optimize frames, control animation speed. Free GIF editing with no watermarks.',
-  keywords:
-    'GIF editor, edit animated GIFs, professional GIF editing tools, resize GIF, crop animated GIF, rotate GIF, add text to GIF, GIF frame editor, optimize animated GIF, GIF effects editor, online GIF editor, free GIF editing tools, animated image editor',
   openGraph: {
     title: `Professional GIF Editor & Advanced Editing Tools | ${SITE_BRAND}`,
     description:

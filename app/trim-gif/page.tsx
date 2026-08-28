@@ -10,15 +10,6 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  keywords: [
-    'trim GIF',
-    'cut GIF',
-    'GIF trimmer',
-    'shorten GIF',
-    'cut animated GIF',
-    'remove GIF frames',
-    'trim GIF by time',
-  ],
   alternates: { canonical: '/trim-gif' },
   openGraph: {
     type: 'website',

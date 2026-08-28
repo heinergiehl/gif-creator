@@ -10,15 +10,6 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  keywords: [
-    'change GIF speed',
-    'GIF speed changer',
-    'speed up GIF',
-    'slow down GIF',
-    'make GIF faster',
-    'make GIF slower',
-    'change GIF duration',
-  ],
   alternates: { canonical: '/change-gif-speed' },
   openGraph: {
     type: 'website',

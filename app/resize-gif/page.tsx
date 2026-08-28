@@ -6,20 +6,13 @@ import {
 } from '@/components/gif-tools/edit/DirectEditPage';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Resize GIF Online with Exact Dimensions';
+const title = 'GIF Resizer — Resize Animated GIF Online';
 const description =
-  'Resize an animated GIF to exact pixel dimensions with aspect-ratio locking and quick presets. Preview and download every frame locally without uploading your GIF.';
+  'Resize an animated GIF to exact pixel dimensions with aspect-ratio locking and presets. Preview every frame locally and download without uploading the GIF.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: [
-    'resize GIF',
-    'GIF resizer',
-    'change GIF dimensions',
-    'resize animated GIF',
-    'make GIF smaller dimensions',
-  ],
   alternates: { canonical: '/resize-gif' },
   openGraph: {
     type: 'website',

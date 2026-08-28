@@ -27,11 +27,9 @@ import {
   UploadIcon,
 } from 'lucide-react';
 export const metadata: Metadata = {
-  title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+  title: 'Free GIF Maker & Animated GIF Creator',
   description:
-    'Create and edit animated GIFs online. Convert video to GIF, make GIFs from images, crop, resize, add text, adjust speed, and optimize file size — free, fast, and without watermarks.',
-  keywords:
-    'GIF maker, video to GIF, GIF editor, animated GIF maker, resize GIF, crop GIF, rotate GIF, GIF optimizer, split GIF frames, add text to GIF, GIF converter, online GIF tools, edit GIF frames, GIF animation editor, compress GIF, WebP to GIF, APNG maker, free GIF editor, no watermark GIF, animated image editor, GIF effects, frame editor, GIF duration editor, image to GIF, animated GIF creator, convert MP4 to GIF online free, how to make a GIF from a video, reduce GIF file size, GIF speed changer, screen recording to GIF, make GIF from images, browser-based GIF editor, private GIF maker no upload, GIF loop editor, best free online GIF tool, create animated GIF without watermark, GIF frame timing editor, video clip to GIF converter, optimize GIF for web, animated sticker maker, MOV to GIF, AVI to GIF, WebM to GIF',
+    'Make animated GIFs from video, images, or an existing GIF. Edit frames, timing, text, and file size locally in your browser with no watermark.',
   alternates: { canonical: '/' },
 };
 const files = [
@@ -279,10 +277,10 @@ export default function Home() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: `${SITE_BRAND} - Online GIF Maker & Editor`,
+    name: `${SITE_BRAND} - Online GIF Maker`,
     url: absoluteUrl('/'),
     description:
-      'Free online GIF maker and editor. Create, resize, crop, rotate, and optimize animated GIFs. Convert videos to GIFs with professional editing tools.',
+      'Make animated GIFs from video, images, or existing animations, then edit and optimize them locally in your browser.',
     applicationCategory: 'ImageApplication',
     operatingSystem: 'Web Browser',
     offers: {
@@ -364,17 +362,15 @@ export default function Home() {
               <div className="flex w-full max-w-6xl flex-col items-center gap-y-6">
                 <NeonGradientCard className="flex w-full items-center justify-center">
                   <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] sm:text-5xl md:text-7xl md:leading-none">
-                    Free Online GIF Maker & Editor
+                    Free Online GIF Maker
                   </h1>
                 </NeonGradientCard>
                 <div className="mt-6 rounded-full border border-white/40 bg-white/60 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-200">
-                  Convert video, build from images, or edit an existing GIF — all in one
-                  browser-based editor.
+                  Make an animated GIF from video or images, then continue in the full editor.
                 </div>
                 <p className="max-w-6xl text-pretty px-4 py-6 text-center text-xl md:px-0">
-                  Start with a video, image sequence, or GIF. Then crop, resize, rotate, add text,
-                  tune timing, and optimize file size with a fast editor that runs locally in your
-                  browser. Supports GIF, WebP, and APNG, with no watermark on export.
+                  Start with a video, image sequence, or existing GIF. Arrange frames, tune timing,
+                  add text, and optimize file size in a fast local workflow with no watermark.
                 </p>
                 <div className=" mx-auto flex flex-col items-center justify-center space-x-4 space-y-8">
                   <CTA />
@@ -577,9 +573,12 @@ export default function Home() {
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
                   <EyeIcon className="mx-auto mb-3 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                  <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">No tracking</h3>
+                  <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">
+                    No media analytics
+                  </h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    We don&apos;t track, store, or analyze your media. Your content is yours.
+                    We never inspect filenames or media content. Product analytics contain only
+                    anonymous workflow events.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">

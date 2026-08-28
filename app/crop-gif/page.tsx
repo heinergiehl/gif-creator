@@ -6,14 +6,13 @@ import {
 } from '@/components/gif-tools/edit/DirectEditPage';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Crop GIF Online with an Animated Preview';
+const title = 'Crop GIF Online — Animated GIF Cropper';
 const description =
-  'Crop an animated GIF with exact X, Y, width, and height controls or common aspect presets. Preview the crop area and download the full animation locally.';
+  'Crop an animated GIF with exact controls or common aspect-ratio presets. Preview the crop area and download the full animation locally without a watermark.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['crop GIF', 'GIF cropper', 'crop animated GIF', 'trim GIF edges', 'square GIF crop'],
   alternates: { canonical: '/crop-gif' },
   openGraph: {
     type: 'website',

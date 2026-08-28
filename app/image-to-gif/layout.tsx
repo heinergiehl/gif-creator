@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import { SITE_BRAND } from '@/lib/site';
 export const metadata: Metadata = {
-  title: 'Image to GIF Converter - Create Animated GIFs from Photos',
+  title: 'Image to GIF Maker — Create GIFs from Photos',
   description:
-    'Convert images to animated GIFs online. Create GIFs from JPG, PNG, WebP photos. Professional editing tools: resize, crop, add text, optimize. Free image to GIF converter.',
-  keywords: 'image to GIF, photo to GIF, JPG to GIF, PNG to GIF, animated GIF from images, image animation maker, free image to GIF converter',
+    'Turn JPG, PNG, WebP, and HEIC images into an animated GIF. Arrange frames, set timing, add text, resize, and export locally without a watermark.',
   openGraph: {
-    title: 'Free Image to GIF Converter - Create Animated GIFs from Photos',
-    description: 'Convert images to animated GIFs online. Support for JPG, PNG, WebP formats. Professional editing tools included.',
+    title: 'Image to GIF Maker — Create GIFs from Photos',
+    description:
+      'Turn photos and image sequences into an animated GIF, edit the timing, and export without a watermark.',
     url: '/image-to-gif',
     siteName: SITE_BRAND,
     images: [
@@ -23,8 +23,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Image to GIF Converter - Create Animated GIFs from Photos',
-    description: 'Convert images to animated GIFs online. Support for JPG, PNG, WebP formats.',
+    title: 'Image to GIF Maker — Create GIFs from Photos',
+    description:
+      'Turn photos and image sequences into an animated GIF and export without a watermark.',
     images: ['/hero-dark.png'],
   },
   alternates: {

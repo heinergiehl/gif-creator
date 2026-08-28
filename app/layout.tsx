@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { PwaRegistration } from '@/components/pwa/PwaRegistration';
 import { Metadata } from 'next';
-import { SITE_BRAND, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL } from '@/lib/site';
+import { SITE_BRAND, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 const inter = Inter({ subsets: ['latin'] });
 import type { Viewport } from 'next';
 export const viewport: Viewport = {
@@ -21,13 +21,12 @@ export const metadata: Metadata = {
   metadataBase: SITE_URL,
   manifest: '/manifest.webmanifest',
   title: {
-    default: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    default: `Free GIF Maker & Animated GIF Creator | ${SITE_BRAND}`,
     template: `%s | ${SITE_BRAND}`,
   },
   description: SITE_DESCRIPTION,
   alternates: { canonical: '/' },
   applicationName: SITE_NAME,
-  keywords: SITE_KEYWORDS,
   authors: [{ name: SITE_BRAND }],
   creator: SITE_BRAND,
   publisher: SITE_BRAND,
@@ -42,7 +41,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: SITE_BRAND,
-    title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    title: `Free GIF Maker & Animated GIF Creator | ${SITE_BRAND}`,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -55,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_BRAND} — Free Online GIF Maker & Editor`,
+    title: `Free GIF Maker & Animated GIF Creator | ${SITE_BRAND}`,
     description: SITE_DESCRIPTION,
     images: ['/hero-dark.png'],
   },

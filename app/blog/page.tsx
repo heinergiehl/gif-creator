@@ -1,20 +1,12 @@
 import type { Metadata } from 'next';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { getAllPosts } from '@/lib/blog';
-import { SITE_BRAND, SITE_KEYWORDS, absoluteUrl } from '@/lib/site';
+import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'GIF Blog - Tutorials, Editing Tips & Optimization Guides',
+  title: 'GIF Blog — Tutorials, Editing & Optimization',
   description:
     'People-first guides for making, editing, optimizing, and converting GIFs. Learn video to GIF workflows, image sequence tips, screen recording steps, and file size best practices.',
-  keywords: [
-    ...SITE_KEYWORDS,
-    'GIF tutorials',
-    'how to make a GIF',
-    'how to edit a GIF',
-    'how to optimize a GIF',
-    'GIF blog',
-  ],
   alternates: { canonical: '/blog' },
   openGraph: {
     title: `GIF Blog - Tutorials, Editing Tips & Optimization Guides | ${SITE_BRAND}`,
@@ -67,7 +59,9 @@ export default function BlogIndexPage() {
             A practical blog for making better GIFs
           </h1>
           <p className="mt-6 text-lg leading-8 text-slate-700 dark:text-slate-300">
-            Learn how to convert video to GIF, create GIFs from image sequences, edit animations without losing quality, and keep files lightweight enough for docs, social posts, and landing pages.
+            Learn how to convert video to GIF, create GIFs from image sequences, edit animations
+            without losing quality, and keep files lightweight enough for docs, social posts, and
+            landing pages.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a

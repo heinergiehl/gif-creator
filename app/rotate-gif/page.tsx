@@ -13,7 +13,6 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['rotate GIF', 'flip GIF', 'rotate animated GIF', 'mirror GIF', 'turn GIF 90 degrees'],
   alternates: { canonical: '/rotate-gif' },
   openGraph: {
     type: 'website',

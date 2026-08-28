@@ -10,14 +10,6 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  keywords: [
-    'reverse GIF',
-    'GIF reverser',
-    'play GIF backwards',
-    'boomerang GIF maker',
-    'ping pong GIF',
-    'reverse animated GIF',
-  ],
   alternates: { canonical: '/reverse-gif' },
   openGraph: {
     type: 'website',

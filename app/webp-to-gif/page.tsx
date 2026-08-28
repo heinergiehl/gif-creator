@@ -3,14 +3,13 @@ import { ConversionPageShell } from '@/components/gif-tools/conversion/Conversio
 import { MediaConversionTool } from '@/components/gif-tools/conversion/MediaConversionTool';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Convert Animated WebP to GIF Online';
+const title = 'WebP to GIF Converter — Animated WebP Online';
 const description =
   'Convert an animated WebP to GIF locally in your browser. Preserve animation timing and transparency, preview the converted GIF, and download it without a watermark.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['WebP to GIF', 'animated WebP to GIF', 'convert WebP to GIF', 'WebP GIF converter'],
   alternates: { canonical: '/webp-to-gif' },
   openGraph: {
     type: 'website',

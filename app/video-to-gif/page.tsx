@@ -9,13 +9,9 @@ import { GifEditorEmbed } from '@/components/video-to-gif/GifEditorEmbed';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Free Video to GIF Converter — MP4, MOV, AVI Online',
+  title: 'Video to GIF Converter — MP4 to GIF Online',
   description:
-    'Convert MP4, MOV, AVI, and WebM videos to animated GIFs online. Trim clips, adjust quality, resize, add text, and export a watermark-free GIF — free and browser-based.',
-  keywords: [
-    'video to gif', 'mp4 to gif', 'mov to gif', 'avi to gif', 'webm to gif',
-    'convert video to gif online', 'gif converter', 'animated gif from video',
-  ],
+    'Convert MP4, MOV, and WebM video to GIF in your browser. Trim the clip, resize, add text, and export a clean animated GIF without a watermark.',
   alternates: { canonical: '/video-to-gif' },
 };
 const features = [
@@ -88,33 +84,34 @@ const faqData = [
 ];
 export default function VideoToGif() {
   const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": `Video to GIF Converter - ${SITE_BRAND}`,
-    "url": absoluteUrl('/video-to-gif'),
-    "description": "Free online video to GIF converter. Convert MP4, AVI, MOV videos to high-quality animated GIFs with professional editing tools.",
-    "applicationCategory": "VideoApplication",
-    "operatingSystem": "Web Browser",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `Video to GIF Converter - ${SITE_BRAND}`,
+    url: absoluteUrl('/video-to-gif'),
+    description:
+      'Free online video to GIF converter. Convert MP4, AVI, MOV videos to high-quality animated GIFs with professional editing tools.',
+    applicationCategory: 'VideoApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
     },
-    "featureList": [
-      "MP4 to GIF converter",
-      "AVI to GIF converter",
-      "MOV to GIF converter",
-      "Video frame extraction",
-      "GIF quality optimization",
-      "Frame rate control",
-      "Video cropping",
-      "Animation speed adjustment",
-      "No watermarks"
+    featureList: [
+      'MP4 to GIF converter',
+      'AVI to GIF converter',
+      'MOV to GIF converter',
+      'Video frame extraction',
+      'GIF quality optimization',
+      'Frame rate control',
+      'Video cropping',
+      'Animation speed adjustment',
+      'No watermarks',
     ],
-    "author": {
-      "@type": "Organization",
-      "name": SITE_BRAND
-    }
+    author: {
+      '@type': 'Organization',
+      name: SITE_BRAND,
+    },
   };
 
   return (
@@ -143,12 +140,14 @@ export default function VideoToGif() {
                     MP4 · MOV · AVI · WebM — browser-based, no watermark
                   </div>
                   <NeonGradientCard className="flex w-full items-center justify-center">
-                    <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent sm:text-5xl md:text-7xl md:leading-none dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
+                    <h1 className="pointer-events-none z-10 w-full bg-gradient-to-br from-[#ff2975] from-35% to-[#00FFF1] bg-clip-text text-center text-4xl font-bold leading-tight tracking-tighter text-transparent dark:drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] sm:text-5xl md:text-7xl md:leading-none">
                       Free Video to GIF Converter
                     </h1>
                   </NeonGradientCard>
                   <p className="max-w-3xl text-pretty px-4 py-4 text-center text-xl text-slate-700 dark:text-slate-300 md:px-0">
-                    Turn a short clip into a crisp, looping GIF. Upload MP4, AVI, MOV, or WebM, trim the scene, crop and resize, add text, and export an optimized GIF — free and watermark-free.
+                    Turn a short clip into a crisp, looping GIF. Upload MP4, AVI, MOV, or WebM, trim
+                    the scene, crop and resize, add text, and export an optimized GIF — free and
+                    watermark-free.
                   </p>
                   <div className="flex flex-col items-center gap-4 sm:flex-row">
                     <Link
@@ -202,15 +201,22 @@ export default function VideoToGif() {
 
             <section className="relative z-[999] w-full py-20">
               <div className="pointer-events-none absolute inset-0 bg-white/30 dark:bg-slate-950/40" />
-              <div className="relative container mx-auto flex h-full w-full flex-col px-4">
+              <div className="container relative mx-auto flex h-full w-full flex-col px-4">
                 <h2 className="mb-8 whitespace-pre-wrap py-12 text-center text-3xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-6xl">
                   Video to GIF Conversion Features
                 </h2>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {features.map((feature, index) => (
-                    <div key={index} className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
-                      <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{feature.name}</h3>
-                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{feature.body}</p>
+                    <div
+                      key={index}
+                      className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
+                    >
+                      <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                        {feature.name}
+                      </h3>
+                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
+                        {feature.body}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -228,14 +234,37 @@ export default function VideoToGif() {
                 </div>
                 <div className="grid gap-6 md:grid-cols-2">
                   {[
-                    { step: '1', title: 'Upload your video', body: 'Select your video file (MP4, AVI, MOV, WMV, etc.). Files are processed locally — nothing is uploaded to a server.' },
-                    { step: '2', title: 'Customize settings', body: 'Choose frame range, adjust quality, resize dimensions, and set frame rate. Preview your GIF in real time.' },
-                    { step: '3', title: 'Edit and optimize', body: 'Crop regions, add text overlays, apply effects, and fine-tune file size with the built-in GIF editor.' },
-                    { step: '4', title: 'Download your GIF', body: 'Export a high-quality animated GIF with no watermark. Perfect for social, websites, docs, and messaging.' },
+                    {
+                      step: '1',
+                      title: 'Upload your video',
+                      body: 'Select your video file (MP4, AVI, MOV, WMV, etc.). Files are processed locally — nothing is uploaded to a server.',
+                    },
+                    {
+                      step: '2',
+                      title: 'Customize settings',
+                      body: 'Choose frame range, adjust quality, resize dimensions, and set frame rate. Preview your GIF in real time.',
+                    },
+                    {
+                      step: '3',
+                      title: 'Edit and optimize',
+                      body: 'Crop regions, add text overlays, apply effects, and fine-tune file size with the built-in GIF editor.',
+                    },
+                    {
+                      step: '4',
+                      title: 'Download your GIF',
+                      body: 'Export a high-quality animated GIF with no watermark. Perfect for social, websites, docs, and messaging.',
+                    },
                   ].map(({ step, title, body }) => (
-                    <article key={step} className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
-                      <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Step {step}</p>
-                      <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+                    <article
+                      key={step}
+                      className="rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
+                    >
+                      <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                        Step {step}
+                      </p>
+                      <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+                        {title}
+                      </h3>
                       <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{body}</p>
                     </article>
                   ))}
@@ -244,29 +273,34 @@ export default function VideoToGif() {
             </section>
             <section className="relative w-full py-20">
               <div className="pointer-events-none absolute inset-0 bg-white/25 dark:bg-slate-950/40" />
-              <div className="relative container mx-auto px-4">
+              <div className="container relative mx-auto px-4">
                 <h2 className="mb-8 whitespace-pre-wrap py-12 text-center text-3xl font-bold leading-none text-slate-800 dark:bg-gradient-to-b dark:from-white dark:to-slate-500 dark:bg-clip-text dark:text-transparent md:text-6xl">
                   Video to GIF Converter FAQ
                 </h2>
-                <div className="mx-auto max-w-4xl space-y-6 mb-[60px]">
+                <div className="mx-auto mb-[60px] max-w-4xl space-y-6">
                   {faqData.map((faq, index) => (
-                    <div key={index} className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20">
+                    <div
+                      key={index}
+                      className="rounded-lg border bg-white/5 p-6 backdrop-blur-sm dark:bg-black/20"
+                    >
                       <h3 className="mb-4 text-2xl font-bold text-[#ff2975]">{faq.question}</h3>
-                      <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">{faq.answer}</p>
+                      <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+                        {faq.answer}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
-          <LatestPostsSection
-            title="Video to GIF tutorials and optimization tips"
-            description="These guides support the same search intent as the converter page and help users choose better clip length, quality, and file-size settings."
-            postSlugs={[
-              'how-to-make-a-gif-from-a-video',
-              'optimize-gif-size-without-losing-quality',
-              'record-screen-and-turn-it-into-a-gif',
-            ]}
-          />
+            <LatestPostsSection
+              title="Video to GIF tutorials and optimization tips"
+              description="These guides support the same search intent as the converter page and help users choose better clip length, quality, and file-size settings."
+              postSlugs={[
+                'how-to-make-a-gif-from-a-video',
+                'optimize-gif-size-without-losing-quality',
+                'record-screen-and-turn-it-into-a-gif',
+              ]}
+            />
           </main>
           <Footer />
         </div>

@@ -37,15 +37,18 @@ export function StudioToolRail({
   activeTool,
   onToolChange,
   className,
+  describedBy,
 }: {
   activeTool: StudioTool;
-  onToolChange: (tool: StudioTool) => void;
+  onToolChange: (tool: StudioTool, trigger: HTMLButtonElement) => void;
   className?: string;
+  describedBy?: string;
 }) {
   return (
     <TooltipProvider delayDuration={350}>
       <nav
         aria-label="Editing tools"
+        aria-describedby={describedBy}
         className={cn(
           'flex shrink-0 items-center gap-1 border-slate-800 bg-slate-950 p-2 lg:w-[76px] lg:flex-col lg:border-r lg:py-3',
           className,
@@ -58,9 +61,9 @@ export function StudioToolRail({
                 type="button"
                 aria-label={label}
                 aria-pressed={activeTool === id}
-                onClick={() => onToolChange(id)}
+                onClick={(event) => onToolChange(id, event.currentTarget)}
                 className={cn(
-                  'group flex h-14 w-12 flex-none flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 lg:h-[58px] lg:w-[58px]',
+                  'group flex h-14 w-12 flex-none snap-start flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 lg:h-[58px] lg:w-[58px]',
                   activeTool === id
                     ? 'bg-sky-400/12 text-sky-300'
                     : 'text-slate-500 hover:bg-white/[0.05] hover:text-slate-200',

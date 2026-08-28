@@ -3,14 +3,13 @@ import { ConversionPageShell } from '@/components/gif-tools/conversion/Conversio
 import { MediaConversionTool } from '@/components/gif-tools/conversion/MediaConversionTool';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Convert GIF to MP4 Online — Free and Private';
+const title = 'GIF to MP4 Converter — Convert GIF to Video';
 const description =
-  'Convert an animated GIF to an MP4 video in your browser. Choose the transparency background, keep the animation timing, preview the result, and download without a watermark.';
+  'Convert an animated GIF to MP4 video in your browser. Keep the timing, choose a transparency background, preview the result, and download without a watermark.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['GIF to MP4', 'convert GIF to video', 'GIF to video converter', 'animated GIF to MP4'],
   alternates: { canonical: '/gif-to-mp4' },
   openGraph: {
     type: 'website',

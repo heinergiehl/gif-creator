@@ -5,22 +5,13 @@ import { GifOptimizerTool } from '@/components/gif-optimizer/GifOptimizerTool';
 import { RelatedGifTools } from '@/components/gif-tools/RelatedGifTools';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'Compress GIF Online to an Exact KB or MB Size';
+const title = 'Compress GIF Online — Exact KB/MB GIF Compressor';
 const description =
-  'Compress an animated GIF to a specific KB or MB limit. Compare real output files, keep the clearest result under your target, and download it without uploading your source.';
+  'Compress an animated GIF to an exact KB or MB target. Compare real outputs and download the clearest result under your limit without uploading the source.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: [
-    'compress GIF',
-    'GIF compressor',
-    'reduce GIF file size',
-    'compress GIF to 1MB',
-    'compress GIF to exact size',
-    'make GIF smaller',
-    'GIF size reducer',
-  ],
   alternates: {
     canonical: '/compress-gif',
   },

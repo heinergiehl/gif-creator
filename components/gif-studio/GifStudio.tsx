@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   Check,
+  ChevronRight,
   CloudOff,
   Download,
   FilePlus2,
@@ -38,6 +39,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { trackProductEvent } from '@/lib/product-analytics';
 import { EDITOR_INTENTS, isEditorIntent, type EditorIntent } from '@/lib/editor-intents';
 import {
   createCrossfadeFrames,
@@ -129,6 +131,8 @@ function StudioTopBar({
   onOpenMedia,
   onOpenProjects,
   onOpenExport,
+  projectsButtonRef,
+  exportButtonRef,
 }: {
   project: StudioProject;
   embedded: boolean;
@@ -141,6 +145,8 @@ function StudioTopBar({
   onOpenMedia: () => void;
   onOpenProjects: () => void;
   onOpenExport: () => void;
+  projectsButtonRef: React.Ref<HTMLButtonElement>;
+  exportButtonRef: React.Ref<HTMLButtonElement>;
 }) {
   const Heading = embedded ? 'h2' : 'h1';
 
@@ -199,27 +205,32 @@ function StudioTopBar({
           variant="ghost"
           className="h-8 px-2 text-slate-400 sm:px-3"
           onClick={onOpenMedia}
+          aria-label="Open media"
         >
-          <Upload className="h-4 w-4 sm:mr-2" />
+          <Upload className="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span className="hidden sm:inline">Open</span>
         </Button>
         <Button
+          ref={projectsButtonRef}
           type="button"
           size="sm"
           variant="ghost"
           className="h-8 px-2 text-slate-400 sm:px-3"
           onClick={onOpenProjects}
+          aria-label="Open projects"
         >
-          <FolderOpen className="h-4 w-4 sm:mr-2" />
+          <FolderOpen className="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span className="hidden sm:inline">Projects</span>
         </Button>
         <Button
+          ref={exportButtonRef}
           type="button"
           size="sm"
           className="h-8 bg-sky-400 px-2 text-slate-950 hover:bg-sky-300 sm:px-3"
           onClick={onOpenExport}
+          aria-label="Export animation"
         >
-          <Download className="h-4 w-4 sm:mr-2" />
+          <Download className="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span className="hidden sm:inline">Export</span>
         </Button>
       </header>
@@ -242,8 +253,12 @@ export function GifStudio({
   const { project, setProject, undo, redo, canUndo, canRedo, resetHistory } =
     useStudioHistory(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const projectsButtonRef = React.useRef<HTMLButtonElement>(null);
+  const exportButtonRef = React.useRef<HTMLButtonElement>(null);
+  const mobileToolTriggerRef = React.useRef<HTMLButtonElement | null>(null);
   const saveSequenceRef = React.useRef(0);
   const currentTimeRef = React.useRef(0);
+  const editTrackedRef = React.useRef(false);
   const [activeTool, setActiveTool] = React.useState<StudioTool>(INTENT_TOOL[intent] ?? 'select');
   const [selectedFrameIds, setSelectedFrameIds] = React.useState<Set<string>>(new Set());
   const [selectedOverlayId, setSelectedOverlayId] = React.useState<string | null>(null);
@@ -273,6 +288,10 @@ export function GifStudio({
   React.useEffect(() => {
     currentTimeRef.current = currentTimeMs;
   }, [currentTimeMs]);
+
+  React.useEffect(() => {
+    trackProductEvent('gif_editor_view', { intent, embedded });
+  }, [embedded, intent]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -343,6 +362,11 @@ export function GifStudio({
       setActiveTool(INTENT_TOOL[intent] ?? 'select');
       setProgress({ phase: 'ready', value: 100, message: 'Project ready.' });
       setError('');
+      editTrackedRef.current = false;
+      trackProductEvent('gif_media_ready', {
+        source: next.sourceKind,
+        frames: next.frames.length,
+      });
       if (intent === 'export') setExportOpen(true);
     },
     [intent, resetHistory, setProject],
@@ -351,6 +375,16 @@ export function GifStudio({
   const importFiles = React.useCallback(
     async (files: File[]) => {
       if (files.length === 0) return;
+      const source = files[0].name.toLowerCase().endsWith('.gifstudio')
+        ? 'project'
+        : files.some((file) => file.type.startsWith('video/'))
+          ? 'video'
+          : files.length > 1
+            ? 'images'
+            : files[0].type === 'image/gif'
+              ? 'gif'
+              : 'image';
+      trackProductEvent('gif_upload_started', { source, files: files.length });
       setPlaying(false);
       setError('');
       setProgress({ phase: 'importing', value: 2, message: 'Inspecting local media…' });
@@ -367,6 +401,7 @@ export function GifStudio({
       } catch (caught) {
         setProgress({ phase: project ? 'ready' : 'empty', value: 0, message: '' });
         setError(caught instanceof Error ? caught.message : 'The media could not be opened.');
+        trackProductEvent('gif_upload_failed', { source });
       }
     },
     [openProject, project],
@@ -386,11 +421,35 @@ export function GifStudio({
 
   const changeProject = React.useCallback(
     (next: StudioProject) => {
+      if (!editTrackedRef.current) {
+        editTrackedRef.current = true;
+        trackProductEvent('gif_edit_started', { tool: activeTool });
+      }
       setProject(next);
       setProgress({ phase: 'ready', value: 100, message: 'Changes applied.' });
     },
-    [setProject],
+    [activeTool, setProject],
   );
+
+  const openExport = React.useCallback(() => {
+    trackProductEvent('gif_export_opened', { frames: project?.frames.length ?? 0 });
+    setExportOpen(true);
+  }, [project?.frames.length]);
+
+  const handleExportOpenChange = React.useCallback((nextOpen: boolean) => {
+    setExportOpen(nextOpen);
+    if (!nextOpen) window.requestAnimationFrame(() => exportButtonRef.current?.focus());
+  }, []);
+
+  const handleProjectsOpenChange = React.useCallback((nextOpen: boolean) => {
+    setProjectsOpen(nextOpen);
+    if (!nextOpen) window.requestAnimationFrame(() => projectsButtonRef.current?.focus());
+  }, []);
+
+  const handleMobileInspectorOpenChange = React.useCallback((nextOpen: boolean) => {
+    setMobileInspectorOpen(nextOpen);
+    if (!nextOpen) window.requestAnimationFrame(() => mobileToolTriggerRef.current?.focus());
+  }, []);
 
   const newProject = React.useCallback(() => {
     setProject(null, { record: false });
@@ -483,7 +542,7 @@ export function GifStudio({
       }
       if (modifier && event.shiftKey && event.key.toLowerCase() === 'e' && project) {
         event.preventDefault();
-        setExportOpen(true);
+        openExport();
         return;
       }
       if (event.code === 'Space' && project) {
@@ -521,7 +580,7 @@ export function GifStudio({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [changeProject, project, redo, selectedFrameIds, selectedOverlayId, undo]);
+  }, [changeProject, openExport, project, redo, selectedFrameIds, selectedOverlayId, undo]);
 
   const inspector = project ? (
     <StudioInspector
@@ -550,7 +609,12 @@ export function GifStudio({
     <div
       className={cn(
         'flex min-h-0 w-full flex-col overflow-hidden bg-[#090d14]',
-        embedded ? 'h-[min(900px,85dvh)] rounded-xl border border-slate-800' : 'h-dvh',
+        embedded
+          ? cn(
+              'rounded-xl border border-slate-800',
+              project ? 'h-[min(900px,85dvh)]' : 'min-h-[390px]',
+            )
+          : 'h-dvh',
       )}
     >
       <input
@@ -579,13 +643,15 @@ export function GifStudio({
             onRedo={redo}
             onOpenMedia={() => fileInputRef.current?.click()}
             onOpenProjects={() => setProjectsOpen(true)}
-            onOpenExport={() => setExportOpen(true)}
+            onOpenExport={openExport}
+            projectsButtonRef={projectsButtonRef}
+            exportButtonRef={exportButtonRef}
           />
           <Workspace aria-label="GIF editor workspace" className="flex min-h-0 flex-1 flex-col">
             <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[76px_minmax(0,1fr)_320px]">
               <StudioToolRail
                 activeTool={activeTool}
-                onToolChange={setActiveTool}
+                onToolChange={(tool) => setActiveTool(tool)}
                 className="hidden lg:flex"
               />
               <StudioStage
@@ -635,16 +701,29 @@ export function GifStudio({
               onDuplicate={() => changeProject(duplicateFrames(project, selectedFrameIds))}
               onDelete={() => changeProject(deleteFrames(project, selectedFrameIds))}
             />
-            <StudioToolRail
-              activeTool={activeTool}
-              onToolChange={(tool) => {
-                setActiveTool(tool);
-                setMobileInspectorOpen(true);
-              }}
-              className="overflow-x-auto border-t [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
-            />
+            <div className="relative border-t border-slate-800 lg:hidden">
+              <p id="mobile-tool-hint" className="sr-only">
+                Swipe horizontally to reveal every editing tool.
+              </p>
+              <StudioToolRail
+                activeTool={activeTool}
+                onToolChange={(tool, trigger) => {
+                  mobileToolTriggerRef.current = trigger;
+                  setActiveTool(tool);
+                  setMobileInspectorOpen(true);
+                }}
+                className="overflow-x-auto border-0 pr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                describedBy="mobile-tool-hint"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 flex w-12 items-center justify-end bg-gradient-to-l from-slate-950 via-slate-950/90 to-transparent pr-1.5 text-slate-400"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </div>
+            </div>
           </Workspace>
-          <Sheet open={mobileInspectorOpen} onOpenChange={setMobileInspectorOpen}>
+          <Sheet open={mobileInspectorOpen} onOpenChange={handleMobileInspectorOpenChange}>
             <SheetContent
               side="bottom"
               className="h-[72dvh] border-slate-800 bg-slate-950 p-0 text-slate-100 lg:hidden"
@@ -658,13 +737,12 @@ export function GifStudio({
           </Sheet>
           <StudioExportDialog
             open={exportOpen}
-            onOpenChange={setExportOpen}
+            onOpenChange={handleExportOpenChange}
             project={project}
-            onProjectChange={changeProject}
           />
           <StudioProjectsDialog
             open={projectsOpen}
-            onOpenChange={setProjectsOpen}
+            onOpenChange={handleProjectsOpenChange}
             project={project}
             onProjectOpen={openProject}
             onNewProject={newProject}

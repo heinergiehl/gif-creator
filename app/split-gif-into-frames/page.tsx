@@ -3,14 +3,13 @@ import { ConversionPageShell } from '@/components/gif-tools/conversion/Conversio
 import { GifFrameExtractorTool } from '@/components/gif-tools/conversion/GifFrameExtractorTool';
 import { absoluteUrl } from '@/lib/site';
 
-const title = 'GIF to PNG Converter — Extract Every Frame Online';
+const title = 'GIF to PNG — Split GIF into Frames Online';
 const description =
   'Convert an animated GIF to correctly composited PNG frames. Preview each frame, download individual PNGs, or save the complete sequence as one ZIP file.';
 
 export const metadata: Metadata = {
   title,
   description,
-  keywords: ['GIF to PNG', 'split GIF into frames', 'GIF frame extractor', 'GIF to frames', 'extract GIF frames'],
   alternates: { canonical: '/gif-to-png' },
   openGraph: {
     type: 'website',
