@@ -478,25 +478,25 @@ const Editor = React.memo(
       >
         <div
           className={cn([
-            'relative flex h-full w-full flex-col items-center justify-center overflow-hidden md:h-screen md:flex-row',
+            'relative flex h-dvh w-full flex-col items-center justify-center overflow-hidden md:flex-row',
           ])}
           draggable="false"
         >
           <LoadingOverlay />
-          <div className="z-[1] hidden shrink-0 flex-row md:flex md:h-screen md:flex-col">
+          <div className="z-[1] hidden shrink-0 flex-row md:flex md:h-full md:flex-col">
             <Sidebar />
             <div className="relative hidden h-full w-[350px] md:ml-[76px] md:flex">
               <Resources />
             </div>
           </div>
           {/* ── main content column ── */}
-          <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden bg-slate-100 dark:bg-slate-800">
+          <div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-slate-100 dark:bg-slate-800">
             {/* top edit bar */}
             <EditResource />
 
             {/* canvas toolbar — compact FPS / play / settings + undo/redo */}
             {hasFrames && (
-              <div className="flex w-full shrink-0 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 py-1.5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
+              <div className="flex w-full shrink-0 items-center gap-2 border-b border-slate-200 bg-white/80 px-2 py-1.5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 sm:gap-3 sm:px-4">
                 {/* Undo / Redo */}
                 <div className="flex items-center gap-0.5">
                   <button
@@ -550,7 +550,7 @@ const Editor = React.memo(
                       animationStore.fps = parseFloat(e.target.value);
                       if (timelineStore) timelineStore.formatCurrentTime();
                     }}
-                    className="h-1 w-24 cursor-pointer accent-slate-800 dark:accent-slate-300"
+                    className="h-1 w-20 cursor-pointer accent-slate-800 dark:accent-slate-300 sm:w-24"
                   />
                 </label>
                 <CanvasSettings />
@@ -558,11 +558,11 @@ const Editor = React.memo(
             )}
 
             {/* scrollable canvas + carousel area */}
-            <div className="flex min-h-0 flex-1 flex-col" id="editor-container">
+            <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col" id="editor-container">
               <CustomAlertDialog />
 
-              <ScrollArea className="flex-1" draggable="false">
-                <div className="flex min-h-full flex-col items-center justify-center p-4">
+              <ScrollArea className="min-h-0 w-full flex-1" draggable="false">
+                <div className={cn('flex min-h-full flex-col items-center justify-center', hasFrames ? 'w-max min-w-full md:p-4' : 'w-full p-4')}>
                   {hasFrames ? (
                     <CanvasComponent containerWidth={containerWidth} />
                   ) : (
@@ -575,6 +575,7 @@ const Editor = React.memo(
                   )}
                 </div>
                 <ScrollBar orientation="vertical" />
+                <ScrollBar orientation="horizontal" />
               </ScrollArea>
 
               {/* carousel / timeline */}
@@ -585,11 +586,11 @@ const Editor = React.memo(
               )}
 
               {/* mobile resources + sidebar */}
-              <ScrollArea className="h-[35dvh] w-full md:hidden">
+              <ScrollArea className="h-[35dvh] w-full shrink-0 md:hidden">
                 <Resources />
                 <ScrollBar orientation="vertical" />
               </ScrollArea>
-              <div className="relative z-50 w-screen md:hidden">
+              <div className="relative z-50 w-full shrink-0 md:hidden">
                 <Sidebar />
               </div>
             </div>

@@ -84,6 +84,8 @@ export function CustomInputFile({ type, onChange }: InputFileProps) {
         </div>
         <input
           {...getInputProps()}
+          data-editor-import={type}
+          aria-label={`Choose ${type} files`}
           className="absolute hidden h-full w-full"
         />
       </div>

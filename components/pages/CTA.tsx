@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { getGifEditorIntentHref } from '@/lib/editor-intents';
+import { getGifEditorIntentHref, IMAGE_EDITOR_PATH, VIDEO_EDITOR_PATH } from '@/lib/editor-intents';
 
 const primaryClassName =
   'group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-slate-900/10 transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:shadow-white/5 dark:hover:bg-slate-100 dark:hover:shadow-white/10';
@@ -11,11 +11,11 @@ const tertiaryClassName =
 
 const ctaLinks = {
   video: {
-    href: '/video-to-gif#video-to-gif-tool',
+    href: VIDEO_EDITOR_PATH,
     label: 'Convert video to GIF',
   },
   image: {
-    href: '/image-to-gif#image-to-gif-tool',
+    href: IMAGE_EDITOR_PATH,
     label: 'Create from images',
   },
   gif: {

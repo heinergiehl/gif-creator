@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { flushSync } from 'react-dom';
 import { FilmIcon, ImageIcon, SparklesIcon, TypeIcon, PaintbrushIcon, ShapesIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -73,6 +74,25 @@ export function EditorEmptyState({
 }: EditorEmptyStateProps) {
   const importOptions = sourceOptions.filter((o) => o.group === 'import');
   const createOptions = sourceOptions.filter((o) => o.group === 'create');
+  const [importNotice, setImportNotice] = useState<string | null>(null);
+
+  const openImport = () => {
+    // Mount the matching resource panel before opening its existing file picker.
+    // Keep this synchronous so the browser retains the user's click activation.
+    flushSync(() => onSelectMenuOption(config.menuOption));
+    const input = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        `input[data-editor-import="${config.routeMode}"]`,
+      ),
+    ).find((candidate) => candidate.parentElement?.getClientRects().length);
+
+    if (input) {
+      setImportNotice(null);
+      input.click();
+    } else {
+      setImportNotice('The import controls are preparing. Please try again in a moment.');
+    }
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 md:px-8">
@@ -100,13 +120,18 @@ export function EditorEmptyState({
               ))}
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button size="lg" onClick={() => onSelectMenuOption(config.menuOption)}>
+              <Button size="lg" onClick={openImport}>
                 {config.primaryActionLabel}
               </Button>
               <Button variant="outline" size="lg" onClick={() => onSelectMenuOption('Export')}>
                 Review export settings
               </Button>
             </div>
+            {importNotice && (
+              <p role="status" className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                {importNotice}
+              </p>
+            )}
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/60">
             <div className="text-sm font-semibold text-slate-900 dark:text-white">Quick steps</div>

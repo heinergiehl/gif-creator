@@ -4,7 +4,8 @@ import { ArrowRight } from 'lucide-react';
 import { Footer } from '../components/ui/Footer';
 import { LatestPostsSection } from '@/components/blog/LatestPostsSection';
 import { NeonGradientCard } from '@/components/magicui/neon-gradient-card';
-import { GifEditorEmbed } from '@/components/video-to-gif/GifEditorEmbed';
+import { Button } from '@/components/ui/button';
+import { IMAGE_EDITOR_PATH } from '@/lib/editor-intents';
 import { SITE_BRAND } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function ImageToGif() {
                 </p>
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <Link
-                    href="#image-to-gif-tool"
+                    href={IMAGE_EDITOR_PATH}
                     className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-slate-900/10 transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:shadow-white/5 dark:hover:bg-slate-100"
                   >
                     Create Your GIF
@@ -84,14 +85,18 @@ export default function ImageToGif() {
                   id="image-to-gif-tool-title"
                   className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl"
                 >
-                  Upload your images and build the animation here
+                  Build your animation in the full-size editor
                 </h2>
                 <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-400">
-                  Add JPG, PNG, WebP, or HEIC files, arrange the frame order, adjust timing, and
-                  export without leaving this page.
+                  Add JPG, PNG, WebP, or HEIC files, arrange the frame order, and adjust timing
+                  in a dedicated workspace with room for the preview and timeline.
                 </p>
               </div>
-              <GifEditorEmbed initialMenuOption="Image" label="Image to GIF editor" />
+              <div className="px-4 sm:px-0">
+                <Button asChild size="lg">
+                  <Link href={IMAGE_EDITOR_PATH}>Open image editor</Link>
+                </Button>
+              </div>
             </div>
           </section>
 

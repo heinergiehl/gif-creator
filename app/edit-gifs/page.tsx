@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Footer } from '@/app/components/ui/Footer';
-import { GifStudioEmbed } from '@/components/gif-studio/GifStudioEmbed';
 import { Button } from '@/components/ui/button';
 import { getGifEditorIntentHref } from '@/lib/editor-intents';
 import { SITE_BRAND, absoluteUrl } from '@/lib/site';
@@ -247,7 +246,10 @@ export default function EditGifsPage() {
                   browser.
                 </p>
 
-                <div className="mt-7 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                <div
+                  id="gif-editor-tool"
+                  className="mt-7 flex scroll-mt-24 flex-col items-start gap-4 sm:flex-row sm:items-center"
+                >
                   <Button
                     asChild
                     size="lg"
@@ -288,13 +290,6 @@ export default function EditGifsPage() {
                 No forced watermark
               </li>
             </ul>
-            <div
-              id="gif-editor-tool"
-              aria-label="Upload and edit an animated GIF"
-              className="mt-6 scroll-mt-24"
-            >
-              <GifStudioEmbed />
-            </div>
           </div>
         </section>
 

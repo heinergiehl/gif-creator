@@ -1,4 +1,7 @@
-export const GIF_EDITOR_PATH = '/edit-gifs' as const;
+// Use fresh editor URLs: browsers may still cache the old permanent redirects.
+export const VIDEO_EDITOR_PATH = '/video-to-gif/editor' as const;
+export const IMAGE_EDITOR_PATH = '/image-to-gif/editor' as const;
+export const GIF_EDITOR_PATH = '/edit-gifs/editor' as const;
 
 export const EDITOR_INTENTS = [
   'edit',
@@ -23,5 +26,5 @@ export function isEditorIntent(value: string | null | undefined): value is Edito
 }
 
 export function getGifEditorIntentHref(intent: EditorIntent): string {
-  return `${GIF_EDITOR_PATH}?intent=${encodeURIComponent(intent)}#gif-editor-tool`;
+  return `${GIF_EDITOR_PATH}?intent=${encodeURIComponent(intent)}`;
 }

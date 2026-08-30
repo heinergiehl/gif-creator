@@ -47,16 +47,11 @@ const baseConfig = {
     },
     {
       source: '/create-and-edit-gifs/converter-and-editor/editor',
-      destination: '/edit-gifs',
+      destination: '/edit-gifs/editor',
       permanent: true,
     },
     {
       source: '/edit-gifs/converter-and-editor',
-      destination: '/edit-gifs',
-      permanent: true,
-    },
-    {
-      source: '/edit-gifs/converter-and-editor/editor',
       destination: '/edit-gifs',
       permanent: true,
     },
@@ -66,17 +61,7 @@ const baseConfig = {
       permanent: true,
     },
     {
-      source: '/image-to-gif/converter-and-editor/editor',
-      destination: '/image-to-gif',
-      permanent: true,
-    },
-    {
       source: '/video-to-gif/converter-and-editor',
-      destination: '/video-to-gif',
-      permanent: true,
-    },
-    {
-      source: '/video-to-gif/converter-and-editor/editor',
       destination: '/video-to-gif',
       permanent: true,
     },

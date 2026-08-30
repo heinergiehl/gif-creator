@@ -80,7 +80,7 @@ export default function ScreenToVideo() {
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                   <Link
-                    href="/video-to-gif#video-to-gif-tool"
+                    href="/video-to-gif/editor"
                     className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-4 text-lg font-semibold text-slate-900 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-800"
                   >
                     Convert recording to GIF

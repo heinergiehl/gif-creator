@@ -1,6 +1,7 @@
 'use client';
 import CustomNavigation from './components/ui/CustomNavigation';
 import { usePathname } from 'next/navigation';
+import { GIF_EDITOR_PATH, IMAGE_EDITOR_PATH, VIDEO_EDITOR_PATH } from '@/lib/editor-intents';
 const sections = [
   {
     section: 'Edit & convert',
@@ -67,7 +68,11 @@ const sections = [
 export default function RootNavigation() {
   const pathname = usePathname();
   const hideNavigation =
-    pathname.includes('/converter-and-editor/editor') || pathname.includes('/record-screen');
+    pathname.includes('/converter-and-editor/editor') ||
+    pathname.includes('/record-screen') ||
+    pathname === VIDEO_EDITOR_PATH ||
+    pathname === IMAGE_EDITOR_PATH ||
+    pathname === GIF_EDITOR_PATH;
 
   return hideNavigation ? null : <CustomNavigation sections={sections} />;
 }

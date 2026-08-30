@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Image to GIF Editor',
   description: 'Interactive image to GIF editor interface.',
-  alternates: { canonical: '/edit-gifs' },
+  alternates: { canonical: '/image-to-gif' },
   robots: { index: false, follow: true },
 };
 
